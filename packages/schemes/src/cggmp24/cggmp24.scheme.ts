@@ -318,13 +318,7 @@ export class CGGMP24Scheme implements IThresholdScheme {
 						resolve(thisDir, '..', '..', '..', '..', 'mpc-wasm'),
 						resolve(thisDir, '..', '..', '..', '..', 'packages', 'mpc-wasm'),
 					]) {
-						const binPath = join(
-							candidate,
-							'native-gen',
-							'target',
-							'release',
-							'agenta-gen-primes',
-						);
+						const binPath = join(candidate, 'native-gen', 'target', 'release', 'agenta-gen-primes');
 						if (existsSyncFn(binPath)) {
 							this._nativeBinPath = binPath;
 							found = true;
