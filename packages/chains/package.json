@@ -1,6 +1,6 @@
 {
 	"name": "@agentaos/chains",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Ethereum chain adapter for AgentaOS threshold wallet",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",
