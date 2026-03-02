@@ -30,7 +30,7 @@ The financial infrastructure for agents and the businesses they transact with.
 
 ## Get Started in 30 Seconds
 
-### From the dashboard
+### From the browser
 
 Go to [app.agentaos.ai](https://app.agentaos.ai), create a wallet, set your guardrails, and start transacting.
 
@@ -96,7 +96,7 @@ signer.destroy();
 ```typescript
 import { ThresholdSigner } from '@agentaos/sdk';
 
-// From API credentials (dashboard → Create Signer → copy credentials)
+// From API credentials (app.agentaos.ai → Create Signer → copy credentials)
 const signer = await ThresholdSigner.fromSecret({
   apiSecret: process.env.AGENTA_API_SECRET!,
   serverUrl: process.env.AGENTA_SERVER!,
@@ -197,7 +197,6 @@ Connect any AI assistant to AgentaOS. Claude, Cursor, Windsurf — they sign tra
       "command": "npx",
       "args": ["-y", "agenta", "mcp"],
       "env": {
-        "AGENTA_SERVER": "https://api.agentaos.ai",
         "AGENTA_API_KEY": "your-api-key",
         "AGENTA_API_SECRET": "your-api-secret"
       }
@@ -205,6 +204,8 @@ Connect any AI assistant to AgentaOS. Claude, Cursor, Windsurf — they sign tra
   }
 }
 ```
+
+Your **API Key** and **API Secret** are generated when you create a wallet — either from [app.agentaos.ai](https://app.agentaos.ai) or via `agenta init`. Copy them from the credentials screen.
 
 ### Tools
 
@@ -308,7 +309,7 @@ See [`examples/`](examples/) for complete working code:
 | Path | Shares | When |
 |------|--------|------|
 | **Signer + Server** | Agent share + Server share | Normal autonomous operation |
-| **User + Server** | Passkey-encrypted share + Server share | Dashboard manual signing |
+| **User + Server** | Passkey-encrypted share + Server share | Browser manual signing |
 | **Signer + User** | Agent share + User share | Server down or bypass |
 
 ### Security Model
@@ -329,9 +330,9 @@ Ethereum, Base, Arbitrum, Optimism, Polygon — mainnet and testnet. All EVM cha
 
 | Variable | Description |
 |----------|-------------|
-| `AGENTA_SERVER` | AgentaOS server URL |
-| `AGENTA_API_KEY` | API key (issued when creating a signer) |
-| `AGENTA_API_SECRET` | API secret (base64-encoded share material) |
+| `AGENTA_API_KEY` | API key — generated when you create a wallet |
+| `AGENTA_API_SECRET` | API secret — your signing credential, shown once at creation |
+| `AGENTA_SERVER` | Optional — defaults to `https://api.agentaos.ai` |
 
 ---
 
