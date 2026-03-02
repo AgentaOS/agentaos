@@ -10,8 +10,9 @@ Accept payments. Automate spending. Enforce guardrails on every transaction.
 [![npm](https://img.shields.io/npm/v/agenta?label=agenta%20CLI)](https://www.npmjs.com/package/agenta)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](LICENSE)
 [![MPC](https://img.shields.io/badge/MPC-CGGMP24-8B5CF6.svg)](https://eprint.iacr.org/2021/060)
+[![Paper](https://img.shields.io/badge/Paper-Zenodo-blue.svg)](https://doi.org/10.5281/zenodo.18684027)
 
-[Quick Start](#quick-start) · [SDK](#sdk) · [CLI](#cli) · [MCP Server](#mcp-server) · [Website](https://agentaos.ai)
+[Quick Start](#quick-start) · [SDK](#sdk) · [CLI](#cli) · [MCP Server](#mcp-server) · [Paper](https://doi.org/10.5281/zenodo.18684027) · [Website](https://agentaos.ai)
 
 </div>
 
@@ -313,6 +314,8 @@ See [`examples/`](examples/) for complete working code:
 - API keys stored as SHA-256 hashes — plaintext exists only on your machine
 - Based on the audited [LFDT-Lockness/cggmp21](https://github.com/LFDT-Lockness/cggmp21) Rust crate
 - Peer-reviewed cryptographic foundation: [ePrint 2021/060](https://eprint.iacr.org/2021/060)
+
+**Read the research:** [AgentaOS: Threshold Custody for the Agent Economy](https://doi.org/10.5281/zenodo.18684027) — our published paper on the security model, signing architecture, and trust guarantees behind AgentaOS.
 
 ### Supported Networks
 
