@@ -7,7 +7,7 @@
 Accept payments. Automate spending. Enforce guardrails on every transaction.
 
 [![npm](https://img.shields.io/npm/v/@agentaos/sdk?label=%40agentaos%2Fsdk)](https://www.npmjs.com/package/@agentaos/sdk)
-[![npm](https://img.shields.io/npm/v/agenta?label=agenta%20CLI)](https://www.npmjs.com/package/agenta)
+[![npm](https://img.shields.io/npm/v/agentaos?label=agentaos%20CLI)](https://www.npmjs.com/package/agentaos)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](LICENSE)
 [![MPC](https://img.shields.io/badge/MPC-CGGMP24-8B5CF6.svg)](https://eprint.iacr.org/2021/060)
 [![Paper](https://img.shields.io/badge/Paper-Zenodo-blue.svg)](https://doi.org/10.5281/zenodo.18684027)
@@ -38,7 +38,7 @@ Go to [app.agentaos.ai](https://app.agentaos.ai), create a wallet, set your guar
 ### From the terminal
 
 ```bash
-npm install -g agenta
+npm install -g agentaos
 agenta login
 agenta init
 agenta send 0xRecipient 0.01
@@ -81,7 +81,7 @@ signer.destroy();
 | Package | npm | What it does |
 |---------|-----|--------------|
 | [`@agentaos/sdk`](packages/signer) | [![npm](https://img.shields.io/npm/v/@agentaos/sdk)](https://www.npmjs.com/package/@agentaos/sdk) | Threshold signing SDK — load shares, sign transactions, viem integration |
-| [`agenta`](packages/wallet) | [![npm](https://img.shields.io/npm/v/agenta)](https://www.npmjs.com/package/agenta) | CLI + MCP server for AI assistants |
+| [`agentaos`](packages/wallet) | [![npm](https://img.shields.io/npm/v/agentaos)](https://www.npmjs.com/package/agentaos) | CLI + MCP server for AI assistants |
 | [`@agentaos/core`](packages/core) | [![npm](https://img.shields.io/npm/v/@agentaos/core)](https://www.npmjs.com/package/@agentaos/core) | Interfaces and types (zero deps) |
 | [`@agentaos/engine`](packages/schemes) | [![npm](https://img.shields.io/npm/v/@agentaos/engine)](https://www.npmjs.com/package/@agentaos/engine) | CGGMP24 threshold ECDSA scheme |
 | [`@agentaos/chains`](packages/chains) | [![npm](https://img.shields.io/npm/v/@agentaos/chains)](https://www.npmjs.com/package/@agentaos/chains) | Ethereum chain adapter (viem) |
@@ -159,7 +159,7 @@ signer.destroy(); // Wipes share material from memory
 ## CLI
 
 ```bash
-npm install -g agenta
+npm install -g agentaos
 ```
 
 | Command | What it does |
@@ -190,9 +190,9 @@ Connect any AI assistant to AgentaOS. Claude, Cursor, Windsurf — they sign tra
 ```json
 {
   "mcpServers": {
-    "agenta": {
+    "agentaos": {
       "command": "npx",
-      "args": ["-y", "agenta", "mcp"],
+      "args": ["-y", "agentaos", "mcp"],
       "env": {
         "AGENTA_API_KEY": "your-api-key",
         "AGENTA_API_SECRET": "your-api-secret"
