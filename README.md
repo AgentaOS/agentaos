@@ -28,7 +28,22 @@ The financial infrastructure for agents and the businesses they transact with.
 
 ---
 
-## Quick Start
+## Get Started in 30 Seconds
+
+### From the dashboard
+
+Go to [app.agentaos.ai](https://app.agentaos.ai), create a wallet, set your guardrails, and start transacting.
+
+### From the terminal
+
+```bash
+npm install -g agenta
+agenta login
+agenta init
+agenta send 0xRecipient 0.01
+```
+
+### From code
 
 ```bash
 npm install @agentaos/sdk
@@ -56,11 +71,8 @@ const hash = await client.sendTransaction({
   value: parseEther('0.01'),
 });
 
-// Always clean up — wipes share material from memory
 signer.destroy();
 ```
-
-That's it. Drop-in viem account. Policy-checked. Audited. No key ever exists.
 
 ---
 
