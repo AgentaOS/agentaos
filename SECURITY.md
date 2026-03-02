@@ -18,17 +18,17 @@ Please include as much detail as possible: steps to reproduce, affected versions
 
 | Package | Description |
 |---------|-------------|
-| `@agentaos/server` | Policy server (NestJS API), signing endpoints, auth, Vault integration |
-| `@agentaos/sdk` | Signer-side SDK (share loading, partial signing, HTTP client) |
-| `agenta` | CLI + MCP server (`gw` command) |
+| `@agentaos/sdk` | Signer SDK (share loading, partial signing, HTTP client) |
+| `agenta` | CLI + MCP server |
 | `@agentaos/core` | Shared interfaces and types |
 | `@agentaos/chains` | Chain-specific transaction logic (Ethereum) |
 | `@agentaos/engine` | Threshold signing implementations (CGGMP24) |
+| `@agentaos/crypto` | CGGMP24 WASM bindings (Rust) |
 
 ### Out of Scope
 
-- **Dashboard UI (`@agentaos/app`)** -- client-side only, no key material handled outside of browser WASM signing (report browser WASM issues under `@agentaos/engine`)
-- **Example code and documentation**
+- Example code and documentation
+- Server and dashboard vulnerabilities (report to the [platform repo](https://github.com/AgentaOS/platform))
 
 ## Core Security Invariant
 
@@ -38,7 +38,7 @@ Not in memory, not in logs, not in any variable, not in any code path.
 Every signing operation is a distributed computation between two share holders.
 ```
 
-Any code path that reconstructs, combines, or exposes the full private key -- even transiently -- is a critical vulnerability. Server shares must be wiped from memory (`buffer.fill(0)`) after every operation.
+Any code path that reconstructs, combines, or exposes the full private key -- even transiently -- is a critical vulnerability.
 
 ## Supported Versions
 

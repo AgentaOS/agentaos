@@ -1,65 +1,34 @@
 # Licensing
 
-Copyright 2025-2026 Aristokrates OÜ
+Copyright 2025-2026 Aristokrates OU
 
-AgentaOS uses a dual-license model. Different packages in this monorepo
-are released under different licenses depending on their purpose.
+All packages in this repository are licensed under the **Apache License 2.0**.
 
-## SDK and Developer Tools — Apache 2.0
+| Package | npm | Description |
+|---------|-----|-------------|
+| `@agentaos/core` | public | Type definitions and interfaces |
+| `@agentaos/crypto` | public | CGGMP24 threshold ECDSA WASM module |
+| `@agentaos/engine` | public | Signing scheme orchestration |
+| `@agentaos/chains` | public | Ethereum chain adapter (viem) |
+| `@agentaos/sdk` | public | Signer SDK — share loading, signing, viem integration |
+| `agenta` | public | CLI + MCP server |
 
-The following packages are licensed under the **Apache License 2.0**
-(`LICENSE-APACHE`). You may freely use, modify, and distribute them in your own
+You may freely use, modify, and distribute these packages in your own
 projects — commercial or otherwise — with no copyleft obligations.
-
-| Package                           | npm    | Description                                           |
-| --------------------------------- | ------ | ----------------------------------------------------- |
-| `@agentaos/core`     | public | Type definitions and interfaces                       |
-| `@agentaos/crypto` | public | CGGMP24 threshold ECDSA WASM module                   |
-| `@agentaos/engine`  | public | Signing scheme orchestration                          |
-| `@agentaos/chains`   | public | Ethereum chain adapter (viem)                         |
-| `@agentaos/sdk`   | public | Signer SDK — share loading, signing, viem integration |
-| `agenta`  | public | CLI + MCP server (`gw` command)                       |
 
 These packages are safe to use alongside any license — MIT, Apache 2.0,
 proprietary, etc. Integrate them with LangChain, Vercel AI SDK, ethers.js, or
 any other library without restriction.
 
-## Server, Dashboard, and Auth — AGPL 3.0
+## Server and Dashboard
 
-The following packages are licensed under the **GNU Affero General Public
-License v3.0** (`LICENSE`). You may self-host them freely. If you modify the
-source and offer the modified version as a network service to third parties, you
-must make your modifications available under the same license.
-
-| Package                         | npm     | Description                |
-| ------------------------------- | ------- | -------------------------- |
-| `@agentaos/server` | private | Policy server (NestJS API) |
-| `@agentaos/app`    | private | Dashboard (React SPA)      |
-| `@agentaos/auth`   | private | WebAuthn + PRF wallet auth |
-
-## Self-Hosting
-
-Self-hosting AgentaOS for your own agents is **free** and encouraged. The
-AGPL only requires source disclosure when you modify the server or dashboard and
-offer the modified version as a service to others.
+The AgentaOS server, dashboard, and auth packages are maintained in a
+[separate repository](https://github.com/AgentaOS/platform) under different
+license terms.
 
 ## Commercial Licensing
 
-If you want to offer AgentaOS as part of a managed or hosted service to
-third parties, or if you need a license without copyleft obligations for the
-AGPL components, contact us for a commercial license:
+For enterprise support or custom licensing inquiries:
 
 - Email: hello@agentaos.ai
 - Web: https://agentaos.ai
-
-## Summary
-
-```
-You want to...                          License that applies
-─────────────────────────────────────── ──────────────────────
-npm install the SDK / CLI               Apache 2.0 — go ahead
-Self-host the server for your agents    AGPL 3.0 — free, no restrictions
-Modify the server for your own use      AGPL 3.0 — free, no restrictions
-Offer a modified server as a service    AGPL 3.0 — must share your changes
-Resell as a hosted/managed product      Contact us for a commercial license
-```
