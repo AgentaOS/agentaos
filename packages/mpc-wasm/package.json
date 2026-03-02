@@ -36,6 +36,7 @@
 		"build": "bash build-node.sh && bash build-web.sh",
 		"build:node": "bash build-node.sh",
 		"build:web": "bash build-web.sh",
+		"prepack": "rm -f pkg/.gitignore pkg-web/.gitignore",
 		"clean": "rm -rf pkg pkg-web target"
 	}
 }
