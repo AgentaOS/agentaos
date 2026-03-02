@@ -56,7 +56,6 @@ import { baseSepolia } from 'viem/chains';
 
 const signer = await ThresholdSigner.fromSecret({
   apiSecret: process.env.AGENTA_API_SECRET!,
-  serverUrl: process.env.AGENTA_SERVER!,
   apiKey: process.env.AGENTA_API_KEY!,
 });
 
@@ -99,14 +98,11 @@ import { ThresholdSigner } from '@agentaos/sdk';
 // From API credentials (app.agentaos.ai → Create Wallet → copy credentials)
 const signer = await ThresholdSigner.fromSecret({
   apiSecret: process.env.AGENTA_API_SECRET!,
-  serverUrl: process.env.AGENTA_SERVER!,
   apiKey: process.env.AGENTA_API_KEY!,
 });
 
 // From a secret file (CLI-style)
-const signer = await ThresholdSigner.fromFile('~/.gw/my-agent.secret', {
-  serverUrl: process.env.AGENTA_SERVER!,
-});
+const signer = await ThresholdSigner.fromFile('~/.gw/my-agent.secret');
 ```
 
 ### Send ETH
@@ -245,7 +241,6 @@ const sendETH = tool({
   execute: async ({ to, amount }) => {
     const signer = await ThresholdSigner.fromSecret({
       apiSecret: process.env.AGENTA_API_SECRET!,
-      serverUrl: process.env.AGENTA_SERVER!,
       apiKey: process.env.AGENTA_API_KEY!,
     });
     const hash = await signer.signTx({ to, value: parseEther(amount) });
@@ -270,7 +265,6 @@ const sendETH = new DynamicStructuredTool({
   func: async ({ to, amount }) => {
     const signer = await ThresholdSigner.fromSecret({
       apiSecret: process.env.AGENTA_API_SECRET!,
-      serverUrl: process.env.AGENTA_SERVER!,
       apiKey: process.env.AGENTA_API_KEY!,
     });
     const hash = await signer.signTx({ to, value: parseEther(amount) });
