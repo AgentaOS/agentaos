@@ -550,7 +550,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "guardian-mpc-wasm"
+name = "agentaos-mpc-wasm"
 version = "0.1.0"
 dependencies = [
  "base64 0.22.1",

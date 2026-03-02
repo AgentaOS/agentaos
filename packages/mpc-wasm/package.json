@@ -13,16 +13,16 @@
 	"bugs": "https://github.com/AgentaOS/agentaos/issues",
 	"keywords": ["threshold", "wallet", "mpc", "cggmp24", "ecdsa", "wasm", "secp256k1"],
 	"type": "module",
-	"main": "./pkg/guardian_mpc_wasm.js",
-	"types": "./pkg/guardian_mpc_wasm.d.ts",
+	"main": "./pkg/agentaos_mpc_wasm.js",
+	"types": "./pkg/agentaos_mpc_wasm.d.ts",
 	"exports": {
 		".": {
-			"types": "./pkg/guardian_mpc_wasm.d.ts",
-			"import": "./pkg/guardian_mpc_wasm.js"
+			"types": "./pkg/agentaos_mpc_wasm.d.ts",
+			"import": "./pkg/agentaos_mpc_wasm.js"
 		},
 		"./web": {
-			"types": "./pkg-web/guardian_mpc_wasm.d.ts",
-			"import": "./pkg-web/guardian_mpc_wasm.js"
+			"types": "./pkg-web/agentaos_mpc_wasm.d.ts",
+			"import": "./pkg-web/agentaos_mpc_wasm.js"
 		}
 	},
 	"files": ["pkg", "pkg-web"],

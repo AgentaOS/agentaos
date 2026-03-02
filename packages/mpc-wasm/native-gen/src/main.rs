@@ -7,8 +7,8 @@
 //! Output: JSON to stdout with shares and public key.
 //!
 //! Usage:
-//!   guardian-gen-primes dkg <n> <threshold> <eid_hex>
-//!   guardian-gen-primes primes <count>
+//!   agenta-gen-primes dkg <n> <threshold> <eid_hex>
+//!   agenta-gen-primes primes <count>
 
 use std::collections::VecDeque;
 use std::io::{BufRead, BufReader, BufWriter, Write};

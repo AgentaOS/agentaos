@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-/// @title GuardianTest — minimal contract to test threshold wallet + Forge integration
-contract GuardianTest {
+/// @title AgentaTest — minimal contract to test threshold wallet + Forge integration
+contract AgentaTest {
     address public immutable deployer;
     string public greeting;
 

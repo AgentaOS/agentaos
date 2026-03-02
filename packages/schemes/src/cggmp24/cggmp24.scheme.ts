@@ -90,7 +90,7 @@ export interface DkgResult {
 	publicKey: Uint8Array;
 }
 
-/** JSON output from the native `guardian-gen-primes dkg` binary. */
+/** JSON output from the native `agenta-gen-primes dkg` binary. */
 interface NativeDkgOutput {
 	shares: Array<{ core_share: string; aux_info: string }>; // base64
 	public_key: string; // hex
@@ -323,7 +323,7 @@ export class CGGMP24Scheme implements IThresholdScheme {
 							'native-gen',
 							'target',
 							'release',
-							'guardian-gen-primes',
+							'agenta-gen-primes',
 						);
 						if (existsSyncFn(binPath)) {
 							this._nativeBinPath = binPath;
@@ -414,7 +414,7 @@ export class CGGMP24Scheme implements IThresholdScheme {
 				resolve(thisDir, '..', '..', '..', '..', 'mpc-wasm'),
 				resolve(thisDir, '..', '..', '..', '..', 'packages', 'mpc-wasm'),
 			]) {
-				const binPath = join(candidate, 'native-gen', 'target', 'release', 'guardian-gen-primes');
+				const binPath = join(candidate, 'native-gen', 'target', 'release', 'agenta-gen-primes');
 				if (existsSyncFn(binPath)) return binPath;
 			}
 		} catch {

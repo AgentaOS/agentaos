@@ -546,7 +546,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "guardian-gen-primes"
+name = "agenta-gen-primes"
 version = "0.1.0"
 dependencies = [
  "base64 0.22.1",

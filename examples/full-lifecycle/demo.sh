@@ -72,13 +72,13 @@ echo ""
 # Step 6: Audit log
 echo "==> Step 6: View recent audit log"
 curl -s "${API_PREFIX}/audit-log?limit=5" \
-    -H "x-api-key: ${AGENTA_API_KEY:-gw_live_demo}" | python3 -m json.tool 2>/dev/null | head -30 || echo "    (no audit data)"
+    -H "x-api-key: ${AGENTA_API_KEY:-YOUR_API_KEY_HERE}" | python3 -m json.tool 2>/dev/null | head -30 || echo "    (no audit data)"
 echo ""
 
 # Step 7: CSV export
 echo "==> Step 7: Export audit log as CSV"
 curl -s "${API_PREFIX}/audit-log/export" \
-    -H "x-api-key: ${AGENTA_API_KEY:-gw_live_demo}" \
+    -H "x-api-key: ${AGENTA_API_KEY:-YOUR_API_KEY_HERE}" \
     -o "${SCRIPT_DIR}/audit-export.csv" 2>/dev/null
 if [ -f "${SCRIPT_DIR}/audit-export.csv" ] && [ -s "${SCRIPT_DIR}/audit-export.csv" ]; then
     echo "    Exported to audit-export.csv ($(wc -l < "${SCRIPT_DIR}/audit-export.csv") rows)"

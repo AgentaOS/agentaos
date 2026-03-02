@@ -4,10 +4,6 @@ export { HttpClient, HttpClientError } from './http-client.js';
 export { AgentaApi } from './agenta-api.js';
 export { Agenta } from './agenta.js';
 
-// Backward-compat re-exports (deprecated)
-export { Agenta as Guardian } from './agenta.js';
-export { AgentaApi as GuardianApi } from './agenta-api.js';
-
 // Functions (share-loader)
 export { wipeShare } from './share-loader.js';
 
@@ -56,4 +52,4 @@ export type {
 } from './agenta-api.js';
 
 // Types — Agenta
-export type { AgentaConnectOptions, GuardianConnectOptions } from './agenta.js';
+export type { AgentaConnectOptions } from './agenta.js';

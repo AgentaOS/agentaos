@@ -32,9 +32,6 @@ export interface AgentaConnectOptions {
 	apiKey: string;
 }
 
-/** @deprecated Use AgentaConnectOptions instead. */
-export type GuardianConnectOptions = AgentaConnectOptions;
-
 // ---------------------------------------------------------------------------
 // Agenta — flat composition facade
 // ---------------------------------------------------------------------------
