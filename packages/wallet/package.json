@@ -1,21 +1,21 @@
 {
-	"name": "@agentokratia/guardian-wallet",
+	"name": "agentaos",
 	"version": "0.1.0",
-	"description": "Guardian Wallet — CLI + MCP server for threshold signing. The key never exists.",
+	"description": "AgentaOS — CLI + MCP server for threshold signing. The key never exists.",
 	"license": "Apache-2.0",
-	"author": "Agentokratia <hello@agentokratia.com>",
+	"author": "AgentaOS <hello@agentaos.ai>",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/agentokratia/guardian-wallet.git",
+		"url": "https://github.com/AgentaOS/agentaos.git",
 		"directory": "packages/wallet"
 	},
-	"homepage": "https://github.com/agentokratia/guardian-wallet",
-	"bugs": "https://github.com/agentokratia/guardian-wallet/issues",
+	"homepage": "https://github.com/AgentaOS/agentaos",
+	"bugs": "https://github.com/AgentaOS/agentaos/issues",
 	"keywords": ["mcp", "threshold", "wallet", "mpc", "ethereum", "agent", "signing", "cli", "x402"],
 	"type": "module",
 	"bin": {
-		"guardian-wallet": "./dist/index.js",
-		"gw": "./dist/index.js"
+		"agentaos": "./dist/index.js",
+		"agenta": "./dist/index.js"
 	},
 	"files": ["dist", "!dist/__tests__", "scripts"],
 	"engines": {
@@ -34,9 +34,9 @@
 		"clean": "rm -rf dist"
 	},
 	"dependencies": {
-		"@agentokratia/guardian-core": "workspace:*",
-		"@agentokratia/guardian-schemes": "workspace:*",
-		"@agentokratia/guardian-signer": "workspace:*",
+		"@agentaos/core": "workspace:*",
+		"@agentaos/engine": "workspace:*",
+		"@agentaos/sdk": "workspace:*",
 		"@inquirer/prompts": "^8.2.1",
 		"@modelcontextprotocol/sdk": "^1.12.0",
 		"@noble/hashes": "^1.7.1",

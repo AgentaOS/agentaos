@@ -71,7 +71,7 @@ function step(icon: string, text: string): void {
 // ---------------------------------------------------------------------------
 
 export const initCommand = new Command('init')
-	.description('Set up your Guardian Wallet')
+	.description('Set up your AgentaOS wallet')
 	.action(async () => {
 		console.log(BRAND_BANNER);
 
@@ -137,7 +137,7 @@ async function handleCreate(): Promise<void> {
 	const token = await getSession();
 	if (!token) {
 		console.log('');
-		console.log(`  ${failMark(`Not logged in. Run ${chalk.bold('gw login')} first.`)}`);
+		console.log(`  ${failMark(`Not logged in. Run ${chalk.bold('agenta login')} first.`)}`);
 		console.log('');
 		process.exitCode = 1;
 		return;
@@ -161,7 +161,7 @@ async function handleCreate(): Promise<void> {
 	console.log('');
 
 	const serverUrl = await input({
-		message: 'Guardian server URL',
+		message: 'AgentaOS server URL',
 		default: 'http://localhost:8080',
 		theme: promptTheme,
 	});
@@ -255,8 +255,8 @@ async function handleCreate(): Promise<void> {
 	console.log('');
 	console.log(`  ${dim(`Config: ${getSignerConfigPath(name)}`)}`);
 	console.log('');
-	console.log(`  ${success('Done!')} Run ${chalk.bold('gw status')} to see your wallets.`);
-	console.log(`         Run ${chalk.bold('gw admin policies')} to manage policies.`);
+	console.log(`  ${success('Done!')} Run ${chalk.bold('agenta status')} to see your wallets.`);
+	console.log(`         Run ${chalk.bold('agenta admin policies')} to manage policies.`);
 	console.log('');
 }
 
@@ -334,14 +334,14 @@ async function handleImport(): Promise<void> {
 	console.log('');
 
 	const serverUrl = await input({
-		message: 'Guardian server URL',
+		message: 'AgentaOS server URL',
 		default: 'http://localhost:8080',
 		theme: promptTheme,
 	});
 
 	// ── 2. Credentials ───────────────────────────────────────────────────
 	section('Credentials');
-	hint('Find your API Key and API Secret in Guardian.');
+	hint('Find your API Key and API Secret in AgentaOS.');
 	console.log('');
 
 	const apiKey = await input({
@@ -403,7 +403,7 @@ async function handleImport(): Promise<void> {
 	console.log('');
 	console.log(`  ${dim(`Config: ${getSignerConfigPath(name)}`)}`);
 	console.log('');
-	console.log(`  ${success('Done!')} Run ${chalk.bold('gw status')} to see your wallets.`);
+	console.log(`  ${success('Done!')} Run ${chalk.bold('agenta status')} to see your wallets.`);
 	console.log('');
 }
 

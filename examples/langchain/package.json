@@ -1,12 +1,12 @@
 {
-	"name": "guardian-langchain-example",
+	"name": "agentaos-example-langchain",
 	"private": true,
 	"type": "module",
 	"scripts": {
 		"start": "tsx agent.ts"
 	},
 	"dependencies": {
-		"@agentokratia/guardian-signer": "workspace:*",
+		"@agentaos/sdk": "workspace:*",
 		"@langchain/core": "^0.3.0",
 		"@langchain/openai": "^0.5.0",
 		"viem": "^2.21.0",

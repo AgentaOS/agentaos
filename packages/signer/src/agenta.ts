@@ -1,5 +1,5 @@
-import { CGGMP24Scheme } from '@agentokratia/guardian-schemes';
-import { GuardianApi } from './guardian-api.js';
+import { CGGMP24Scheme } from '@agentaos/engine';
+import { AgentaApi } from './agenta-api.js';
 import type {
 	AuditOpts,
 	AuditResult,
@@ -14,7 +14,7 @@ import type {
 	SimulateResult,
 	TokenBalance,
 	TokenInfo,
-} from './guardian-api.js';
+} from './agenta-api.js';
 import { HttpClient } from './http-client.js';
 import { ThresholdSigner } from './threshold-signer.js';
 import type { SignMessageResult, SignTransactionResult, ViemAccount } from './threshold-signer.js';
@@ -23,45 +23,48 @@ import type { SignMessageResult, SignTransactionResult, ViemAccount } from './th
 // Connect options
 // ---------------------------------------------------------------------------
 
-export interface GuardianConnectOptions {
+export interface AgentaConnectOptions {
 	/** Base64-encoded key share (JSON: { coreShare, auxInfo }) */
 	apiSecret: string;
-	/** Guardian server URL (e.g. "http://localhost:8080") */
+	/** AgentaOS server URL (e.g. "http://localhost:8080") */
 	serverUrl: string;
 	/** API key for authentication */
 	apiKey: string;
 }
 
+/** @deprecated Use AgentaConnectOptions instead. */
+export type GuardianConnectOptions = AgentaConnectOptions;
+
 // ---------------------------------------------------------------------------
-// Guardian — flat composition facade
+// Agenta — flat composition facade
 // ---------------------------------------------------------------------------
 
-export class Guardian {
+export class Agenta {
 	private _signer: ThresholdSigner;
-	private _api: GuardianApi;
+	private _api: AgentaApi;
 
-	private constructor(signer: ThresholdSigner, api: GuardianApi) {
+	private constructor(signer: ThresholdSigner, api: AgentaApi) {
 		this._signer = signer;
 		this._api = api;
 	}
 
 	/**
-	 * Connect to the Guardian server and load key material.
-	 * Returns a fully-initialized Guardian instance with all methods available.
+	 * Connect to the AgentaOS server and load key material.
+	 * Returns a fully-initialized Agenta instance with all methods available.
 	 */
-	static async connect(opts: GuardianConnectOptions): Promise<Guardian> {
+	static async connect(opts: AgentaConnectOptions): Promise<Agenta> {
 		const client = new HttpClient({
 			baseUrl: opts.serverUrl,
 			apiKey: opts.apiKey,
 		});
-		const api = new GuardianApi(client);
+		const api = new AgentaApi(client);
 		const signer = await ThresholdSigner.fromSecret({
 			apiSecret: opts.apiSecret,
 			serverUrl: opts.serverUrl,
 			apiKey: opts.apiKey,
 			scheme: new CGGMP24Scheme(),
 		});
-		return new Guardian(signer, api);
+		return new Agenta(signer, api);
 	}
 
 	// -- Signing (delegates to ThresholdSigner) --------------------------------
@@ -90,7 +93,7 @@ export class Guardian {
 		return this._signer.toViemAccount();
 	}
 
-	// -- Read operations (delegates to GuardianApi) ----------------------------
+	// -- Read operations (delegates to AgentaApi) ----------------------------
 
 	getHealth(): Promise<HealthStatus> {
 		return this._api.getHealth();

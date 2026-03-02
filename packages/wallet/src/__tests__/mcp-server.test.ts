@@ -4,32 +4,32 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const EXPECTED_TOOLS = [
 	// Discovery
-	'guardian_wallet_overview',
-	'guardian_list_networks',
-	'guardian_list_signers',
-	'guardian_resolve_address',
+	'agenta_wallet_overview',
+	'agenta_list_networks',
+	'agenta_list_signers',
+	'agenta_resolve_address',
 	// Common operations
-	'guardian_send_eth',
-	'guardian_send_token',
-	'guardian_get_balances',
+	'agenta_send_eth',
+	'agenta_send_token',
+	'agenta_get_balances',
 	// Advanced
-	'guardian_call_contract',
-	'guardian_read_contract',
-	'guardian_execute',
-	'guardian_simulate',
+	'agenta_call_contract',
+	'agenta_read_contract',
+	'agenta_execute',
+	'agenta_simulate',
 	// Signing
-	'guardian_sign_message',
-	'guardian_sign_typed_data',
+	'agenta_sign_message',
+	'agenta_sign_typed_data',
 	// Management
-	'guardian_get_status',
-	'guardian_get_audit_log',
+	'agenta_get_status',
+	'agenta_get_audit_log',
 	// x402
-	'guardian_x402_check',
-	'guardian_x402_discover',
-	'guardian_x402_fetch',
+	'agenta_x402_check',
+	'agenta_x402_discover',
+	'agenta_x402_fetch',
 ];
 
-describe('Guardian Terminal MCP Server', () => {
+describe('AgentaOS Terminal MCP Server', () => {
 	let client: Client;
 	let transport: StdioClientTransport;
 
@@ -41,9 +41,9 @@ describe('Guardian Terminal MCP Server', () => {
 			env: {
 				...process.env,
 				// Dummy values — tools/list doesn't invoke the signer
-				GUARDIAN_API_SECRET: 'dGVzdA==',
-				GUARDIAN_API_KEY: 'gw_test_dummy',
-				GUARDIAN_SERVER: 'http://localhost:8080',
+				AGENTA_API_SECRET: 'dGVzdA==',
+				AGENTA_API_KEY: 'gw_test_dummy',
+				AGENTA_SERVER: 'http://localhost:8080',
 			},
 		});
 
@@ -77,17 +77,17 @@ describe('Guardian Terminal MCP Server', () => {
 	it('x402 tools have correct input schema', async () => {
 		const { tools } = await client.listTools();
 
-		const check = tools.find((t) => t.name === 'guardian_x402_check');
+		const check = tools.find((t) => t.name === 'agenta_x402_check');
 		expect(check).toBeDefined();
 		const checkProps = check!.inputSchema.properties as Record<string, unknown>;
 		expect(checkProps).toHaveProperty('url');
 
-		const discover = tools.find((t) => t.name === 'guardian_x402_discover');
+		const discover = tools.find((t) => t.name === 'agenta_x402_discover');
 		expect(discover).toBeDefined();
 		const discoverProps = discover!.inputSchema.properties as Record<string, unknown>;
 		expect(discoverProps).toHaveProperty('domain');
 
-		const fetchTool = tools.find((t) => t.name === 'guardian_x402_fetch');
+		const fetchTool = tools.find((t) => t.name === 'agenta_x402_fetch');
 		expect(fetchTool).toBeDefined();
 		const fetchProps = fetchTool!.inputSchema.properties as Record<string, unknown>;
 		expect(fetchProps).toHaveProperty('url');

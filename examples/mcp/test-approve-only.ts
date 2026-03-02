@@ -10,9 +10,9 @@ const transport = new StdioClientTransport({
 const client = new Client({ name: 'test-approve', version: '1.0.0' });
 await client.connect(transport);
 
-console.log('==> guardian_call_contract (approve USDC)');
+console.log('==> agenta_call_contract (approve USDC)');
 const r = await client.callTool({
-	name: 'guardian_call_contract',
+	name: 'agenta_call_contract',
 	arguments: {
 		contractAddress: '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
 		abi: [

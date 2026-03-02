@@ -1,72 +1,72 @@
-# @agentokratia/guardian-wallet
+# agenta
 
-**Guardian Wallet CLI + MCP Server -- threshold signing for AI agents.**
+**AgentaOS CLI + MCP Server -- threshold signing for AI agents.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE-APACHE)
-[![npm](https://img.shields.io/npm/v/@agentokratia/guardian-wallet)](https://www.npmjs.com/package/@agentokratia/guardian-wallet)
+[![npm](https://img.shields.io/npm/v/agenta)](https://www.npmjs.com/package/agenta)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](https://nodejs.org)
 
-CLI and [MCP](https://modelcontextprotocol.io/) server for [Guardian Wallet](https://github.com/agentokratia/guardian-wallet). Gives AI agents (Claude, GPT, custom) secure on-chain spending power through threshold ECDSA -- the full private key never exists.
+CLI and [MCP](https://modelcontextprotocol.io/) server for [AgentaOS](https://github.com/AgentaOS/agentaos). Gives AI agents (Claude, GPT, custom) secure on-chain spending power through threshold ECDSA -- the full private key never exists.
 
 ## Install
 
 ```bash
-npm install -g @agentokratia/guardian-wallet
+npm install -g agenta
 # or
-npx @agentokratia/guardian-wallet --help
+npx agenta --help
 ```
 
 ## Quick Start
 
 ```bash
 # Create a new signer (no dashboard required)
-gw init
+agenta init
 
 # Check status
-gw status
+agenta status
 
 # Send ETH
-gw send 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 0.001
+agenta send 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 0.001
 
 # Manage policies
-gw admin unlock
-gw admin policies
+agenta admin unlock
+agenta admin policies
 ```
 
-`gw init` walks you through everything interactively -- create a new signer on the server, or import an existing one from the dashboard.
+`agenta init` walks you through everything interactively -- create a new signer on the server, or import an existing one from the dashboard.
 
 ## CLI
 
 ```bash
-gw --help
+agenta --help
 ```
 
 ### Commands
 
 | Command | Description |
 |---------|-------------|
-| `gw init` | Create a new signer or import an existing one |
-| `gw status` | Show signer info, server health, and balances |
-| `gw info` | Show raw signer config (debug) |
-| `gw balance` | Show ETH and token balances |
-| `gw send <to> <amount>` | Send ETH to an address |
-| `gw sign-message <message>` | Sign a message (EIP-191) |
-| `gw deploy <bytecode>` | Deploy a contract |
-| `gw proxy` | Start a JSON-RPC signing proxy for Foundry/Hardhat |
-| `gw admin` | Admin commands (policies, pause/resume, audit) |
+| `agenta init` | Create a new signer or import an existing one |
+| `agenta status` | Show signer info, server health, and balances |
+| `agenta info` | Show raw signer config (debug) |
+| `agenta balance` | Show ETH and token balances |
+| `agenta send <to> <amount>` | Send ETH to an address |
+| `agenta sign-message <message>` | Sign a message (EIP-191) |
+| `agenta deploy <bytecode>` | Deploy a contract |
+| `agenta proxy` | Start a JSON-RPC signing proxy for Foundry/Hardhat |
+| `agenta admin` | Admin commands (policies, pause/resume, audit) |
 
 ### Multi-Signer
 
-Each signer gets its own config file under `~/.guardian-wallet/signers/`.
+Each signer gets its own config file under `~/.agenta/signers/`.
 
 ```bash
 # Create multiple signers
-gw init               # creates "my-agent"
-gw init               # creates "trading-bot"
+agenta init               # creates "my-agent"
+agenta init               # creates "trading-bot"
 
 # Use a specific signer
-gw --signer trading-bot send 0x... 0.01
-gw --signer my-agent balance
+agenta --signer trading-bot send 0x... 0.01
+agenta --signer my-agent balance
 
 # Default signer is auto-detected (single signer) or set during init
 ```
@@ -77,31 +77,31 @@ Manage policies, pause/resume, and view audit logs for your signers. Requires an
 
 ```bash
 # Unlock admin access (retrieves user share from keychain, computes auth token)
-gw admin unlock
+agenta admin unlock
 
 # Policy management
-gw admin policies                    # list policies
-gw admin policies add                # interactive policy creation
-gw admin policies remove <id>        # remove a policy
-gw admin policies toggle <id>        # enable/disable a policy
+agenta admin policies                    # list policies
+agenta admin policies add                # interactive policy creation
+agenta admin policies remove <id>        # remove a policy
+agenta admin policies toggle <id>        # enable/disable a policy
 
 # Signer control
-gw admin pause                       # pause signer (blocks all signing)
-gw admin resume                      # resume signer
+agenta admin pause                       # pause signer (blocks all signing)
+agenta admin resume                      # resume signer
 
 # Audit log
-gw admin audit                       # last 20 signing requests
-gw admin audit --limit 50            # more results
-gw admin audit --status blocked      # filter by status
+agenta admin audit                       # last 20 signing requests
+agenta admin audit --limit 50            # more results
+agenta admin audit --status blocked      # filter by status
 
 # Lock admin (remove token from disk)
-gw admin lock
+agenta admin lock
 ```
 
 ### Config Layout
 
 ```
-~/.guardian-wallet/
+~/.agenta/
   signers/
     my-agent.json           # { serverUrl, apiKey, apiSecret, network, ... }
     trading-bot.json
@@ -109,7 +109,7 @@ gw admin lock
     my-agent.token          # SHA-256(userShare) -- admin auth credential
   .default                  # default signer name
 
-OS Keychain (service: guardian-wallet):
+OS Keychain (service: agenta):
   my-agent/user-share       # user share for admin auth + backup signing
 ```
 
@@ -121,24 +121,24 @@ When invoked with no arguments, runs as an MCP server over stdio. This lets AI a
 
 | Tool | Description |
 |------|-------------|
-| `guardian_wallet_overview` | Wallet address, balances, recent activity |
-| `guardian_list_signers` | List all signers |
-| `guardian_get_status` | Server health and vault connectivity |
-| `guardian_list_networks` | Available networks and chain IDs |
-| `guardian_get_balances` | ETH and token balances |
-| `guardian_get_audit_log` | Transaction history and audit trail |
-| `guardian_resolve_address` | Resolve ENS names or validate addresses |
-| `guardian_simulate` | Simulate a transaction (gas estimate) |
-| `guardian_read_contract` | Read from any smart contract |
-| `guardian_sign_message` | Sign an EIP-191 message |
-| `guardian_sign_typed_data` | Sign EIP-712 typed data |
-| `guardian_send_eth` | Send ETH to an address |
-| `guardian_send_token` | Send ERC-20 tokens |
-| `guardian_call_contract` | Call any smart contract function |
-| `guardian_execute` | Execute a raw transaction |
-| `guardian_x402_check` | Check if a URL requires x402 payment |
-| `guardian_x402_discover` | Discover x402-protected endpoints |
-| `guardian_x402_fetch` | Fetch a 402-protected resource with auto-payment |
+| `agenta_wallet_overview` | Wallet address, balances, recent activity |
+| `agenta_list_signers` | List all signers |
+| `agenta_get_status` | Server health and vault connectivity |
+| `agenta_list_networks` | Available networks and chain IDs |
+| `agenta_get_balances` | ETH and token balances |
+| `agenta_get_audit_log` | Transaction history and audit trail |
+| `agenta_resolve_address` | Resolve ENS names or validate addresses |
+| `agenta_simulate` | Simulate a transaction (gas estimate) |
+| `agenta_read_contract` | Read from any smart contract |
+| `agenta_sign_message` | Sign an EIP-191 message |
+| `agenta_sign_typed_data` | Sign EIP-712 typed data |
+| `agenta_send_eth` | Send ETH to an address |
+| `agenta_send_token` | Send ERC-20 tokens |
+| `agenta_call_contract` | Call any smart contract function |
+| `agenta_execute` | Execute a raw transaction |
+| `agenta_x402_check` | Check if a URL requires x402 payment |
+| `agenta_x402_discover` | Discover x402-protected endpoints |
+| `agenta_x402_fetch` | Fetch a 402-protected resource with auto-payment |
 
 ### Claude Desktop
 
@@ -147,13 +147,13 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "guardian-wallet": {
+    "agenta": {
       "command": "npx",
-      "args": ["@agentokratia/guardian-wallet"],
+      "args": ["-y", "agenta"],
       "env": {
-        "GUARDIAN_API_SECRET": "your-base64-share",
-        "GUARDIAN_API_KEY": "gw_live_...",
-        "GUARDIAN_SERVER": "http://localhost:8080"
+        "AGENTA_API_SECRET": "your-base64-share",
+        "AGENTA_API_KEY": "gw_live_...",
+        "AGENTA_SERVER": "http://localhost:8080"
       }
     }
   }
@@ -167,13 +167,13 @@ Add to `.cursor/mcp.json`:
 ```json
 {
   "mcpServers": {
-    "guardian-wallet": {
+    "agenta": {
       "command": "npx",
-      "args": ["@agentokratia/guardian-wallet"],
+      "args": ["-y", "agenta"],
       "env": {
-        "GUARDIAN_API_SECRET": "your-base64-share",
-        "GUARDIAN_API_KEY": "gw_live_...",
-        "GUARDIAN_SERVER": "http://localhost:8080"
+        "AGENTA_API_SECRET": "your-base64-share",
+        "AGENTA_API_KEY": "gw_live_...",
+        "AGENTA_SERVER": "http://localhost:8080"
       }
     }
   }
@@ -185,13 +185,13 @@ Add to `.cursor/mcp.json`:
 ```json
 {
   "mcpServers": {
-    "guardian-wallet": {
+    "agenta": {
       "command": "node",
       "args": ["packages/wallet/dist/index.js"],
       "env": {
-        "GUARDIAN_API_SECRET": "your-base64-share",
-        "GUARDIAN_API_KEY": "gw_live_...",
-        "GUARDIAN_SERVER": "http://localhost:8080"
+        "AGENTA_API_SECRET": "your-base64-share",
+        "AGENTA_API_KEY": "gw_live_...",
+        "AGENTA_SERVER": "http://localhost:8080"
       }
     }
   }
@@ -200,10 +200,10 @@ Add to `.cursor/mcp.json`:
 
 ## JSON-RPC Proxy
 
-The `gw proxy` command starts a local HTTP server that acts as an Ethereum JSON-RPC endpoint. It intercepts signing methods (`eth_sendTransaction`, `eth_signTransaction`, `eth_sign`, `personal_sign`) and routes them through Guardian's threshold signing, while forwarding all other calls to the upstream RPC.
+The `agenta proxy` command starts a local HTTP server that acts as an Ethereum JSON-RPC endpoint. It intercepts signing methods (`eth_sendTransaction`, `eth_signTransaction`, `eth_sign`, `personal_sign`) and routes them through Agenta's threshold signing, while forwarding all other calls to the upstream RPC.
 
 ```bash
-gw proxy --port 8545 --rpc-url https://sepolia.base.org
+agenta proxy --port 8545 --rpc-url https://sepolia.base.org
 
 # Use with Foundry
 forge script Deploy.s.sol --rpc-url http://localhost:8545
@@ -218,13 +218,13 @@ Built-in support for the [x402 payment protocol](https://www.x402.org/). AI agen
 
 ```bash
 # Check if a URL requires payment
-# (via MCP: guardian_x402_check)
+# (via MCP: agenta_x402_check)
 
 # Discover protected endpoints on a domain
-# (via MCP: guardian_x402_discover)
+# (via MCP: agenta_x402_discover)
 
 # Fetch and auto-pay
-# (via MCP: guardian_x402_fetch)
+# (via MCP: agenta_x402_fetch)
 ```
 
 ## Environment Variables
@@ -233,10 +233,10 @@ Environment variables are an alternative to file-based config. Useful for CI/CD,
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `GUARDIAN_API_SECRET` | Base64-encoded signer key share | Yes |
-| `GUARDIAN_SERVER` | Server URL (e.g. `http://localhost:8080`) | Yes |
-| `GUARDIAN_API_KEY` | API key for authentication | Yes |
-| `GUARDIAN_NETWORK` | Default network name (e.g. `base-sepolia`, `mainnet`) | No |
+| `AGENTA_API_SECRET` | Base64-encoded signer key share | Yes |
+| `AGENTA_SERVER` | Server URL (e.g. `http://localhost:8080`) | Yes |
+| `AGENTA_API_KEY` | API key for authentication | Yes |
+| `AGENTA_NETWORK` | Default network name (e.g. `base-sepolia`, `mainnet`) | No |
 
 ## Security
 

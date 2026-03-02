@@ -5,10 +5,10 @@ import type { SignerManager } from '../../lib/signer-manager.js';
 
 export function registerSimulate(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_simulate',
+		'agenta_simulate',
 		{
 			description:
-				'Simulate a transaction to estimate gas cost before sending. No signing, no broadcast. Use this before guardian_send_eth or guardian_call_contract to verify the transaction will succeed and see gas estimates. Note: policy evaluation only happens during actual signing.',
+				'Simulate a transaction to estimate gas cost before sending. No signing, no broadcast. Use this before agenta_send_eth or agenta_call_contract to verify the transaction will succeed and see gas estimates. Note: policy evaluation only happens during actual signing.',
 			inputSchema: {
 				to: z
 					.string()
@@ -26,7 +26,7 @@ export function registerSimulate(server: McpServer, signerManager: SignerManager
 					.string()
 					.optional()
 					.describe(
-						'Network name from guardian_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required — call guardian_list_networks first if unknown.',
+						'Network name from agenta_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required — call agenta_list_networks first if unknown.',
 					),
 			},
 		},

@@ -1,4 +1,4 @@
-import type { IThresholdScheme, Share } from '@agentokratia/guardian-core';
+import type { IThresholdScheme, Share } from '@agentaos/core';
 
 import { HttpClient } from './http-client.js';
 import type {
@@ -63,7 +63,7 @@ let defaultScheme: IThresholdScheme | null = null;
 
 async function getDefaultScheme(): Promise<IThresholdScheme> {
 	if (defaultScheme) return defaultScheme;
-	const { CGGMP24Scheme } = await import('@agentokratia/guardian-schemes');
+	const { CGGMP24Scheme } = await import('@agentaos/engine');
 	defaultScheme = new CGGMP24Scheme();
 	return defaultScheme;
 }

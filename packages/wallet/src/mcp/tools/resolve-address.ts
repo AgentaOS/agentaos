@@ -5,7 +5,7 @@ import type { SignerManager } from '../../lib/signer-manager.js';
 
 export function registerResolveAddress(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_resolve_address',
+		'agenta_resolve_address',
 		{
 			description:
 				'Resolve an ENS name (e.g. "vitalik.eth") to an Ethereum address. Useful before sending transactions to human-readable names.',

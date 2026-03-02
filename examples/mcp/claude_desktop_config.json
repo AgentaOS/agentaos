@@ -1,13 +1,13 @@
 {
 	"mcpServers": {
-		"guardian": {
+		"agenta": {
 			"command": "npx",
-			"args": ["-y", "@agentokratia/guardian-wallet"],
+			"args": ["-y", "agenta"],
 			"env": {
-				"GUARDIAN_API_SECRET": "base64-encoded-key-material",
-				"GUARDIAN_API_KEY": "gw_live_abc123...",
-				"GUARDIAN_SERVER": "http://localhost:8080",
-				"GUARDIAN_NETWORK": "base-sepolia"
+				"AGENTA_API_SECRET": "base64-encoded-key-material",
+				"AGENTA_API_KEY": "gw_live_abc123...",
+				"AGENTA_SERVER": "http://localhost:8080",
+				"AGENTA_NETWORK": "base-sepolia"
 			}
 		}
 	}

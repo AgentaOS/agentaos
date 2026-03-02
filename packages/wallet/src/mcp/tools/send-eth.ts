@@ -6,10 +6,10 @@ import type { SignerManager } from '../../lib/signer-manager.js';
 
 export function registerSendEth(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_send_eth',
+		'agenta_send_eth',
 		{
 			description:
-				'Send ETH to any address or ENS name (e.g. "vitalik.eth"). Uses Guardian threshold signing — the full private key never exists. Policy-enforced by the server.',
+				'Send ETH to any address or ENS name (e.g. "vitalik.eth"). Uses AgentaOS threshold signing — the full private key never exists. Policy-enforced by the server.',
 			inputSchema: {
 				to: z.string().describe('Recipient — 0x address or ENS name (e.g. "vitalik.eth")'),
 				value: z.string().describe('Amount in ETH (e.g. "0.01", "1.5")'),
@@ -17,7 +17,7 @@ export function registerSendEth(server: McpServer, signerManager: SignerManager)
 					.string()
 					.optional()
 					.describe(
-						'Network name from guardian_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required — call guardian_list_networks first if unknown.',
+						'Network name from agenta_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required — call agenta_list_networks first if unknown.',
 					),
 			},
 		},

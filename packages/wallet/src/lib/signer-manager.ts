@@ -1,19 +1,19 @@
-import { CGGMP24Scheme } from '@agentokratia/guardian-schemes';
-import { GuardianApi, HttpClient, ThresholdSigner } from '@agentokratia/guardian-signer';
+import { CGGMP24Scheme } from '@agentaos/engine';
+import { AgentaApi, HttpClient, ThresholdSigner } from '@agentaos/sdk';
 
 export class SignerManager {
 	private signer: ThresholdSigner | null = null;
 	private signerPromise: Promise<ThresholdSigner> | null = null;
 	private httpClient: HttpClient | null = null;
-	private api: GuardianApi | null = null;
+	private api: AgentaApi | null = null;
 
 	private getConfig() {
-		const apiSecret = process.env.GUARDIAN_API_SECRET;
-		const serverUrl = process.env.GUARDIAN_SERVER || 'http://localhost:8080';
-		const apiKey = process.env.GUARDIAN_API_KEY;
+		const apiSecret = process.env.AGENTA_API_SECRET;
+		const serverUrl = process.env.AGENTA_SERVER || 'http://localhost:8080';
+		const apiKey = process.env.AGENTA_API_KEY;
 
-		if (!apiSecret) throw new Error('GUARDIAN_API_SECRET is required');
-		if (!apiKey) throw new Error('GUARDIAN_API_KEY is required');
+		if (!apiSecret) throw new Error('AGENTA_API_SECRET is required');
+		if (!apiKey) throw new Error('AGENTA_API_KEY is required');
 
 		return { apiSecret, serverUrl, apiKey };
 	}
@@ -53,22 +53,22 @@ export class SignerManager {
 		return this.httpClient;
 	}
 
-	getApi(): GuardianApi {
+	getApi(): AgentaApi {
 		if (this.api) return this.api;
-		this.api = new GuardianApi(this.getHttpClient());
+		this.api = new AgentaApi(this.getHttpClient());
 		return this.api;
 	}
 
-	/** GUARDIAN_NETWORK — network name matching server's GET /api/v1/networks (e.g. "base-sepolia", "mainnet"). */
+	/** AGENTA_NETWORK — network name matching server's GET /api/v1/networks (e.g. "base-sepolia", "mainnet"). */
 	getNetwork(): string | null {
-		return process.env.GUARDIAN_NETWORK || null;
+		return process.env.AGENTA_NETWORK || null;
 	}
 
 	requireNetwork(networkParam?: string): string {
 		const network = networkParam || this.getNetwork();
 		if (!network) {
 			throw new Error(
-				'No network specified. Call guardian_list_networks first to see available networks, then pass the "network" parameter to this tool.',
+				'No network specified. Call agenta_list_networks first to see available networks, then pass the "network" parameter to this tool.',
 			);
 		}
 		return network;

@@ -7,7 +7,7 @@ import { wordlist } from '@scure/bip39/wordlists/english.js';
 // Constants
 // ---------------------------------------------------------------------------
 
-const HKDF_SALT = 'guardian-transfer-v1';
+const HKDF_SALT = 'agentaos-transfer-v1';
 const HKDF_INFO_PREFIX = 'aes-256-gcm:';
 const WORD_COUNT = 6;
 const AES_KEY_BYTES = 32;
@@ -50,7 +50,7 @@ export function generateTransferCode(transferId: string): {
  *
  * Uses HKDF-SHA256 with:
  * - IKM: space-joined lowercase words
- * - Salt: 'guardian-transfer-v1'
+ * - Salt: 'agentaos-transfer-v1'
  * - Info: 'aes-256-gcm:{transferId}'
  */
 export function deriveTransferKey(words: string[], transferId: string): Uint8Array {

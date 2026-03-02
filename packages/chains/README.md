@@ -1,25 +1,25 @@
-# @agentokratia/guardian-chains
+# @agentaos/chains
 
-**Ethereum chain adapter for Guardian Wallet.**
+**Ethereum chain adapter for AgentaOS.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE-APACHE)
-[![npm](https://img.shields.io/npm/v/@agentokratia/guardian-chains)](https://www.npmjs.com/package/@agentokratia/guardian-chains)
+[![npm](https://img.shields.io/npm/v/@agentaos/chains)](https://www.npmjs.com/package/@agentaos/chains)
 
-Implements the `IChain` interface from `@agentokratia/guardian-core` for Ethereum-compatible chains. Handles transaction building, decoding, serialization, and signature assembly using [viem](https://viem.sh/).
+Implements the `IChain` interface from `@agentaos/core` for Ethereum-compatible chains. Handles transaction building, decoding, serialization, and signature assembly using [viem](https://viem.sh/).
 
 ## Install
 
 ```bash
-npm install @agentokratia/guardian-chains
+npm install @agentaos/chains
 ```
 
 ## Usage
 
 ```typescript
-import { EthereumChain } from '@agentokratia/guardian-chains';
+import { EthereumChain } from '@agentaos/chains';
 ```
 
-This package is used internally by `@agentokratia/guardian-server` for transaction processing. Most users should use the higher-level `Guardian` facade from the signer package instead.
+This package is used internally by `@agentaos/server` for transaction processing. Most users should use the higher-level `Agenta` facade from the SDK package instead.
 
 ## What It Does
 
@@ -30,7 +30,7 @@ This package is used internally by `@agentokratia/guardian-server` for transacti
 
 ## Dependencies
 
-- `@agentokratia/guardian-core` -- interfaces and types
+- `@agentaos/core` -- interfaces and types
 - `viem` -- Ethereum client library
 
 ## License

@@ -1,9 +1,4 @@
-import type {
-	DecodedAction,
-	FeeEstimate,
-	IChain,
-	TransactionRequest,
-} from '@agentokratia/guardian-core';
+import type { DecodedAction, FeeEstimate, IChain, TransactionRequest } from '@agentaos/core';
 import {
 	http,
 	type PublicClient,

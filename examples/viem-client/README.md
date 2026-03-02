@@ -1,4 +1,4 @@
-# Guardian + viem
+# AgentaOS + viem
 
 Direct WalletClient integration using `ThresholdSigner.toViemAccount()`. The full private key never exists.
 
@@ -13,7 +13,7 @@ pnpm example:viem 0xRecipient 0.001
 
 ## How It Works
 
-`ThresholdSigner.toViemAccount()` returns a viem `Account` that can be used with any viem `WalletClient`. Under the hood, every `signTransaction` call runs the interactive CGGMP24 protocol with the Guardian server.
+`ThresholdSigner.toViemAccount()` returns a viem `Account` that can be used with any viem `WalletClient`. Under the hood, every `signTransaction` call runs the interactive CGGMP24 protocol with the AgentaOS server.
 
 ```typescript
 const account = signer.toViemAccount();

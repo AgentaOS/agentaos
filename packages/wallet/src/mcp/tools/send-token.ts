@@ -7,7 +7,7 @@ import type { SignerManager } from '../../lib/signer-manager.js';
 
 export function registerSendToken(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_send_token',
+		'agenta_send_token',
 		{
 			description:
 				'Send ERC-20 tokens by symbol (e.g. "USDC", "WETH") or contract address. Supports ENS names for recipients. Automatically handles decimal conversion. The full private key never exists.',
@@ -25,7 +25,7 @@ export function registerSendToken(server: McpServer, signerManager: SignerManage
 					.string()
 					.optional()
 					.describe(
-						'Network name from guardian_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required — call guardian_list_networks first if unknown.',
+						'Network name from agenta_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required — call agenta_list_networks first if unknown.',
 					),
 			},
 		},

@@ -5,10 +5,10 @@ import type { SignerManager } from '../../lib/signer-manager.js';
 
 export function registerSignTypedData(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_sign_typed_data',
+		'agenta_sign_typed_data',
 		{
 			description:
-				'Sign EIP-712 typed data using Guardian threshold signing. Used for x402 payments, Permit2 approvals, ERC-3009 transfers, and off-chain structured signatures. No gas is spent.',
+				'Sign EIP-712 typed data using AgentaOS threshold signing. Used for x402 payments, Permit2 approvals, ERC-3009 transfers, and off-chain structured signatures. No gas is spent.',
 			inputSchema: {
 				domain: z
 					.record(z.unknown())

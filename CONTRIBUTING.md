@@ -1,4 +1,4 @@
-# Contributing to Guardian Wallet
+# Contributing to AgentaOS
 
 ## Prerequisites
 - Node.js 20+
@@ -7,8 +7,8 @@
 
 ## Setup
 ```bash
-git clone https://github.com/agentokratia/guardian-wallet.git
-cd guardian-wallet
+git clone https://github.com/AgentaOS/agentaos.git
+cd agenta
 pnpm install
 pnpm build
 ```
@@ -19,10 +19,10 @@ pnpm build
 docker compose up -d
 
 # Start the server in dev mode
-pnpm --filter @agentokratia/guardian-server dev
+pnpm --filter @agentaos/server dev
 
 # Start the dashboard in dev mode
-pnpm --filter @agentokratia/guardian-app dev
+pnpm --filter @agentaos/app dev
 
 # Run tests
 pnpm test
@@ -69,7 +69,7 @@ Build order: `core` --> `schemes` + `chains` (parallel) --> `server`, `signer` -
 - Add tests for new functionality
 
 ## Security
-If you discover a security vulnerability, please report it via security@agentokratia.com rather than opening a public issue. See SECURITY.md for details.
+If you discover a security vulnerability, please report it via security@agentaos.ai rather than opening a public issue. See SECURITY.md for details.
 
 ## License
 By contributing, you agree that your contributions will be licensed under AGPL-3.0.

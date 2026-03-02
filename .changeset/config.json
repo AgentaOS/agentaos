@@ -1,24 +1,20 @@
 {
 	"$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
-	"changelog": ["@changesets/changelog-github", { "repo": "agentokratia/guardian-wallet" }],
+	"changelog": ["@changesets/changelog-github", { "repo": "AgentaOS/agentaos" }],
 	"commit": false,
 	"fixed": [
 		[
-			"@agentokratia/guardian-core",
-			"@agentokratia/guardian-mpc-wasm",
-			"@agentokratia/guardian-schemes",
-			"@agentokratia/guardian-chains",
-			"@agentokratia/guardian-signer",
-			"@agentokratia/guardian-wallet"
+			"@agentaos/core",
+			"@agentaos/crypto",
+			"@agentaos/engine",
+			"@agentaos/chains",
+			"@agentaos/sdk",
+			"agentaos"
 		]
 	],
 	"linked": [],
 	"access": "public",
 	"baseBranch": "main",
 	"updateInternalDependencies": "patch",
-	"ignore": [
-		"@agentokratia/guardian-server",
-		"@agentokratia/guardian-app",
-		"@agentokratia/guardian-auth"
-	]
+	"ignore": ["@agentaos/server", "@agentaos/app", "@agentaos/auth"]
 }

@@ -1,7 +1,7 @@
 /**
- * Guardian Wallet + LangChain
+ * AgentaOS + LangChain
  *
- * A LangChain agent using Guardian.connect() for threshold signing.
+ * A LangChain agent using Agenta.connect() for threshold signing.
  * The full private key never exists — signing is 2-of-3 MPC.
  *
  * Usage:
@@ -9,7 +9,7 @@
  *   pnpm example:langchain "Check my wallet balance"
  */
 
-import { Guardian } from '@agentokratia/guardian-signer';
+import { Agenta } from '@agentaos/sdk';
 import { type BaseMessageLike, HumanMessage, ToolMessage } from '@langchain/core/messages';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { ChatOpenAI } from '@langchain/openai';
@@ -28,10 +28,10 @@ const llm = new ChatOpenAI({
 });
 // ─────────────────────────────────────────────────────────────────────
 
-const gw = await Guardian.connect({
-	apiSecret: process.env.GUARDIAN_API_SECRET as string,
-	serverUrl: process.env.GUARDIAN_SERVER || 'http://localhost:8080',
-	apiKey: process.env.GUARDIAN_API_KEY as string,
+const gw = await Agenta.connect({
+	apiSecret: process.env.AGENTA_API_SECRET as string,
+	serverUrl: process.env.AGENTA_SERVER || 'http://localhost:8080',
+	apiKey: process.env.AGENTA_API_KEY as string,
 });
 
 const account = gw.toViemAccount();
@@ -86,7 +86,7 @@ const model = llm.bindTools(tools);
 
 const input =
 	process.argv[2] ||
-	`Run a startup health check: verify the wallet has funds, then sign the message "guardian-agent-online::${new Date().toISOString()}" as a proof-of-liveness attestation.`;
+	`Run a startup health check: verify the wallet has funds, then sign the message "agenta-agent-online::${new Date().toISOString()}" as a proof-of-liveness attestation.`;
 
 console.log(`\n🤖 Agent input: ${input}\n`);
 

@@ -5,10 +5,10 @@ import type { SignerManager } from '../../lib/signer-manager.js';
 
 export function registerSignMessage(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_sign_message',
+		'agenta_sign_message',
 		{
 			description:
-				'Sign an arbitrary message using Guardian threshold signing (2-of-3 MPC). Returns an EIP-191 personal signature. No gas is spent.',
+				'Sign an arbitrary message using AgentaOS threshold signing (2-of-3 MPC). Returns an EIP-191 personal signature. No gas is spent.',
 			inputSchema: {
 				message: z.string().min(1).describe('The message to sign (plain text string)'),
 			},

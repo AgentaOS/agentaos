@@ -5,7 +5,7 @@ import { isatty } from 'node:tty';
 const args = process.argv.slice(2);
 
 if (args.length > 0) {
-	// CLI mode: gw <command> [options]
+	// CLI mode: agenta <command> [options]
 	const { runCli } = await import('./cli/index.js');
 	await runCli();
 } else if (isatty(0)) {

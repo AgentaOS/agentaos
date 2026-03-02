@@ -2,13 +2,13 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in Guardian Wallet, please report it responsibly.
+If you discover a security vulnerability in AgentaOS, please report it responsibly.
 
-**Primary contact:** [security@agentokratia.com](mailto:security@agentokratia.com)
+**Primary contact:** [security@agentaos.ai](mailto:security@agentaos.ai)
 
 - You will receive an acknowledgment within **48 hours** of your report.
 - We will provide a detailed response within **5 business days**, including an assessment of the issue and an expected timeline for a fix.
-- If you prefer, you may also report vulnerabilities through [GitHub Security Advisories](https://github.com/agentokratia/guardian-wallet/security/advisories/new).
+- If you prefer, you may also report vulnerabilities through [GitHub Security Advisories](https://github.com/AgentaOS/agentaos/security/advisories/new).
 
 Please include as much detail as possible: steps to reproduce, affected versions, and any proof-of-concept code.
 
@@ -18,16 +18,16 @@ Please include as much detail as possible: steps to reproduce, affected versions
 
 | Package | Description |
 |---------|-------------|
-| `@agentokratia/guardian-server` | Policy server (NestJS API), signing endpoints, auth, Vault integration |
-| `@agentokratia/guardian-signer` | Signer-side SDK (share loading, partial signing, HTTP client) |
-| `@agentokratia/guardian-wallet` | CLI + MCP server (`gw` command) |
-| `@agentokratia/guardian-core` | Shared interfaces and types |
-| `@agentokratia/guardian-chains` | Chain-specific transaction logic (Ethereum) |
-| `@agentokratia/guardian-schemes` | Threshold signing implementations (CGGMP24) |
+| `@agentaos/server` | Policy server (NestJS API), signing endpoints, auth, Vault integration |
+| `@agentaos/sdk` | Signer-side SDK (share loading, partial signing, HTTP client) |
+| `agenta` | CLI + MCP server (`gw` command) |
+| `@agentaos/core` | Shared interfaces and types |
+| `@agentaos/chains` | Chain-specific transaction logic (Ethereum) |
+| `@agentaos/engine` | Threshold signing implementations (CGGMP24) |
 
 ### Out of Scope
 
-- **Dashboard UI (`@agentokratia/guardian-app`)** -- client-side only, no key material handled outside of browser WASM signing (report browser WASM issues under `@agentokratia/guardian-schemes`)
+- **Dashboard UI (`@agentaos/app`)** -- client-side only, no key material handled outside of browser WASM signing (report browser WASM issues under `@agentaos/engine`)
 - **Example code and documentation**
 
 ## Core Security Invariant

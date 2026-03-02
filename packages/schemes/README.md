@@ -1,22 +1,22 @@
-# @agentokratia/guardian-schemes
+# @agentaos/engine
 
-**CGGMP24 threshold ECDSA signing scheme for Guardian Wallet.**
+**CGGMP24 threshold ECDSA signing scheme for AgentaOS.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE-APACHE)
-[![npm](https://img.shields.io/npm/v/@agentokratia/guardian-schemes)](https://www.npmjs.com/package/@agentokratia/guardian-schemes)
+[![npm](https://img.shields.io/npm/v/@agentaos/engine)](https://www.npmjs.com/package/@agentaos/engine)
 
-Implements the `IThresholdScheme` interface from `@agentokratia/guardian-core` using CGGMP24 (Canetti-Gennaro-Goldfeder-Makriyannis-Peled 2024) threshold ECDSA over secp256k1. Wraps a Rust WASM module for the cryptographic operations.
+Implements the `IThresholdScheme` interface from `@agentaos/core` using CGGMP24 (Canetti-Gennaro-Goldfeder-Makriyannis-Peled 2024) threshold ECDSA over secp256k1. Wraps a Rust WASM module for the cryptographic operations.
 
 ## Install
 
 ```bash
-npm install @agentokratia/guardian-schemes
+npm install @agentaos/engine
 ```
 
 ## Usage
 
 ```typescript
-import { CGGMP24Scheme, SchemeRegistry } from '@agentokratia/guardian-schemes';
+import { CGGMP24Scheme, SchemeRegistry } from '@agentaos/engine';
 
 // Direct usage
 const scheme = new CGGMP24Scheme();
@@ -25,7 +25,7 @@ const scheme = new CGGMP24Scheme();
 const scheme = SchemeRegistry.get('cggmp24');
 ```
 
-This package is used internally by `@agentokratia/guardian-signer` and `@agentokratia/guardian-server`. Most users should use the higher-level `Guardian` facade from the signer package instead.
+This package is used internally by `@agentaos/sdk` and `@agentaos/server`. Most users should use the higher-level `Agenta` facade from the signer package instead.
 
 ## What It Does
 
@@ -36,8 +36,8 @@ This package is used internally by `@agentokratia/guardian-signer` and `@agentok
 
 ## Dependencies
 
-- `@agentokratia/guardian-core` -- interfaces and types
-- `@agentokratia/guardian-mpc-wasm` -- Rust WASM binary (CGGMP24 implementation)
+- `@agentaos/core` -- interfaces and types
+- `@agentaos/crypto` -- Rust WASM binary (CGGMP24 implementation)
 
 ## License
 

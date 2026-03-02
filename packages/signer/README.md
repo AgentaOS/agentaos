@@ -1,36 +1,36 @@
-# @agentokratia/guardian-signer
+# @agentaos/sdk
 
-**Guardian Wallet SDK -- threshold signing where the key never exists.**
+**AgentaOS SDK -- threshold signing where the key never exists.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE-APACHE)
-[![npm](https://img.shields.io/npm/v/@agentokratia/guardian-signer)](https://www.npmjs.com/package/@agentokratia/guardian-signer)
+[![npm](https://img.shields.io/npm/v/@agentaos/sdk)](https://www.npmjs.com/package/@agentaos/sdk)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](https://nodejs.org)
 
-The TypeScript SDK for [Guardian Wallet](https://github.com/agentokratia/guardian-wallet). Sign Ethereum transactions and messages using 2-of-3 threshold ECDSA -- the full private key is never constructed.
+The TypeScript SDK for [AgentaOS](https://github.com/AgentaOS/agentaos). Sign Ethereum transactions and messages using 2-of-3 threshold ECDSA -- the full private key is never constructed.
 
 ## Install
 
 ```bash
-npm install @agentokratia/guardian-signer
+npm install @agentaos/sdk
 # or
-pnpm add @agentokratia/guardian-signer
+pnpm add @agentaos/sdk
 ```
 
 ## Quick Start
 
-### Using the `Guardian` facade (recommended)
+### Using the `Agenta` facade (recommended)
 
 ```typescript
-import { Guardian } from '@agentokratia/guardian-signer';
+import { Agenta } from '@agentaos/sdk';
 
-const gw = await Guardian.connect({
-  apiSecret: process.env.GUARDIAN_API_SECRET,  // base64 key share
-  serverUrl: process.env.GUARDIAN_SERVER,       // e.g. "http://localhost:8080"
-  apiKey: process.env.GUARDIAN_API_KEY,         // API key for auth
+const agent = await Agenta.connect({
+  apiSecret: process.env.AGENTA_API_SECRET,  // base64 key share
+  serverUrl: process.env.AGENTA_SERVER,       // e.g. "http://localhost:8080"
+  apiKey: process.env.AGENTA_API_KEY,         // API key for auth
 });
 
 // Sign and broadcast a transaction
-const { txHash } = await gw.signTransaction({
+const { txHash } = await agent.signTransaction({
   to: '0x...',
   value: '0.01',
   network: 'base-sepolia',
@@ -39,22 +39,22 @@ const { txHash } = await gw.signTransaction({
 console.log(`Transaction: ${txHash}`);
 
 // Query server data
-const signers = await gw.listSigners();
-const balance = await gw.getBalance(signers[0].id, 'base-sepolia');
+const signers = await agent.listSigners();
+const balance = await agent.getBalance(signers[0].id, 'base-sepolia');
 
 // Always clean up
-gw.destroy();
+agent.destroy();
 ```
 
 ### Using `ThresholdSigner` directly
 
 ```typescript
-import { ThresholdSigner } from '@agentokratia/guardian-signer';
+import { ThresholdSigner } from '@agentaos/sdk';
 
 const signer = await ThresholdSigner.fromSecret({
-  apiSecret: process.env.GUARDIAN_API_SECRET,
+  apiSecret: process.env.AGENTA_API_SECRET,
   serverUrl: 'http://localhost:8080',
-  apiKey: process.env.GUARDIAN_API_KEY,
+  apiKey: process.env.AGENTA_API_KEY,
 });
 
 // Sign a transaction
@@ -65,7 +65,7 @@ const { txHash, signature } = await signer.signTransaction({
 });
 
 // Sign a message (EIP-191)
-const { signature } = await signer.signMessage('Hello Guardian');
+const { signature } = await signer.signMessage('Hello AgentaOS');
 
 console.log(`Address: ${signer.address}`);
 signer.destroy(); // wipe key material from memory
@@ -74,14 +74,14 @@ signer.destroy(); // wipe key material from memory
 ### viem Integration
 
 ```typescript
-import { Guardian } from '@agentokratia/guardian-signer';
+import { Agenta } from '@agentaos/sdk';
 import { createWalletClient, http } from 'viem';
 import { baseSepolia } from 'viem/chains';
 
-const gw = await Guardian.connect({ ... });
+const agent = await Agenta.connect({ ... });
 
 const client = createWalletClient({
-  account: gw.toViemAccount(),
+  account: agent.toViemAccount(),
   chain: baseSepolia,
   transport: http(),
 });
@@ -91,29 +91,29 @@ const hash = await client.sendTransaction({
   value: 1000000000000000n, // 0.001 ETH
 });
 
-gw.destroy();
+agent.destroy();
 ```
 
 ## API
 
-### `Guardian` (facade)
+### `Agenta` (facade)
 
 | Method | Description |
 |--------|-------------|
-| `Guardian.connect(opts)` | Connect to server, load key share, return initialized instance |
-| `gw.address` | Ethereum address derived from the threshold key |
-| `gw.signTransaction(tx)` | Sign and broadcast a transaction |
-| `gw.signMessage(msg)` | Sign a message (EIP-191) |
-| `gw.toViemAccount()` | Get a viem-compatible account |
-| `gw.listSigners()` | List all signers on the server |
-| `gw.getBalance(id, network)` | Get ETH balance for a signer |
-| `gw.getTokenBalances(id, chainId)` | Get tracked token balances |
-| `gw.listNetworks()` | List supported networks |
-| `gw.getPolicies(id)` | Get signer's policy rules |
-| `gw.getAuditLog(opts?)` | Query the audit log |
-| `gw.simulate(id, tx)` | Simulate a transaction (gas estimate) |
-| `gw.resolveAddress(addressOrEns)` | Resolve ENS name or validate address |
-| `gw.destroy()` | Wipe key material from memory |
+| `Agenta.connect(opts)` | Connect to server, load key share, return initialized instance |
+| `agent.address` | Ethereum address derived from the threshold key |
+| `agent.signTransaction(tx)` | Sign and broadcast a transaction |
+| `agent.signMessage(msg)` | Sign a message (EIP-191) |
+| `agent.toViemAccount()` | Get a viem-compatible account |
+| `agent.listSigners()` | List all signers on the server |
+| `agent.getBalance(id, network)` | Get ETH balance for a signer |
+| `agent.getTokenBalances(id, chainId)` | Get tracked token balances |
+| `agent.listNetworks()` | List supported networks |
+| `agent.getPolicies(id)` | Get signer's policy rules |
+| `agent.getAuditLog(opts?)` | Query the audit log |
+| `agent.simulate(id, tx)` | Simulate a transaction (gas estimate) |
+| `agent.resolveAddress(addressOrEns)` | Resolve ENS name or validate address |
+| `agent.destroy()` | Wipe key material from memory |
 
 ### `ThresholdSigner`
 
@@ -126,15 +126,15 @@ gw.destroy();
 | `signer.address` | Ethereum address |
 | `signer.destroy()` | Wipe share from memory |
 
-### `GuardianApi`
+### `AgentaApi`
 
-Low-level API client for server read operations. Used internally by `Guardian`, but available for advanced use:
+Low-level API client for server read operations. Used internally by `Agenta`, but available for advanced use:
 
 ```typescript
-import { GuardianApi, HttpClient } from '@agentokratia/guardian-signer';
+import { AgentaApi, HttpClient } from '@agentaos/sdk';
 
 const client = new HttpClient({ baseUrl: 'http://localhost:8080', apiKey: '...' });
-const api = new GuardianApi(client);
+const api = new AgentaApi(client);
 
 const health = await api.getHealth();
 const networks = await api.listNetworks();
@@ -152,9 +152,9 @@ const networks = await api.listNetworks();
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `GUARDIAN_API_SECRET` | Base64-encoded key share | Yes |
-| `GUARDIAN_SERVER` | Server URL (e.g. `http://localhost:8080`) | Yes |
-| `GUARDIAN_API_KEY` | API key for authentication | Yes |
+| `AGENTA_API_SECRET` | Base64-encoded key share | Yes |
+| `AGENTA_SERVER` | Server URL (e.g. `http://localhost:8080`) | Yes |
+| `AGENTA_API_KEY` | API key for authentication | Yes |
 
 ## License
 

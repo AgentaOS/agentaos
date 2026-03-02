@@ -6,10 +6,10 @@ import type { SignerManager } from '../../lib/signer-manager.js';
 
 export function registerExecute(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_execute',
+		'agenta_execute',
 		{
 			description:
-				'Execute a raw Ethereum transaction with pre-encoded calldata using Guardian threshold signing. For advanced use cases where you already have the encoded transaction data.',
+				'Execute a raw Ethereum transaction with pre-encoded calldata using AgentaOS threshold signing. For advanced use cases where you already have the encoded transaction data.',
 			inputSchema: {
 				to: z
 					.string()
@@ -27,7 +27,7 @@ export function registerExecute(server: McpServer, signerManager: SignerManager)
 					.string()
 					.optional()
 					.describe(
-						'Network name from guardian_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required — call guardian_list_networks first if unknown.',
+						'Network name from agenta_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required — call agenta_list_networks first if unknown.',
 					),
 			},
 		},

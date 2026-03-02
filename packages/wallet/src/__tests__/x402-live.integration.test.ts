@@ -3,10 +3,10 @@
  *
  * These tests hit a real x402 server on Base Sepolia.
  * - checkX402 and discoverX402: always run (no signer needed)
- * - fetchWithX402: only runs when GUARDIAN_API_SECRET + GUARDIAN_SERVER_URL are set
+ * - fetchWithX402: only runs when AGENTA_API_SECRET + AGENTA_SERVER_URL are set
  *   AND the signer has USDC on Base Sepolia
  *
- * Run: pnpm --filter @agentokratia/guardian vitest run x402-live
+ * Run: pnpm --filter agenta vitest run x402-live
  */
 import { describe, expect, it } from 'vitest';
 import { checkX402, discoverX402, fetchWithX402 } from '../lib/x402-client.js';
@@ -48,16 +48,16 @@ describe('x402 live integration', () => {
 	});
 
 	describe('fetchWithX402', () => {
-		it.skipIf(!process.env.GUARDIAN_API_SECRET)(
+		it.skipIf(!process.env.AGENTA_API_SECRET)(
 			'pays and fetches protected content',
 			async () => {
-				const { ThresholdSigner } = await import('@agentokratia/guardian-signer');
-				const { CGGMP24Scheme } = await import('@agentokratia/guardian-schemes');
+				const { ThresholdSigner } = await import('@agentaos/sdk');
+				const { CGGMP24Scheme } = await import('@agentaos/engine');
 
 				const signer = await ThresholdSigner.fromSecret({
-					apiSecret: process.env.GUARDIAN_API_SECRET!,
-					serverUrl: process.env.GUARDIAN_SERVER_URL || 'http://localhost:8080',
-					apiKey: process.env.GUARDIAN_API_KEY || '',
+					apiSecret: process.env.AGENTA_API_SECRET!,
+					serverUrl: process.env.AGENTA_SERVER_URL || 'http://localhost:8080',
+					apiKey: process.env.AGENTA_API_KEY || '',
 					scheme: new CGGMP24Scheme(),
 				});
 

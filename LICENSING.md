@@ -2,7 +2,7 @@
 
 Copyright 2025-2026 Aristokrates OÜ
 
-Guardian Wallet uses a dual-license model. Different packages in this monorepo
+AgentaOS uses a dual-license model. Different packages in this monorepo
 are released under different licenses depending on their purpose.
 
 ## SDK and Developer Tools — Apache 2.0
@@ -13,12 +13,12 @@ projects — commercial or otherwise — with no copyleft obligations.
 
 | Package                           | npm    | Description                                           |
 | --------------------------------- | ------ | ----------------------------------------------------- |
-| `@agentokratia/guardian-core`     | public | Type definitions and interfaces                       |
-| `@agentokratia/guardian-mpc-wasm` | public | CGGMP24 threshold ECDSA WASM module                   |
-| `@agentokratia/guardian-schemes`  | public | Signing scheme orchestration                          |
-| `@agentokratia/guardian-chains`   | public | Ethereum chain adapter (viem)                         |
-| `@agentokratia/guardian-signer`   | public | Signer SDK — share loading, signing, viem integration |
-| `@agentokratia/guardian-wallet`  | public | CLI + MCP server (`gw` command)                       |
+| `@agentaos/core`     | public | Type definitions and interfaces                       |
+| `@agentaos/crypto` | public | CGGMP24 threshold ECDSA WASM module                   |
+| `@agentaos/engine`  | public | Signing scheme orchestration                          |
+| `@agentaos/chains`   | public | Ethereum chain adapter (viem)                         |
+| `@agentaos/sdk`   | public | Signer SDK — share loading, signing, viem integration |
+| `agenta`  | public | CLI + MCP server (`gw` command)                       |
 
 These packages are safe to use alongside any license — MIT, Apache 2.0,
 proprietary, etc. Integrate them with LangChain, Vercel AI SDK, ethers.js, or
@@ -33,24 +33,24 @@ must make your modifications available under the same license.
 
 | Package                         | npm     | Description                |
 | ------------------------------- | ------- | -------------------------- |
-| `@agentokratia/guardian-server` | private | Policy server (NestJS API) |
-| `@agentokratia/guardian-app`    | private | Dashboard (React SPA)      |
-| `@agentokratia/guardian-auth`   | private | WebAuthn + PRF wallet auth |
+| `@agentaos/server` | private | Policy server (NestJS API) |
+| `@agentaos/app`    | private | Dashboard (React SPA)      |
+| `@agentaos/auth`   | private | WebAuthn + PRF wallet auth |
 
 ## Self-Hosting
 
-Self-hosting Guardian Wallet for your own agents is **free** and encouraged. The
+Self-hosting AgentaOS for your own agents is **free** and encouraged. The
 AGPL only requires source disclosure when you modify the server or dashboard and
 offer the modified version as a service to others.
 
 ## Commercial Licensing
 
-If you want to offer Guardian Wallet as part of a managed or hosted service to
+If you want to offer AgentaOS as part of a managed or hosted service to
 third parties, or if you need a license without copyleft obligations for the
 AGPL components, contact us for a commercial license:
 
-- Email: contact@agentokratia.com
-- Web: https://agentokratia.com
+- Email: hello@agentaos.ai
+- Web: https://agentaos.ai
 
 ## Summary
 

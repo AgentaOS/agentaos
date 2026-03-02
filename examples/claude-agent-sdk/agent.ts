@@ -1,11 +1,11 @@
 /**
- * Autonomous DeFi Rebalancing Agent — Guardian Wallet + Claude Agent SDK
+ * Autonomous DeFi Rebalancing Agent — AgentaOS + Claude Agent SDK
  *
  * A fully autonomous portfolio manager that runs in a continuous loop:
  *   1. Reads on-chain balances (ETH + USDC) from Base Sepolia
  *   2. Reads ETH/USDC price from Uniswap V3 pool
  *   3. Claude decides when to rebalance based on allocation drift
- *   4. Executes swaps via Guardian 2-of-3 threshold signing (no private key)
+ *   4. Executes swaps via AgentaOS 2-of-3 threshold signing (no private key)
  *   5. Logs trades and sleeps until next cycle
  *
  * Uses the Claude Agent SDK — same agent loop that powers Claude Code.
@@ -19,10 +19,10 @@
  *   (Or set ANTHROPIC_API_KEY in examples/.env if you prefer API key auth.)
  *
  * Requires:
- *   GUARDIAN_* vars in examples/.env (server URL, API key, secret)
+ *   AGENTA_* env vars in examples/.env (server URL, API key, secret)
  */
 
-import { Guardian } from '@agentokratia/guardian-signer';
+import { Agenta } from '@agentaos/sdk';
 import { createSdkMcpServer, query, tool } from '@anthropic-ai/claude-agent-sdk';
 import {
 	http,
@@ -154,12 +154,12 @@ function log(msg: string): void {
 	console.log(`  [${ts}] ${msg}`);
 }
 
-// ── Initialize Guardian + viem ──────────────────────────────────────────
+// ── Initialize AgentaOS + viem ──────────────────────────────────────────
 
-const gw = await Guardian.connect({
-	apiSecret: process.env.GUARDIAN_API_SECRET as string,
-	serverUrl: process.env.GUARDIAN_SERVER || 'http://localhost:8080',
-	apiKey: process.env.GUARDIAN_API_KEY as string,
+const gw = await Agenta.connect({
+	apiSecret: process.env.AGENTA_API_SECRET as string,
+	serverUrl: process.env.AGENTA_SERVER || 'http://localhost:8080',
+	apiKey: process.env.AGENTA_API_KEY as string,
 });
 
 const publicClient = createPublicClient({
@@ -309,7 +309,7 @@ const getEthPrice = tool(
 
 const swapEthToUsdc = tool(
 	'swap_eth_to_usdc',
-	'Swap ETH for USDC on Uniswap V3 via Guardian threshold signing. The private key NEVER exists — signing is 2-of-3 MPC. The SwapRouter wraps ETH to WETH internally.',
+	'Swap ETH for USDC on Uniswap V3 via AgentaOS threshold signing. The private key NEVER exists — signing is 2-of-3 MPC. The SwapRouter wraps ETH to WETH internally.',
 	{
 		amount_eth: z.string().describe('Amount of ETH to swap (e.g. "0.01")'),
 		min_usdc_out: z
@@ -428,8 +428,8 @@ const getTradeLog = tool(
 
 // ── MCP Server ──────────────────────────────────────────────────────────
 
-const guardianDefi = createSdkMcpServer({
-	name: 'guardian-defi',
+const agentaDefi = createSdkMcpServer({
+	name: 'agenta-defi',
 	version: '1.0.0',
 	tools: [checkPortfolio, getEthPrice, swapEthToUsdc, signAttestation, getTradeLog],
 });
@@ -464,7 +464,7 @@ RULES:
 // ── Main — Autonomous Loop ──────────────────────────────────────────────
 
 console.log('\n  ┌──────────────────────────────────────────────────────┐');
-console.log('  │  Guardian Autonomous DeFi Agent                      │');
+console.log('  │  AgentaOS Autonomous DeFi Agent                      │');
 console.log('  │  Claude Agent SDK + 2-of-3 Threshold Signing         │');
 console.log('  │  Strategy: 50/50 ETH/USDC rebalance at ±10% drift   │');
 console.log('  └──────────────────────────────────────────────────────┘\n');
@@ -491,8 +491,8 @@ for (let cycle = 1; cycle <= MAX_CYCLES; cycle++) {
 		prompt,
 		options: {
 			systemPrompt: SYSTEM_PROMPT,
-			mcpServers: { 'guardian-defi': guardianDefi },
-			allowedTools: ['mcp__guardian-defi__*'],
+			mcpServers: { 'agenta-defi': agentaDefi },
+			allowedTools: ['mcp__agenta-defi__*'],
 			permissionMode: 'bypassPermissions',
 			allowDangerouslySkipPermissions: true,
 			model: 'claude-sonnet-4-5-20250929',

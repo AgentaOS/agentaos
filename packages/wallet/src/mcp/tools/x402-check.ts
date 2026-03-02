@@ -5,7 +5,7 @@ import { checkX402 } from '../../lib/x402-client.js';
 
 export function registerX402Check(server: McpServer) {
 	server.registerTool(
-		'guardian_x402_check',
+		'agenta_x402_check',
 		{
 			description:
 				'Check if a URL requires x402 payment. Returns payment requirements (scheme, network, amount, asset) for each accepted payment option.',

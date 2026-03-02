@@ -1,13 +1,13 @@
 /**
- * Guardian MCP + LLM Agent
+ * AgentaOS MCP + LLM Agent
  *
- * An AI agent that discovers and uses Guardian wallet tools via MCP.
+ * An AI agent that discovers and uses AgentaOS wallet tools via MCP.
  * Tools are auto-discovered — the agent sees all 12 tools without hardcoding.
  *
  * Uses Google Gemini with native function calling.
  *
  * Works in two modes:
- *   1. With Guardian server running  → full signing + contract calls
+ *   1. With AgentaOS server running  → full signing + contract calls
  *   2. Without server (read-only)    → contract reads + status checks
  *
  * Usage:
@@ -107,20 +107,20 @@ async function sendWithRetry(
 }
 
 async function main() {
-	// ── Connect to Guardian MCP server ──────────────────────────────────
+	// ── Connect to AgentaOS MCP server ──────────────────────────────────
 
 	const transport = new StdioClientTransport({
 		command: 'node',
 		args: ['packages/wallet/dist/index.js'],
 		env: {
 			...process.env,
-			GUARDIAN_API_SECRET: process.env.GUARDIAN_API_SECRET || 'dGVzdA==',
-			GUARDIAN_API_KEY: process.env.GUARDIAN_API_KEY || 'gw_test_dummy',
-			GUARDIAN_SERVER: process.env.GUARDIAN_SERVER || 'http://localhost:8080',
+			AGENTA_API_SECRET: process.env.AGENTA_API_SECRET || 'dGVzdA==',
+			AGENTA_API_KEY: process.env.AGENTA_API_KEY || 'gw_test_dummy',
+			AGENTA_SERVER: process.env.AGENTA_SERVER || 'http://localhost:8080',
 		},
 	});
 
-	const mcpClient = new Client({ name: 'guardian-agent', version: '1.0.0' });
+	const mcpClient = new Client({ name: 'agenta-agent', version: '1.0.0' });
 	await mcpClient.connect(transport);
 
 	// ── Auto-discover tools from MCP ────────────────────────────────────
@@ -142,7 +142,7 @@ async function main() {
 		model: 'gemini-2.0-flash',
 		tools: [{ functionDeclarations }],
 		systemInstruction:
-			'You are an autonomous agent with Guardian threshold wallet tools via MCP. ' +
+			'You are an autonomous agent with AgentaOS threshold wallet tools via MCP. ' +
 			'Use tools to answer blockchain questions, read contracts, and manage the wallet. ' +
 			'The wallet uses 2-of-3 MPC threshold signing — the private key never exists. ' +
 			'Be concise in your final summary.',
@@ -153,7 +153,7 @@ async function main() {
 		[
 			'Do a quick blockchain check:',
 			'1. Read the USDC contract on Base Sepolia (0x036CbD53842c5426634e7929541eC2318f3dCF7e) — get the symbol, decimals, and total supply.',
-			'2. Check the Guardian server status.',
+			'2. Check the AgentaOS server status.',
 			'Summarize everything concisely.',
 		].join('\n');
 

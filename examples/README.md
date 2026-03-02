@@ -1,6 +1,6 @@
 # Examples
 
-Working integration examples for Guardian Wallet. Each one sends a real transaction on Base Sepolia.
+Working integration examples for AgentaOS. Each one sends a real transaction on Base Sepolia.
 
 ## Prerequisites
 
@@ -12,16 +12,16 @@ Working integration examples for Guardian Wallet. Each one sends a real transact
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/agentokratia/guardian-wallet.git
-cd guardian-wallet
+git clone https://github.com/AgentaOS/agentaos.git
+cd agenta
 cp .env.example .env
 pnpm install
 pnpm build
 
 # 2. Start the database and server
 npx supabase start
-pnpm --filter @agentokratia/guardian-server dev    # terminal 1
-pnpm --filter @agentokratia/guardian-app dev       # terminal 2
+pnpm --filter @agentaos/server dev    # terminal 1
+pnpm --filter @agentaos/app dev       # terminal 2
 
 # 3. Create a signer
 #    Open http://localhost:3000, sign in, create a signer.
@@ -29,7 +29,7 @@ pnpm --filter @agentokratia/guardian-app dev       # terminal 2
 
 # 4. Configure examples
 cp examples/.env.example examples/.env
-#    Fill in GUARDIAN_API_KEY and GUARDIAN_API_SECRET from step 3.
+#    Fill in AGENTA_API_KEY and AGENTA_API_SECRET from step 3.
 
 # 5. Run
 pnpm example:viem 0xRecipient 0.001
@@ -39,9 +39,9 @@ pnpm example:viem 0xRecipient 0.001
 
 | Variable | Required | Where to get it |
 |----------|----------|-----------------|
-| `GUARDIAN_SERVER` | Yes | Default: `http://localhost:8080` |
-| `GUARDIAN_API_KEY` | Yes | Shown when you create a signer in the dashboard |
-| `GUARDIAN_API_SECRET` | Yes | API Secret copied from the dashboard during signer creation |
+| `AGENTA_SERVER` | Yes | Default: `http://localhost:8080` |
+| `AGENTA_API_KEY` | Yes | Shown when you create a signer in the dashboard |
+| `AGENTA_API_SECRET` | Yes | API Secret copied from the dashboard during signer creation |
 | `GOOGLE_API_KEY` | LangChain / Vercel AI only | [aistudio.google.com](https://aistudio.google.com/apikey) |
 | `ANTHROPIC_API_KEY` | Claude agent / MCP agent only | [console.anthropic.com](https://console.anthropic.com) |
 
@@ -76,4 +76,4 @@ pnpm example:claude-agent
 | [vercel-ai-sdk](vercel-ai-sdk/) | Vercel AI `tool()` | AI agent with the same tools using Vercel's SDK (Gemini via OpenAI endpoint) |
 | [full-lifecycle](full-lifecycle/) | CLI | 7-step demo: health, init, balance, sign, send, audit log, CSV export |
 | [claude-agent-sdk](claude-agent-sdk/) | Claude Agent SDK + MCP | **Autonomous** DeFi rebalancing agent — reads Uniswap V3 prices, manages 50/50 ETH/USDC portfolio, swaps via threshold signing. Zero human input. |
-| [forge-proxy](forge-proxy/) | Foundry | Deploy a Solidity contract through the Guardian signing proxy |
+| [forge-proxy](forge-proxy/) | Foundry | Deploy a Solidity contract through the AgentaOS signing proxy |

@@ -3,8 +3,8 @@
  * Mirrors the app's policy-builder/conversions.ts but for CLI use.
  */
 
-import { CRITERION_CATALOG } from '@agentokratia/guardian-core';
-import type { CriterionMeta } from '@agentokratia/guardian-core';
+import { CRITERION_CATALOG } from '@agentaos/core';
+import type { CriterionMeta } from '@agentaos/core';
 
 export type FormValues = Record<string, Record<string, unknown>>;
 export type EnabledMap = Record<string, boolean>;

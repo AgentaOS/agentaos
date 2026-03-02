@@ -1,7 +1,7 @@
 import chalk, { type ChalkInstance } from 'chalk';
 
 // ---------------------------------------------------------------------------
-// Agentokratia brand palette (from brand-guidelines.html)
+// Agenta brand palette (from brand-guidelines.html)
 //
 // The brand is monochrome: #1A1A1A accent on #FAFAF8 cream.
 // Terminal adaptation: bold/white for emphasis, dim for secondary.
@@ -63,20 +63,20 @@ export function failMark(text: string): string {
 // Brand header + ASCII logo
 // ---------------------------------------------------------------------------
 
-export const BRAND_LINE = `${brand('▪')} ${brandBold('Guardian Wallet')} ${dim('by Agentokratia')}`;
+export const BRAND_LINE = `${brand('▪')} ${brandBold('AgentaOS')} ${dim('by Agenta')}`;
 
 export const BRAND_BANNER = [
 	'',
 	`   ${bold('●')}     ${bold('●')}     ${bold('●')}`,
 	'',
-	`   ${bold('█████╗  ██████╗ ███████╗███╗   ██╗████████╗ ██████╗ ██╗  ██╗██████╗  █████╗ ████████╗██╗ █████╗')}`,
-	`   ${bold('██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝██╔═══██╗██║ ██╔╝██╔══██╗██╔══██╗╚══██╔══╝██║██╔══██╗')}`,
-	`   ${bold('███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║   ██║   ██║█████╔╝ ██████╔╝███████║   ██║   ██║███████║')}`,
-	`   ${bold('██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║   ██║   ██║██╔═██╗ ██╔══██╗██╔══██║   ██║   ██║██╔══██║')}`,
-	`   ${bold('██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   ╚██████╔╝██║  ██╗██║  ██║██║  ██║   ██║   ██║██║  ██║')}`,
-	`   ${bold('╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝╚═╝  ╚═╝')}`,
+	`   ${bold(' █████╗  ██████╗ ███████╗███╗   ██╗████████╗ █████╗  ██████╗ ███████╗')}`,
+	`   ${bold('██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝██╔══██╗██╔═══██╗██╔════╝')}`,
+	`   ${bold('███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║   ███████║██║   ██║███████╗')}`,
+	`   ${bold('██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║   ██╔══██║██║   ██║╚════██║')}`,
+	`   ${bold('██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   ██║  ██║╚██████╔╝███████║')}`,
+	`   ${bold('╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚══════╝')}`,
 	'',
-	`   ${bold('Guardian Wallet')}  ${dim('The key never exists.')}`,
+	`   ${bold('AgentaOS')}  ${dim('The financial OS for autonomous agents.')}`,
 	'',
 ].join('\n');
 

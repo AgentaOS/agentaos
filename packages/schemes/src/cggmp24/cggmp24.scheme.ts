@@ -1,5 +1,5 @@
 /**
- * CGGMP24 threshold ECDSA scheme backed by the guardian-mpc-wasm Rust WASM module.
+ * CGGMP24 threshold ECDSA scheme backed by the @agentaos/crypto Rust WASM module.
  *
  * - Two-phase DKG: auxInfoGen (Paillier primes) + keygen (shares) — run as single WASM call
  * - Signing requires messageHash upfront
@@ -10,13 +10,9 @@
  * THE FULL PRIVATE KEY NEVER EXISTS — signing is a distributed computation.
  */
 
-import type {
-	AuxInfoRoundResult,
-	DKGRoundResult,
-	IThresholdScheme,
-} from '@agentokratia/guardian-core';
-import type { CurveName } from '@agentokratia/guardian-core';
-import type { SchemeName } from '@agentokratia/guardian-core';
+import type { AuxInfoRoundResult, DKGRoundResult, IThresholdScheme } from '@agentaos/core';
+import type { CurveName } from '@agentaos/core';
+import type { SchemeName } from '@agentaos/core';
 import { secp256k1 } from '@noble/curves/secp256k1.js';
 import { getAddress, keccak256, toHex } from 'viem';
 
@@ -67,13 +63,13 @@ function getExistsSync(): typeof import('node:fs').existsSync | null {
 // WASM module — lazily loaded
 // ---------------------------------------------------------------------------
 
-type WasmModule = typeof import('@agentokratia/guardian-mpc-wasm');
+type WasmModule = typeof import('@agentaos/crypto');
 
 let wasmModule: WasmModule | null = null;
 
 async function getWasm(): Promise<WasmModule> {
 	if (wasmModule) return wasmModule;
-	const mod = await import('@agentokratia/guardian-mpc-wasm');
+	const mod = await import('@agentaos/crypto');
 	// The web build (pkg-web) exports a default init function that must be
 	// called to fetch + instantiate the .wasm file. The Node.js build (pkg)
 	// auto-initializes via readFileSync, so its default export is undefined.
@@ -94,7 +90,7 @@ export interface DkgResult {
 	publicKey: Uint8Array;
 }
 
-/** JSON output from the native `guardian-gen-primes dkg` binary */
+/** JSON output from the native `guardian-gen-primes dkg` binary. */
 interface NativeDkgOutput {
 	shares: Array<{ core_share: string; aux_info: string }>; // base64
 	public_key: string; // hex
@@ -283,7 +279,7 @@ class NativeSignProcess {
 /**
  * CGGMP24 threshold ECDSA scheme.
  *
- * Wraps the guardian-mpc-wasm Rust WASM module for all cryptographic
+ * Wraps the @agentaos/crypto Rust WASM module for all cryptographic
  * operations. When the native GMP binary is available, signing is routed
  * through it for ~10x faster Paillier operations. Falls back to WASM
  * automatically (browser, or when binary is not built).

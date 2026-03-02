@@ -1,12 +1,12 @@
 {
-	"name": "guardian-viem-example",
+	"name": "agentaos-example-viem",
 	"private": true,
 	"type": "module",
 	"scripts": {
 		"start": "tsx send.ts"
 	},
 	"dependencies": {
-		"@agentokratia/guardian-signer": "workspace:*",
+		"@agentaos/sdk": "workspace:*",
 		"viem": "^2.21.0"
 	},
 	"devDependencies": {

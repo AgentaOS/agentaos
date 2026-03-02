@@ -40,7 +40,7 @@ async function fetchJson<T>(url: string, body: unknown): Promise<T> {
 }
 
 // ---------------------------------------------------------------------------
-// gw login
+// agenta login
 // ---------------------------------------------------------------------------
 
 export const loginCommand = new Command('login')
@@ -52,7 +52,7 @@ export const loginCommand = new Command('login')
 			const existing = await getSession();
 			if (existing) {
 				console.log(
-					`\n  ${dim('Already logged in. Run')} ${chalk.bold('gw logout')} ${dim('to switch accounts.')}\n`,
+					`\n  ${dim('Already logged in. Run')} ${chalk.bold('agenta logout')} ${dim('to switch accounts.')}\n`,
 				);
 				return;
 			}
@@ -106,7 +106,7 @@ export const loginCommand = new Command('login')
 				throw err;
 			}
 
-			// Store JWT + refresh token + server URL (so `gw receive` works without `gw init`)
+			// Store JWT + refresh token + server URL (so `agenta receive` works without `agenta init`)
 			await storeSession(result.token, baseUrl, result.refreshToken);
 			verifySpinner.succeed('Logged in');
 
@@ -114,8 +114,10 @@ export const loginCommand = new Command('login')
 			console.log(`  ${successMark(`Authenticated as ${chalk.bold(result.email)}`)}`);
 			console.log(`  ${dim(`Session stored in ${getConfigDir()}`)}`);
 			console.log('');
-			console.log(`  ${success('Done!')} Run ${chalk.bold('gw init')} to create a wallet,`);
-			console.log(`         or ${chalk.bold('gw receive')} to import a share from another device.`);
+			console.log(`  ${success('Done!')} Run ${chalk.bold('agenta init')} to create a wallet,`);
+			console.log(
+				`         or ${chalk.bold('agenta receive')} to import a share from another device.`,
+			);
 			console.log('');
 		} catch (error: unknown) {
 			if (error instanceof Error && error.name === 'ExitPromptError') {
@@ -129,7 +131,7 @@ export const loginCommand = new Command('login')
 	});
 
 // ---------------------------------------------------------------------------
-// gw logout
+// agenta logout
 // ---------------------------------------------------------------------------
 
 export const logoutCommand = new Command('logout')

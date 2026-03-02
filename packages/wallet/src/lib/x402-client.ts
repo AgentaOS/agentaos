@@ -1,12 +1,12 @@
 /**
- * x402 Protocol Client for Guardian Wallet
+ * x402 Protocol Client for AgentaOS
  *
  * Supports the x402 **exact** payment scheme (ERC-3009 / Permit2) via @x402/evm.
  * Both v2 (CAIP-2 networks, PAYMENT-REQUIRED/PAYMENT-SIGNATURE headers) and
  * v1 (legacy network names, X-PAYMENT header) are supported.
  */
 
-import type { ThresholdSigner } from '@agentokratia/guardian-signer';
+import type { ThresholdSigner } from '@agentaos/sdk';
 import type { PaymentRequired, PaymentRequirements } from '@x402/core/types';
 import type { ClientEvmSigner } from '@x402/evm';
 

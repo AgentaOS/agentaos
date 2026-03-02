@@ -10,7 +10,7 @@ let refreshing: Promise<boolean> | null = null;
 export async function authenticatedFetch(url: string, opts?: RequestInit): Promise<Response> {
 	const token = await getSession();
 	if (!token) {
-		throw new Error('Not logged in. Run gw login first.');
+		throw new Error('Not logged in. Run agenta login first.');
 	}
 
 	let res = await fetch(url, {
@@ -27,7 +27,7 @@ export async function authenticatedFetch(url: string, opts?: RequestInit): Promi
 				headers: { ...opts?.headers, authorization: `Bearer ${newToken}` },
 			});
 		} else {
-			throw new Error('Session expired. Run gw login again.');
+			throw new Error('Session expired. Run agenta login again.');
 		}
 	}
 

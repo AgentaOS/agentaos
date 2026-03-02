@@ -1,7 +1,7 @@
 /**
- * Guardian Wallet + viem
+ * AgentaOS + viem
  *
- * Direct integration using Guardian.connect() — the full private key never
+ * Direct integration using Agenta.connect() — the full private key never
  * exists. Signing is 2-of-3 MPC.
  *
  * - toViemAccount() for reads + message signing
@@ -11,14 +11,14 @@
  *   npx tsx send.ts [to] [amountInEth]
  */
 
-import { Guardian } from '@agentokratia/guardian-signer';
+import { Agenta } from '@agentaos/sdk';
 import { http, createPublicClient, formatEther, parseEther } from 'viem';
 import { baseSepolia } from 'viem/chains';
 
-const gw = await Guardian.connect({
-	apiSecret: process.env.GUARDIAN_API_SECRET as string,
-	serverUrl: process.env.GUARDIAN_SERVER || 'http://localhost:8080',
-	apiKey: process.env.GUARDIAN_API_KEY as string,
+const gw = await Agenta.connect({
+	apiSecret: process.env.AGENTA_API_SECRET as string,
+	serverUrl: process.env.AGENTA_SERVER || 'http://localhost:8080',
+	apiKey: process.env.AGENTA_API_KEY as string,
 });
 
 const account = gw.toViemAccount();
@@ -45,7 +45,7 @@ const value = parseEther(amount);
 
 console.log(`\nSending ${formatEther(value)} ETH to ${to}...`);
 
-// Guardian.signTransaction() — the server signs and broadcasts in one step.
+// Agenta.signTransaction() — the server signs and broadcasts in one step.
 const result = await gw.signTransaction({
 	to,
 	value: value.toString(),

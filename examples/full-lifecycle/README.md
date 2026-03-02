@@ -1,18 +1,18 @@
-# Guardian — Full Lifecycle Demo
+# AgentaOS — Full Lifecycle Demo
 
-End-to-end demonstration of Guardian Wallet: DKG, policies, signing, and audit.
+End-to-end demonstration of AgentaOS Wallet: DKG, policies, signing, and audit.
 
 ## Prerequisites
 
 - Docker & Docker Compose
 - Node.js 20+
-- Guardian CLI: `npm install -g @agentokratia/guardian-wallet`
+- AgentaOS CLI: `npm install -g agenta`
 
 ## Run
 
 ```bash
 # 1. Start infrastructure
-cd /path/to/guardian-wallet
+cd /path/to/agenta
 docker compose up -d
 
 # 2. Open dashboard and create a signer
@@ -26,7 +26,7 @@ chmod +x demo.sh
 
 ## What the Demo Does
 
-1. **Initialize** — configures the CLI to point at your Guardian server
+1. **Initialize** — configures the CLI to point at your AgentaOS server
 2. **Health check** — verifies the server is running
 3. **Status** — shows signer info (address, chain, scheme)
 4. **Balance** — checks the signer's ETH balance
@@ -42,19 +42,19 @@ chmod +x demo.sh
 #   - An API key (gw_live_...)
 
 # Configure the CLI
-guardian-wallet init
+agenta init
 
 # Send a transaction
-guardian-wallet send 0.001 ETH to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+agenta send 0.001 ETH to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 
 # Sign a message
-guardian-wallet sign-message "Hello from Guardian"
+agenta sign-message "Hello from AgentaOS"
 
 # Check status
-guardian-wallet status
+agenta status
 
 # Check balance
-guardian-wallet balance
+agenta balance
 ```
 
 ## Policy Enforcement
@@ -69,6 +69,6 @@ curl -X POST "${SERVER}/api/v1/signers/${SIGNER_ID}/policies" \
   -d '{"type": "spending_limit", "config": {"maxAmount": "100000000000000000"}}'
 
 # Now try to send more than 0.1 ETH — it will be blocked with 403
-guardian-wallet send 0.5 ETH to 0x...
+agenta send 0.5 ETH to 0x...
 # Error: Policy violation: spending_limit — amount exceeds limit
 ```

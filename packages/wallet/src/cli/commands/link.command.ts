@@ -7,11 +7,11 @@ import { encryptShareForTransfer, generateTransferCode } from '../../lib/transfe
 import { brand, dim, failMark, hint, section, success } from '../theme.js';
 
 // ---------------------------------------------------------------------------
-// gw link <signer> — Export share to another device via 6-word code
+// agenta link <signer> — Export share to another device via 6-word code
 // ---------------------------------------------------------------------------
 
 export const linkCommand = new Command('link')
-	.description('Send recovery key to Guardian (via 6-word transfer code)')
+	.description('Send recovery key to AgentaOS (via 6-word transfer code)')
 	.argument('[signer]', 'Signer name')
 	.option('--server <url>', 'Server URL override')
 	.action(async (signerArg: string | undefined, opts: { server?: string }) => {
@@ -19,7 +19,9 @@ export const linkCommand = new Command('link')
 			// 1. Require session
 			const token = await getSession();
 			if (!token) {
-				console.error(`\n  ${failMark(`Not logged in. Run ${chalk.bold('gw login')} first.`)}\n`);
+				console.error(
+					`\n  ${failMark(`Not logged in. Run ${chalk.bold('agenta login')} first.`)}\n`,
+				);
 				process.exitCode = 1;
 				return;
 			}
@@ -28,13 +30,13 @@ export const linkCommand = new Command('link')
 			const config = loadSignerConfig(signerName);
 			const signerId = config.signerId;
 			if (!signerId) {
-				throw new Error('No signer ID in config. Re-run `gw init` or add signerId to config.');
+				throw new Error('No signer ID in config. Re-run `agenta init` or add signerId to config.');
 			}
 
 			const baseUrl = (opts.server ?? config.serverUrl).replace(/\/+$/, '');
 
 			// 2. Read user share from keychain (triggers biometric)
-			section('Send to Guardian');
+			section('Send to AgentaOS');
 			hint('Reading recovery key from keychain — you may be prompted for biometric auth.');
 			console.log('');
 
@@ -42,7 +44,7 @@ export const linkCommand = new Command('link')
 			const userShare = await getUserShare(signerName);
 			if (!userShare) {
 				spinner.fail('No recovery key found');
-				console.error(dim('\n  Was this wallet created via `gw init`?\n'));
+				console.error(dim('\n  Was this wallet created via `agenta init`?\n'));
 				process.exitCode = 1;
 				return;
 			}
@@ -113,9 +115,9 @@ export const linkCommand = new Command('link')
 			console.log('');
 			console.log(`     ${chalk.bold.cyan(words.join('  '))}`);
 			console.log('');
-			console.log(`  ${dim(`Expires in ${expiresIn} minutes. Enter this code in Guardian.`)}`);
+			console.log(`  ${dim(`Expires in ${expiresIn} minutes. Enter this code in AgentaOS.`)}`);
 			console.log(
-				`  ${dim(`Open Guardian → click ${chalk.reset('Receive')} on the signer card.`)}`,
+				`  ${dim(`Open AgentaOS → click ${chalk.reset('Receive')} on the signer card.`)}`,
 			);
 			console.log('');
 			console.log(

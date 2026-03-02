@@ -10,7 +10,7 @@ function bigIntReplacer(_key: string, value: unknown) {
 
 export function registerReadContract(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_read_contract',
+		'agenta_read_contract',
 		{
 			description:
 				'Read data from a smart contract (view/pure functions). No gas spent, no signing needed. Use this for checking balances, prices, allowances, or any on-chain state.',
@@ -34,7 +34,7 @@ export function registerReadContract(server: McpServer, signerManager: SignerMan
 					.string()
 					.optional()
 					.describe(
-						'Network name from guardian_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required — call guardian_list_networks first if unknown.',
+						'Network name from agenta_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required — call agenta_list_networks first if unknown.',
 					),
 			},
 		},

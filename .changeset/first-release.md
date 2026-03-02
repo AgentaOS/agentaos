@@ -1,10 +1,10 @@
 ---
-'@agentokratia/guardian-core': minor
-'@agentokratia/guardian-mpc-wasm': minor
-'@agentokratia/guardian-schemes': minor
-'@agentokratia/guardian-chains': minor
-'@agentokratia/guardian-signer': minor
-'@agentokratia/guardian-wallet': minor
+'@agentaos/core': minor
+'@agentaos/crypto': minor
+'@agentaos/engine': minor
+'@agentaos/chains': minor
+'@agentaos/sdk': minor
+'agenta': minor
 ---
 
 Initial public release — threshold ECDSA signing for autonomous agents

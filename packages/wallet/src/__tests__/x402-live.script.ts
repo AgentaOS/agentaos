@@ -62,19 +62,19 @@ async function main() {
 	}
 
 	console.log('4. fetchWithX402:', X402_URL);
-	const { ThresholdSigner } = await import('@agentokratia/guardian-signer');
-	const { CGGMP24Scheme } = await import('@agentokratia/guardian-schemes');
+	const { ThresholdSigner } = await import('@agentaos/sdk');
+	const { CGGMP24Scheme } = await import('@agentaos/engine');
 
-	const apiSecret = process.env.GUARDIAN_API_SECRET;
-	const serverUrl = process.env.GUARDIAN_SERVER || 'http://localhost:8080';
-	const apiKey = process.env.GUARDIAN_API_KEY || '';
+	const apiSecret = process.env.AGENTA_API_SECRET;
+	const serverUrl = process.env.AGENTA_SERVER || 'http://localhost:8080';
+	const apiKey = process.env.AGENTA_API_KEY || '';
 
 	if (!apiSecret) {
-		console.log('   GUARDIAN_API_SECRET not set — skipping payment test');
+		console.log('   AGENTA_API_SECRET not set — skipping payment test');
 		return;
 	}
 
-	console.log('   Loading signer from GUARDIAN_API_SECRET env var');
+	console.log('   Loading signer from AGENTA_API_SECRET env var');
 	const signer = await ThresholdSigner.fromSecret({
 		apiSecret,
 		serverUrl,

@@ -85,7 +85,7 @@ export const statusCommand = new Command('status')
 		const names = listSigners();
 
 		if (names.length === 0) {
-			console.log(chalk.yellow('\n  No wallets found. Run `gw init` to create one.\n'));
+			console.log(chalk.yellow('\n  No wallets found. Run `agenta init` to create one.\n'));
 			return;
 		}
 
@@ -140,6 +140,6 @@ export const statusCommand = new Command('status')
 				activeLabel +
 				dim(` · ${wallets.length} wallet${wallets.length > 1 ? 's' : ''}`),
 		);
-		console.log(dim(`  Run ${chalk.reset('gw info <name>')} for full details`));
+		console.log(dim(`  Run ${chalk.reset('agenta info <name>')} for full details`));
 		console.log('');
 	});

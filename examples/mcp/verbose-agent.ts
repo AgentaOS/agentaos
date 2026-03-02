@@ -42,7 +42,7 @@ const transport = new StdioClientTransport({
 	args: ['packages/wallet/dist/index.js'],
 	env: { ...process.env },
 });
-const mcpClient = new Client({ name: 'guardian-agent', version: '1.0.0' });
+const mcpClient = new Client({ name: 'agenta-agent', version: '1.0.0' });
 await mcpClient.connect(transport);
 const { tools: mcpTools } = await mcpClient.listTools();
 
@@ -66,7 +66,7 @@ const model = genAI.getGenerativeModel({
 	model: 'gemini-2.0-flash',
 	tools: [{ functionDeclarations }],
 	systemInstruction:
-		'You are an autonomous agent with Guardian threshold wallet tools via MCP. Use tools to answer blockchain questions, read contracts, and manage the wallet. The wallet uses 2-of-3 MPC threshold signing — the private key never exists. Be concise in your final summary.',
+		'You are an autonomous agent with AgentaOS threshold wallet tools via MCP. Use tools to answer blockchain questions, read contracts, and manage the wallet. The wallet uses 2-of-3 MPC threshold signing — the private key never exists. Be concise in your final summary.',
 });
 
 const prompt =

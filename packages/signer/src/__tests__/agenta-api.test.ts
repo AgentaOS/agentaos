@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { GuardianApi } from '../guardian-api.js';
+import { AgentaApi } from '../agenta-api.js';
 import type { HttpClient } from '../http-client.js';
 
 function mockClient(): HttpClient {
@@ -9,13 +9,13 @@ function mockClient(): HttpClient {
 	} as unknown as HttpClient;
 }
 
-describe('GuardianApi', () => {
+describe('AgentaApi', () => {
 	let client: HttpClient;
-	let api: GuardianApi;
+	let api: AgentaApi;
 
 	beforeEach(() => {
 		client = mockClient();
-		api = new GuardianApi(client);
+		api = new AgentaApi(client);
 	});
 
 	// -- Health ---------------------------------------------------------------

@@ -1,6 +1,6 @@
 <div align="center">
 
-# Guardian Wallet
+# AgentaOS
 
 ### The wallet where the key never exists.
 
@@ -8,13 +8,13 @@ Self-hosted. Open-source. 2-of-3 threshold ECDSA.
 
 The full private key is never constructed — not during creation, not during signing, not ever.
 
-[![GitHub stars](https://img.shields.io/github/stars/agentokratia/guardian-wallet?style=social)](https://github.com/agentokratia/guardian-wallet)
+[![GitHub stars](https://img.shields.io/github/stars/AgentaOS/agentaos?style=social)](https://github.com/AgentaOS/agentaos)
 &nbsp;
 [![License: Apache-2.0](https://img.shields.io/badge/SDK-Apache--2.0-green.svg)](LICENSE-APACHE)
 [![License: AGPL-3.0](https://img.shields.io/badge/Server-AGPL--3.0-blue.svg)](LICENSE)
 [![MPC](https://img.shields.io/badge/MPC-CGGMP24-8B5CF6.svg)](https://eprint.iacr.org/2021/060)
 
-[Quick Start](#quick-start) · [Why Guardian](#why-guardian) · [Docs](#how-it-works) · [Website](https://agentokratia.com)
+[Quick Start](#quick-start) · [Why AgentaOS](#why-agentaos) · [Docs](#how-it-works) · [Website](https://agentaos.ai)
 
 </div>
 
@@ -23,10 +23,10 @@ The full private key is never constructed — not during creation, not during si
 ## Quick Start
 
 ```bash
-git clone https://github.com/agentokratia/guardian-wallet.git && cd guardian-wallet
+git clone https://github.com/AgentaOS/agentaos.git && cd agenta
 docker compose up -d          # Starts server, database, vault
-guardian-wallet init           # Interactive setup — generates keys, configures policies
-guardian-wallet send 0xRecipient 0.1   # Send ETH. Threshold-signed. Policy-checked. Audited.
+agenta init           # Interactive setup — generates keys, configures policies
+agenta send 0xRecipient 0.1   # Send ETH. Threshold-signed. Policy-checked. Audited.
 ```
 
 It's free. It's open-source. Clone the repo. Run it.
@@ -35,11 +35,11 @@ It's free. It's open-source. Clone the repo. Run it.
 
 ---
 
-## Why Guardian
+## Why AgentaOS
 
 Your AI agent needs a wallet. Here's what's out there:
 
-| | **Raw private key** | **Fireblocks** | **Guardian Wallet** |
+| | **Raw private key** | **Fireblocks** | **AgentaOS** |
 |---|---|---|---|
 | **Security** | One leaked `.env` = everything gone | MPC, but they hold the shares | 2-of-3 threshold — you hold all shares |
 | **Policy engine** | None | External rules only | 9 built-in policy types |
@@ -50,7 +50,7 @@ Your AI agent needs a wallet. Here's what's out there:
 | **Open source** | N/A | No | Yes (AGPL + Apache 2.0) |
 | **Agent-native** | Copy-paste a key into `.env` | API, not built for agents | CLI + SDK + MCP server |
 
-Guardian splits every private key into 3 shares. Any 2 can co-sign a transaction. The full key is never reconstructed — not in memory, not in logs, not anywhere. Agents get spending power. Operators keep control.
+AgentaOS splits every private key into 3 shares. Any 2 can co-sign a transaction. The full key is never reconstructed — not in memory, not in logs, not anywhere. Agents get spending power. Operators keep control.
 
 ---
 
@@ -64,9 +64,9 @@ AI agents need on-chain spending power, but every existing approach forces a tra
 | Smart contract wallet | On-chain gas overhead, chain-specific | Requires deployed contracts per chain |
 | TEE / enclave | Hardware supply chain trust, attestation complexity | Vendor lock-in, limited auditability |
 | Standard MPC (2-of-2) | Both parties must be online, no recovery path | Single point of failure if one party is lost |
-| **Guardian (2-of-3 threshold)** | **No single point of compromise** | **Self-hosted, open source, chain-agnostic** |
+| **AgentaOS (2-of-3 threshold)** | **No single point of compromise** | **Self-hosted, open source, chain-agnostic** |
 
-Guardian eliminates the tradeoff. The private key is split into 3 shares via distributed key generation. Any 2 shares can co-sign a transaction through a distributed computation. No share alone is useful. No party ever holds the full key.
+AgentaOS eliminates the tradeoff. The private key is split into 3 shares via distributed key generation. Any 2 shares can co-sign a transaction through a distributed computation. No share alone is useful. No party ever holds the full key.
 
 ---
 
@@ -133,8 +133,8 @@ graph TD
 ### From Source
 
 ```bash
-git clone https://github.com/agentokratia/guardian-wallet.git
-cd guardian-wallet
+git clone https://github.com/AgentaOS/agentaos.git
+cd agenta
 
 # Copy the dev env — it works out of the box, no edits needed
 cp .env.example .env
@@ -146,8 +146,8 @@ pnpm build
 npx supabase start
 
 # In separate terminals:
-pnpm --filter @agentokratia/guardian-server dev   # Server on :8080
-pnpm --filter @agentokratia/guardian-app dev      # Dashboard on :3000
+pnpm --filter @agentaos/server dev   # Server on :8080
+pnpm --filter @agentaos/app dev      # Dashboard on :3000
 ```
 
 Open `http://localhost:3000` to access the dashboard.
@@ -162,51 +162,51 @@ Open `http://localhost:3000` to access the dashboard.
 
 ```bash
 # Interactive setup -- configures server URL, API key, network
-guardian-wallet init
+agenta init
 
 # Check connection and signer status
-guardian-wallet status
+agenta status
 
 # View balance
-guardian-wallet balance
+agenta balance
 ```
 
 ---
 
 ## CLI Reference
 
-The `guardian-wallet` command-line tool provides full signer operations from the terminal (also available as `gw` alias).
+The `agenta` command-line tool provides full signer operations from the terminal (also available as `gw` alias).
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| `guardian-wallet init` | Interactive setup wizard | `guardian-wallet init` |
-| `guardian-wallet status` | Display signer info and connection status | `guardian-wallet status` |
-| `guardian-wallet balance` | Show ETH balance for the configured signer | `guardian-wallet balance [-n network]` |
-| `guardian-wallet send` | Send ETH to an address | `guardian-wallet send <to> <amount> [-n network] [--gas-limit N] [--data 0x...]` |
-| `guardian-wallet sign-message` | Sign a message using threshold ECDSA | `guardian-wallet sign-message <message>` |
-| `guardian-wallet deploy` | Deploy a smart contract | `guardian-wallet deploy <bytecode> [-n network] [--constructor-args 0x...]` |
-| `guardian-wallet proxy` | Start a JSON-RPC signing proxy for Foundry/Hardhat | `guardian-wallet proxy [-p port] [-r rpc-url]` |
+| `agenta init` | Interactive setup wizard | `agenta init` |
+| `agenta status` | Display signer info and connection status | `agenta status` |
+| `agenta balance` | Show ETH balance for the configured signer | `agenta balance [-n network]` |
+| `agenta send` | Send ETH to an address | `agenta send <to> <amount> [-n network] [--gas-limit N] [--data 0x...]` |
+| `agenta sign-message` | Sign a message using threshold ECDSA | `agenta sign-message <message>` |
+| `agenta deploy` | Deploy a smart contract | `agenta deploy <bytecode> [-n network] [--constructor-args 0x...]` |
+| `agenta proxy` | Start a JSON-RPC signing proxy for Foundry/Hardhat | `agenta proxy [-p port] [-r rpc-url]` |
 
 ### Examples
 
 ```bash
 # Send 0.01 ETH on Base Sepolia
-guardian-wallet send 0xRecipient 0.01 --network base-sepolia
+agenta send 0xRecipient 0.01 --network base-sepolia
 
 # Sign an arbitrary message
-guardian-wallet sign-message "Hello from Guardian"
+agenta sign-message "Hello from AgentaOS"
 
 # Sign a hex message (0x prefix)
-guardian-wallet sign-message 0xdeadbeef
+agenta sign-message 0xdeadbeef
 
 # Deploy a contract with constructor arguments
-guardian-wallet deploy ./MyContract.bin --constructor-args 0x000000000000000000000000...
+agenta deploy ./MyContract.bin --constructor-args 0x000000000000000000000000...
 
 # Start Foundry-compatible signing proxy on port 8545
-guardian-wallet proxy --port 8545
+agenta proxy --port 8545
 
 # Use with Forge
-# GUARDIAN_RPC=http://localhost:8545 forge script Deploy.s.sol --rpc-url $GUARDIAN_RPC --broadcast
+# AGENTA_RPC=http://localhost:8545 forge script Deploy.s.sol --rpc-url $AGENTA_RPC --broadcast
 ```
 
 ---
@@ -216,14 +216,14 @@ guardian-wallet proxy --port 8545
 ### viem (drop-in WalletClient)
 
 ```typescript
-import { ThresholdSigner } from '@agentokratia/guardian-signer';
+import { ThresholdSigner } from '@agentaos/sdk';
 import { createWalletClient, http, parseEther } from 'viem';
 import { baseSepolia } from 'viem/chains';
 
 const signer = await ThresholdSigner.fromSecret({
-  apiSecret: process.env.GUARDIAN_API_SECRET!,
-  serverUrl: process.env.GUARDIAN_SERVER!,
-  apiKey: process.env.GUARDIAN_API_KEY!,
+  apiSecret: process.env.AGENTA_API_SECRET!,
+  serverUrl: process.env.AGENTA_SERVER!,
+  apiKey: process.env.AGENTA_API_KEY!,
 });
 
 const client = createWalletClient({
@@ -242,7 +242,7 @@ const hash = await client.sendTransaction({
 
 ```typescript
 import { tool } from 'ai';
-import { ThresholdSigner } from '@agentokratia/guardian-signer';
+import { ThresholdSigner } from '@agentaos/sdk';
 import { z } from 'zod';
 
 const sendETH = tool({
@@ -253,9 +253,9 @@ const sendETH = tool({
   }),
   execute: async ({ to, amount }) => {
     const signer = await ThresholdSigner.fromSecret({
-      apiSecret: process.env.GUARDIAN_API_SECRET!,
-      serverUrl: process.env.GUARDIAN_SERVER!,
-      apiKey: process.env.GUARDIAN_API_KEY!,
+      apiSecret: process.env.AGENTA_API_SECRET!,
+      serverUrl: process.env.AGENTA_SERVER!,
+      apiKey: process.env.AGENTA_API_KEY!,
     });
     const hash = await signer.signTx({ to, value: parseEther(amount) });
     signer.destroy();
@@ -268,21 +268,21 @@ const sendETH = tool({
 
 ```typescript
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { ThresholdSigner } from '@agentokratia/guardian-signer';
+import { ThresholdSigner } from '@agentaos/sdk';
 import { z } from 'zod';
 
-const guardianSignTool = new DynamicStructuredTool({
-  name: 'guardian_send_eth',
-  description: 'Send ETH using Guardian threshold signing',
+const agentaSignTool = new DynamicStructuredTool({
+  name: 'agenta_send_eth',
+  description: 'Send ETH using AgentaOS threshold signing',
   schema: z.object({
     to: z.string(),
     amount: z.string(),
   }),
   func: async ({ to, amount }) => {
     const signer = await ThresholdSigner.fromSecret({
-      apiSecret: process.env.GUARDIAN_API_SECRET!,
-      serverUrl: process.env.GUARDIAN_SERVER!,
-      apiKey: process.env.GUARDIAN_API_KEY!,
+      apiSecret: process.env.AGENTA_API_SECRET!,
+      serverUrl: process.env.AGENTA_SERVER!,
+      apiKey: process.env.AGENTA_API_KEY!,
     });
     const hash = await signer.signTx({ to, value: parseEther(amount) });
     signer.destroy();
@@ -293,11 +293,11 @@ const guardianSignTool = new DynamicStructuredTool({
 
 ### Foundry Proxy
 
-The `guardian-wallet proxy` command starts a JSON-RPC server that intercepts `eth_sendTransaction` and `eth_signTransaction`, signs them via the Guardian protocol, and forwards everything else to the upstream RPC.
+The `agenta proxy` command starts a JSON-RPC server that intercepts `eth_sendTransaction` and `eth_signTransaction`, signs them via the AgentaOS protocol, and forwards everything else to the upstream RPC.
 
 ```bash
 # Start the proxy
-guardian-wallet proxy --port 8545
+agenta proxy --port 8545
 
 # Deploy with Forge
 forge script script/Deploy.s.sol \
@@ -309,7 +309,7 @@ forge script script/Deploy.s.sol \
 
 ## Dashboard
 
-The Guardian dashboard is a React SPA with 8 pages:
+The AgentaOS dashboard is a React SPA with 8 pages:
 
 - **Login** -- Email + passkey authentication (WebAuthn). No wallet extension required.
 - **Create Signer** -- Wizard: name, chain, DKG ceremony, policy setup, credentials (API Key + API Secret).
@@ -330,13 +330,13 @@ Authentication uses email verification + WebAuthn passkeys with PRF-based key de
 
 | Package | Description |
 |---------|-------------|
-| [`@agentokratia/guardian-core`](packages/core) | Shared interfaces and types (zero dependencies) |
-| [`@agentokratia/guardian-schemes`](packages/schemes) | CGGMP24 threshold ECDSA via Rust WASM |
-| [`@agentokratia/guardian-chains`](packages/chains) | Ethereum chain adapter (viem) |
-| [`@agentokratia/guardian-server`](packages/server) | NestJS policy server (port 8080) |
-| [`@agentokratia/guardian-signer`](packages/signer) | TypeScript SDK (share loading, signing, viem integration) |
-| [`@agentokratia/guardian-wallet`](packages/wallet) | CLI + MCP server (`guardian-wallet` / `gw`) |
-| [`@agentokratia/guardian-app`](packages/app) | React dashboard (Vite SPA, port 3000) |
+| [`@agentaos/core`](packages/core) | Shared interfaces and types (zero dependencies) |
+| [`@agentaos/engine`](packages/schemes) | CGGMP24 threshold ECDSA via Rust WASM |
+| [`@agentaos/chains`](packages/chains) | Ethereum chain adapter (viem) |
+| [`@agentaos/server`](packages/server) | NestJS policy server (port 8080) |
+| [`@agentaos/sdk`](packages/signer) | TypeScript SDK (share loading, signing, viem integration) |
+| [`agenta`](packages/wallet) | CLI + MCP server (`agenta` / `gw`) |
+| [`@agentaos/app`](packages/app) | React dashboard (Vite SPA, port 3000) |
 
 ### Dependency Rules
 
@@ -479,7 +479,7 @@ A declarative rules engine with 10 criterion types for complex policy logic:
 
 ### Responsible Disclosure
 
-Report vulnerabilities to [security@agentokratia.com](mailto:security@agentokratia.com). See [SECURITY.md](SECURITY.md) for scope, process, and response timeline.
+Report vulnerabilities to [security@agentaos.ai](mailto:security@agentaos.ai). See [SECURITY.md](SECURITY.md) for scope, process, and response timeline.
 
 ---
 
@@ -518,7 +518,7 @@ Services:
 | Service | Port | Description |
 |---------|------|-------------|
 | `vault` | 8200 | HashiCorp Vault (share storage) |
-| `server` | 8080 | Guardian API server |
+| `server` | 8080 | AgentaOS API server |
 | `app` | 3000 | Dashboard |
 
 ### Environment Variables
@@ -540,7 +540,7 @@ Services:
 | `JWT_EXPIRY` | No | `24h` | JWT token expiry |
 | `ALLOWED_ORIGINS` | No | `http://localhost:3000` | CORS allowed origins (comma-separated) |
 | `RP_ID` | No | `localhost` | WebAuthn Relying Party ID (domain, no port) |
-| `RP_NAME` | No | `Guardian Wallet` | WebAuthn Relying Party display name |
+| `RP_NAME` | No | `AgentaOS` | WebAuthn Relying Party display name |
 | `EMAIL_PROVIDER` | No | `console` | OTP delivery: `console` (dev) or `resend` (prod) |
 | `RESEND_API_KEY` | When `resend` | -- | Resend API key for email delivery |
 | `AUXINFO_POOL_TARGET` | No | `5` | Target pool size for pre-generated AuxInfo |
@@ -571,8 +571,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding conventions
 
 ```bash
 # Quick setup
-git clone https://github.com/agentokratia/guardian-wallet.git
-cd guardian-wallet
+git clone https://github.com/AgentaOS/agentaos.git
+cd agenta
 pnpm install
 pnpm build
 pnpm test
@@ -583,7 +583,7 @@ pnpm lint
 
 ## Research
 
-Guardian implements the CGGMP24 threshold ECDSA protocol. The cryptographic foundation is described in:
+AgentaOS implements the CGGMP24 threshold ECDSA protocol. The cryptographic foundation is described in:
 
 - **Canetti, Gennaro, Goldfeder, Makriyannis, Peled** -- *UC Non-Interactive, Proactive, Threshold ECDSA with Identifiable Aborts* ([ePrint 2021/060](https://eprint.iacr.org/2021/060))
 
@@ -593,7 +593,7 @@ The Rust WASM implementation is based on the [LFDT-Lockness/cggmp21](https://git
 
 ## License
 
-Guardian Wallet uses a dual-license model. SDK and developer tools (core, mpc-wasm, schemes, chains, signer, cli) are [Apache-2.0](LICENSE-APACHE). Server, dashboard, and auth are [AGPL-3.0](LICENSE). Self-hosting for your own agents is free and encouraged. See [LICENSING.md](LICENSING.md) for details.
+AgentaOS uses a dual-license model. SDK and developer tools (core, mpc-wasm, schemes, chains, signer, cli) are [Apache-2.0](LICENSE-APACHE). Server, dashboard, and auth are [AGPL-3.0](LICENSE). Self-hosting for your own agents is free and encouraged. See [LICENSING.md](LICENSING.md) for details.
 
 Copyright 2025-2026 Aristokrates OÜ
 
@@ -601,8 +601,8 @@ Copyright 2025-2026 Aristokrates OÜ
 
 ## Links
 
-- **Website:** [agentokratia.com](https://agentokratia.com)
-- **GitHub:** [github.com/agentokratia/guardian-wallet](https://github.com/agentokratia/guardian-wallet)
-- **Telegram:** [t.me/agentokratia](https://t.me/agentokratia)
-- **Security:** [security@agentokratia.com](mailto:security@agentokratia.com)
-- **Issues:** [GitHub Issues](https://github.com/agentokratia/guardian-wallet/issues)
+- **Website:** [agentaos.ai](https://agentaos.ai)
+- **GitHub:** [github.com/AgentaOS/agentaos](https://github.com/AgentaOS/agentaos)
+- **Telegram:** [t.me/agenta](https://t.me/agenta)
+- **Security:** [security@agentaos.ai](mailto:security@agentaos.ai)
+- **Issues:** [GitHub Issues](https://github.com/AgentaOS/agentaos/issues)

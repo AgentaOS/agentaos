@@ -5,7 +5,7 @@ import { type SignerConfig, loadSignerConfig, saveSignerConfig } from '../../lib
 import { brand, dim, success, warn } from '../theme.js';
 
 // ---------------------------------------------------------------------------
-// gw network list — show available networks from server
+// agenta network list — show available networks from server
 // ---------------------------------------------------------------------------
 
 const listCommand = new Command('list')
@@ -49,7 +49,7 @@ const listCommand = new Command('list')
 
 			console.log('');
 			console.log(`  ${chalk.bold('Available Networks')}`);
-			console.log(`  ${dim('Networks supported by your Guardian server.')}`);
+			console.log(`  ${dim('Networks supported by your AgentaOS server.')}`);
 			console.log('');
 
 			const current = config.network;
@@ -68,7 +68,7 @@ const listCommand = new Command('list')
 			console.log('');
 			if (!current) {
 				console.log(
-					`  ${warn('No default network set.')} Run ${chalk.bold('gw network set <name>')} to pick one.`,
+					`  ${warn('No default network set.')} Run ${chalk.bold('agenta network set <name>')} to pick one.`,
 				);
 				console.log('');
 			}
@@ -80,7 +80,7 @@ const listCommand = new Command('list')
 	});
 
 // ---------------------------------------------------------------------------
-// gw network set <name> — save default network to signer config
+// agenta network set <name> — save default network to signer config
 // ---------------------------------------------------------------------------
 
 const setCommand = new Command('set')
@@ -117,7 +117,7 @@ const setCommand = new Command('set')
 				const valid = networks.some((n) => n.name === networkName);
 				if (!valid) {
 					spinner.fail(
-						`Unknown network "${networkName}". Run ${chalk.bold('gw network list')} to see available networks.`,
+						`Unknown network "${networkName}". Run ${chalk.bold('agenta network list')} to see available networks.`,
 					);
 					process.exitCode = 1;
 					return;
@@ -140,7 +140,7 @@ const setCommand = new Command('set')
 	});
 
 // ---------------------------------------------------------------------------
-// gw network get — show current default network
+// agenta network get — show current default network
 // ---------------------------------------------------------------------------
 
 const getCommand = new Command('get')
@@ -160,18 +160,18 @@ const getCommand = new Command('get')
 		if (config.network) {
 			console.log(`  Default network: ${brand(config.network)}`);
 			console.log(
-				`  ${dim('Used by gw balance, gw send, and other commands when --network is omitted.')}`,
+				`  ${dim('Used by agenta balance, agenta send, and other commands when --network is omitted.')}`,
 			);
 		} else {
 			console.log(`  ${warn('No default network set.')}`);
 			console.log(`  ${dim('Commands will require --network <name> until you set one.')}`);
-			console.log(`  ${dim(`Run ${chalk.bold('gw network set <name>')} to pick a default.`)}`);
+			console.log(`  ${dim(`Run ${chalk.bold('agenta network set <name>')} to pick a default.`)}`);
 		}
 		console.log('');
 	});
 
 // ---------------------------------------------------------------------------
-// gw network info <name> — show details for a specific network
+// agenta network info <name> — show details for a specific network
 // ---------------------------------------------------------------------------
 
 const infoCommand = new Command('info')
@@ -217,7 +217,7 @@ const infoCommand = new Command('info')
 			const net = networks.find((n) => n.name === networkName);
 			if (!net) {
 				spinner.fail(
-					`Unknown network "${networkName}". Run ${chalk.bold('gw network list')} to see available networks.`,
+					`Unknown network "${networkName}". Run ${chalk.bold('agenta network list')} to see available networks.`,
 				);
 				process.exitCode = 1;
 				return;

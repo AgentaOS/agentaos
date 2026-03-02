@@ -23,19 +23,19 @@ import { getConfigDir } from './config.js';
 //
 // If the keychain read fails (headless SSH without GUI, locked keychain),
 // getUserShare() falls through to the .user-share file fallback.
-// During `gw init`, headless users should pick "Local file" storage.
+// During `agenta init`, headless users should pick "Local file" storage.
 //
 // For SSH sessions: `security unlock-keychain` once per session, then
 // the approval dialog still fires per-item access (because -T '').
 // ---------------------------------------------------------------------------
 
-const SERVICE_NAME = 'guardian-wallet';
+const SERVICE_NAME = 'agenta';
 
 // ---------------------------------------------------------------------------
 // Session (JWT) storage
 // ---------------------------------------------------------------------------
 
-// Session tokens use file storage only (~/.gw/session.json, 0600).
+// Session tokens use file storage only (~/.agenta/session.json, 0600).
 // No keychain — a short-lived JWT doesn't need biometric protection,
 // and keychain prompts add unnecessary friction for admin ops.
 
@@ -135,7 +135,7 @@ function macKeychainSet(account: string, secret: string): void {
 			'-T',
 			'',
 			'-j',
-			'Guardian Wallet signing key',
+			'AgentaOS signing key',
 		],
 		{ stdio: 'ignore' },
 	);

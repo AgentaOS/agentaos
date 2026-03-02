@@ -1,16 +1,16 @@
-# @agentokratia/guardian-core
+# @agentaos/core
 
-**Type definitions and interfaces for Guardian Wallet.**
+**Type definitions and interfaces for AgentaOS.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE-APACHE)
-[![npm](https://img.shields.io/npm/v/@agentokratia/guardian-core)](https://www.npmjs.com/package/@agentokratia/guardian-core)
+[![npm](https://img.shields.io/npm/v/@agentaos/core)](https://www.npmjs.com/package/@agentaos/core)
 
-Zero-dependency package that defines the contracts all Guardian packages implement. Contains TypeScript interfaces, type definitions, and enums -- no runtime code.
+Zero-dependency package that defines the contracts all Agenta packages implement. Contains TypeScript interfaces, type definitions, and enums -- no runtime code.
 
 ## Install
 
 ```bash
-npm install @agentokratia/guardian-core
+npm install @agentaos/core
 ```
 
 ## What's Inside
@@ -45,20 +45,20 @@ npm install @agentokratia/guardian-core
 ## Usage
 
 ```typescript
-import { SignerStatus, PolicyType } from '@agentokratia/guardian-core';
-import type { IThresholdScheme, Share, Policy } from '@agentokratia/guardian-core';
+import { SignerStatus, PolicyType } from '@agentaos/core';
+import type { IThresholdScheme, Share, Policy } from '@agentaos/core';
 ```
 
 ## Dependency Rules
 
-`@agentokratia/guardian-core` imports nothing. All other Guardian packages depend on it.
+`@agentaos/core` imports nothing. All other Agenta packages depend on it.
 
 ```
 core     -> imports NOTHING
-schemes  -> imports core
+engine   -> imports core
 chains   -> imports core
-signer   -> imports core, schemes
-server   -> imports core, schemes, chains
+sdk      -> imports core, engine
+server   -> imports core, engine, chains
 ```
 
 ## License

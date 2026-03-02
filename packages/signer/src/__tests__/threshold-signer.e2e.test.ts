@@ -1,5 +1,5 @@
 import { type ChildProcess, spawn } from 'node:child_process';
-import { CGGMP24Scheme } from '@agentokratia/guardian-schemes';
+import { CGGMP24Scheme } from '@agentaos/engine';
 import {
 	http,
 	type TransactionSerializableEIP1559,
@@ -413,7 +413,7 @@ describe('Section 2: ThresholdSigner Hash Computation', () => {
 		it('hashTypedData produces a valid 32-byte hash', () => {
 			const typedData = {
 				domain: {
-					name: 'Guardian Wallet',
+					name: 'AgentaOS',
 					version: '1',
 					chainId: 1,
 					verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC' as const,

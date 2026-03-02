@@ -1,16 +1,16 @@
 {
-	"name": "@agentokratia/guardian-chains",
+	"name": "@agentaos/chains",
 	"version": "0.1.0",
-	"description": "Ethereum chain adapter for Guardian threshold wallet",
+	"description": "Ethereum chain adapter for AgentaOS threshold wallet",
 	"license": "Apache-2.0",
-	"author": "Agentokratia <hello@agentokratia.com>",
+	"author": "AgentaOS <hello@agentaos.ai>",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/agentokratia/guardian-wallet.git",
+		"url": "https://github.com/AgentaOS/agentaos.git",
 		"directory": "packages/chains"
 	},
-	"homepage": "https://github.com/agentokratia/guardian-wallet",
-	"bugs": "https://github.com/agentokratia/guardian-wallet/issues",
+	"homepage": "https://github.com/AgentaOS/agentaos",
+	"bugs": "https://github.com/AgentaOS/agentaos/issues",
 	"keywords": ["threshold", "wallet", "ethereum", "chain", "viem", "agent"],
 	"type": "module",
 	"main": "./dist/index.js",
@@ -36,7 +36,7 @@
 		"clean": "rm -rf dist"
 	},
 	"dependencies": {
-		"@agentokratia/guardian-core": "workspace:*",
+		"@agentaos/core": "workspace:*",
 		"viem": "^2.21.0"
 	},
 	"devDependencies": {}

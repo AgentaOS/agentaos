@@ -1,5 +1,5 @@
 {
-	"name": "guardian-mcp-example",
+	"name": "agentaos-example-mcp",
 	"private": true,
 	"type": "module",
 	"dependencies": {

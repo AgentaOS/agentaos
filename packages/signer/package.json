@@ -1,16 +1,16 @@
 {
-	"name": "@agentokratia/guardian-signer",
+	"name": "@agentaos/sdk",
 	"version": "0.1.0",
 	"description": "SDK for threshold signing — the key never exists",
 	"license": "Apache-2.0",
-	"author": "Agentokratia <hello@agentokratia.com>",
+	"author": "AgentaOS <hello@agentaos.ai>",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/agentokratia/guardian-wallet.git",
+		"url": "https://github.com/AgentaOS/agentaos.git",
 		"directory": "packages/signer"
 	},
-	"homepage": "https://github.com/agentokratia/guardian-wallet",
-	"bugs": "https://github.com/agentokratia/guardian-wallet/issues",
+	"homepage": "https://github.com/AgentaOS/agentaos",
+	"bugs": "https://github.com/AgentaOS/agentaos/issues",
 	"keywords": ["threshold", "wallet", "mpc", "ecdsa", "sdk", "signer", "agent", "viem"],
 	"type": "module",
 	"main": "./dist/index.js",
@@ -36,8 +36,8 @@
 		"clean": "rm -rf dist"
 	},
 	"dependencies": {
-		"@agentokratia/guardian-core": "workspace:*",
-		"@agentokratia/guardian-schemes": "workspace:*"
+		"@agentaos/core": "workspace:*",
+		"@agentaos/engine": "workspace:*"
 	},
 	"peerDependencies": {
 		"viem": "^2.0.0"

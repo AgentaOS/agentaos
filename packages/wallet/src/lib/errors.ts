@@ -1,4 +1,4 @@
-import { HttpClientError } from '@agentokratia/guardian-signer';
+import { HttpClientError } from '@agentaos/sdk';
 
 interface PolicyViolation {
 	type: string;

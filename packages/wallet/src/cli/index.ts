@@ -18,7 +18,7 @@ export async function runCli(): Promise<void> {
 	const program = new Command();
 
 	program
-		.name('gw')
+		.name('agenta')
 		.description(BRAND_BANNER)
 		.version('0.1.0')
 		.option('-s, --signer <name>', 'Signer name (default: auto-detected)')
@@ -26,14 +26,14 @@ export async function runCli(): Promise<void> {
 			'after',
 			`
 ${dim('Getting started:')}
-  $ gw login             Log in with email + OTP
-  $ gw init              Create your first wallet
-  $ gw status            See all your wallets
-  $ gw send 0x... 0.01   Send ETH
-  $ gw link <name>       Export share to another device
-  $ gw receive <name>    Import share from another device
+  $ agenta login             Log in with email + OTP
+  $ agenta init              Create your first wallet
+  $ agenta status            See all your wallets
+  $ agenta send 0x... 0.01   Send ETH
+  $ agenta link <name>       Export share to another device
+  $ agenta receive <name>    Import share from another device
 
-${dim('Docs: https://github.com/agentokratia/guardian-wallet')}
+${dim('Docs: https://github.com/AgentaOS/agentaos')}
 `,
 		);
 

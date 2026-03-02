@@ -1,5 +1,5 @@
 /**
- * Guardian MCP Server — Full Tool Test (all 19 tools)
+ * AgentaOS MCP Server — Full Tool Test (all 19 tools)
  *
  * Usage: tsx --env-file=examples/.env examples/mcp/test-all-tools.ts
  */
@@ -12,13 +12,13 @@ const transport = new StdioClientTransport({
 	args: ['packages/wallet/dist/index.js'],
 	env: {
 		...process.env,
-		GUARDIAN_API_SECRET: process.env.GUARDIAN_API_SECRET as string,
-		GUARDIAN_API_KEY: process.env.GUARDIAN_API_KEY as string,
-		GUARDIAN_SERVER: process.env.GUARDIAN_SERVER || 'http://localhost:8080',
+		AGENTA_API_SECRET: process.env.AGENTA_API_SECRET as string,
+		AGENTA_API_KEY: process.env.AGENTA_API_KEY as string,
+		AGENTA_SERVER: process.env.AGENTA_SERVER || 'http://localhost:8080',
 	},
 });
 
-const client = new Client({ name: 'guardian-full-test', version: '1.0.0' });
+const client = new Client({ name: 'agenta-full-test', version: '1.0.0' });
 await client.connect(transport);
 
 const { tools } = await client.listTools();
@@ -42,40 +42,40 @@ async function call(name: string, args: Record<string, unknown> = {}) {
 }
 
 // ── 1. wallet_overview ──────────────────────────────────────────────
-await call('guardian_wallet_overview');
+await call('agenta_wallet_overview');
 
 // ── 2. list_networks ────────────────────────────────────────────────
-await call('guardian_list_networks');
+await call('agenta_list_networks');
 
 // ── 3. list_signers ─────────────────────────────────────────────────
-await call('guardian_list_signers');
+await call('agenta_list_signers');
 
 // ── 4. get_status ───────────────────────────────────────────────────
-await call('guardian_get_status');
+await call('agenta_get_status');
 
 // ── 5. get_balances ─────────────────────────────────────────────────
-await call('guardian_get_balances', { network: 'base-sepolia' });
+await call('agenta_get_balances', { network: 'base-sepolia' });
 
 // ── 6. get_policies ─────────────────────────────────────────────────
-await call('guardian_get_policies');
+await call('agenta_get_policies');
 
 // ── 7. get_audit_log ────────────────────────────────────────────────
-await call('guardian_get_audit_log', { limit: 3 });
+await call('agenta_get_audit_log', { limit: 3 });
 
 // ── 8. resolve_address ──────────────────────────────────────────────
-await call('guardian_resolve_address', {
+await call('agenta_resolve_address', {
 	addressOrEns: '0x0000000000000000000000000000000000000001',
 });
 
 // ── 9. simulate ─────────────────────────────────────────────────────
-await call('guardian_simulate', {
+await call('agenta_simulate', {
 	to: '0x0000000000000000000000000000000000000001',
 	value: '0.001',
 	network: 'base-sepolia',
 });
 
 // ── 10. read_contract ───────────────────────────────────────────────
-await call('guardian_read_contract', {
+await call('agenta_read_contract', {
 	contractAddress: '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
 	abi: [
 		{
@@ -91,7 +91,7 @@ await call('guardian_read_contract', {
 });
 
 // ── 11. read_contract (decimals) ────────────────────────────────────
-await call('guardian_read_contract', {
+await call('agenta_read_contract', {
 	contractAddress: '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
 	abi: [
 		{
@@ -107,14 +107,14 @@ await call('guardian_read_contract', {
 });
 
 // ── 12. sign_message ────────────────────────────────────────────────
-await call('guardian_sign_message', {
+await call('agenta_sign_message', {
 	message: `full-test::${new Date().toISOString()}`,
 });
 
 // ── 13. sign_typed_data ─────────────────────────────────────────────
-await call('guardian_sign_typed_data', {
+await call('agenta_sign_typed_data', {
 	domain: {
-		name: 'GuardianTest',
+		name: 'AgentaTest',
 		version: '1',
 		chainId: 84532,
 	},
@@ -122,18 +122,18 @@ await call('guardian_sign_typed_data', {
 		Test: [{ name: 'message', type: 'string' }],
 	},
 	primaryType: 'Test',
-	message: { message: 'hello from guardian' },
+	message: { message: 'hello from agenta' },
 });
 
 // ── 14. send_eth ────────────────────────────────────────────────────
-await call('guardian_send_eth', {
+await call('agenta_send_eth', {
 	to: '0x0000000000000000000000000000000000000001',
 	value: '0.000001',
 	network: 'base-sepolia',
 });
 
 // ── 15. send_token (will likely fail — no token balance) ────────────
-await call('guardian_send_token', {
+await call('agenta_send_token', {
 	token: 'USDC',
 	to: '0x0000000000000000000000000000000000000001',
 	amount: '0.01',
@@ -141,7 +141,7 @@ await call('guardian_send_token', {
 });
 
 // ── 16. call_contract (approve USDC — state-changing write call) ────
-await call('guardian_call_contract', {
+await call('agenta_call_contract', {
 	contractAddress: '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
 	abi: [
 		{
@@ -161,7 +161,7 @@ await call('guardian_call_contract', {
 });
 
 // ── 17. execute (raw tx) ────────────────────────────────────────────
-await call('guardian_execute', {
+await call('agenta_execute', {
 	to: '0x0000000000000000000000000000000000000001',
 	value: '0.000001',
 	data: '0x',
@@ -169,17 +169,17 @@ await call('guardian_execute', {
 });
 
 // ── 18. x402_check ──────────────────────────────────────────────────
-await call('guardian_x402_check', {
+await call('agenta_x402_check', {
 	url: 'https://example.com',
 });
 
 // ── 19. x402_discover ───────────────────────────────────────────────
-await call('guardian_x402_discover', {
+await call('agenta_x402_discover', {
 	domain: 'example.com',
 });
 
 // ── 20. x402_fetch (will fail — no x402 server) ────────────────────
-await call('guardian_x402_fetch', {
+await call('agenta_x402_fetch', {
 	url: 'https://example.com',
 	maxAmount: '0.001',
 });

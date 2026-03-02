@@ -1,5 +1,5 @@
 {
-	"name": "guardian-claude-agent-example",
+	"name": "agentaos-example-claude",
 	"private": true,
 	"type": "module",
 	"dependencies": {

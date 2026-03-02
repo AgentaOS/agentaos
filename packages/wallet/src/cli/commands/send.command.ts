@@ -1,4 +1,4 @@
-import type { ThresholdSigner } from '@agentokratia/guardian-signer';
+import type { ThresholdSigner } from '@agentaos/sdk';
 import chalk from 'chalk';
 import { Command, type Command as CommandType } from 'commander';
 import ora from 'ora';

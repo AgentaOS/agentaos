@@ -1,5 +1,5 @@
 import { type IncomingMessage, type ServerResponse, createServer } from 'node:http';
-import type { ThresholdSigner } from '@agentokratia/guardian-signer';
+import type { ThresholdSigner } from '@agentaos/sdk';
 import chalk from 'chalk';
 import { Command, type Command as CommandType } from 'commander';
 import ora from 'ora';
@@ -142,7 +142,7 @@ export const proxyCommand = new Command('proxy')
 			return;
 		}
 
-		console.log(chalk.bold('\n  Guardian Wallet RPC Proxy'));
+		console.log(chalk.bold('\n  AgentaOS RPC Proxy'));
 		console.log(dim(`  ${'-'.repeat(40)}`));
 
 		const { api } = createClientFromConfig(config);

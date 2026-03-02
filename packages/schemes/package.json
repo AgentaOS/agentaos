@@ -1,16 +1,16 @@
 {
-	"name": "@agentokratia/guardian-schemes",
+	"name": "@agentaos/engine",
 	"version": "0.1.0",
 	"description": "CGGMP24 threshold ECDSA signing scheme (WASM)",
 	"license": "Apache-2.0",
-	"author": "Agentokratia <hello@agentokratia.com>",
+	"author": "AgentaOS <hello@agentaos.ai>",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/agentokratia/guardian-wallet.git",
+		"url": "https://github.com/AgentaOS/agentaos.git",
 		"directory": "packages/schemes"
 	},
-	"homepage": "https://github.com/agentokratia/guardian-wallet",
-	"bugs": "https://github.com/agentokratia/guardian-wallet/issues",
+	"homepage": "https://github.com/AgentaOS/agentaos",
+	"bugs": "https://github.com/AgentaOS/agentaos/issues",
 	"keywords": ["threshold", "wallet", "mpc", "ecdsa", "cggmp24", "wasm", "signing"],
 	"type": "module",
 	"main": "./dist/index.js",
@@ -37,8 +37,8 @@
 	},
 	"dependencies": {
 		"@noble/curves": "^2.0.1",
-		"@agentokratia/guardian-core": "workspace:*",
-		"@agentokratia/guardian-mpc-wasm": "workspace:*",
+		"@agentaos/core": "workspace:*",
+		"@agentaos/crypto": "workspace:*",
 		"viem": "^2.21.0"
 	},
 	"devDependencies": {}

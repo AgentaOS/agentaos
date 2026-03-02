@@ -1,9 +1,9 @@
 /**
- * Guardian MCP Server — Tool Smoke Test
+ * AgentaOS MCP Server — Tool Smoke Test
  *
- * Connects to the Guardian MCP server via stdio and exercises tools
+ * Connects to the AgentaOS MCP server via stdio and exercises tools
  * from all 3 tiers (Universal, Sugar, Signing & Info).
- * Run after starting the Guardian server on :8080.
+ * Run after starting the AgentaOS server on :8080.
  *
  * Usage:
  *   pnpm example:mcp
@@ -17,13 +17,13 @@ const transport = new StdioClientTransport({
 	args: ['packages/wallet/dist/index.js'],
 	env: {
 		...process.env,
-		GUARDIAN_API_SECRET: process.env.GUARDIAN_API_SECRET as string,
-		GUARDIAN_API_KEY: process.env.GUARDIAN_API_KEY as string,
-		GUARDIAN_SERVER: process.env.GUARDIAN_SERVER || 'http://localhost:8080',
+		AGENTA_API_SECRET: process.env.AGENTA_API_SECRET as string,
+		AGENTA_API_KEY: process.env.AGENTA_API_KEY as string,
+		AGENTA_SERVER: process.env.AGENTA_SERVER || 'http://localhost:8080',
 	},
 });
 
-const client = new Client({ name: 'guardian-test', version: '1.0.0' });
+const client = new Client({ name: 'agenta-test', version: '1.0.0' });
 await client.connect(transport);
 
 // List available tools — should be 19
@@ -31,33 +31,33 @@ const { tools } = await client.listTools();
 console.log(`\n  Available tools (${tools.length}): ${tools.map((t) => t.name).join(', ')}\n`);
 
 // -- Tier 3: Info -----------------------------------------------------------
-console.log('==> guardian_get_status');
-const status = await client.callTool({ name: 'guardian_get_status', arguments: {} });
+console.log('==> agenta_get_status');
+const status = await client.callTool({ name: 'agenta_get_status', arguments: {} });
 console.log(`    ${(status.content as Array<{ text: string }>)[0]?.text}\n`);
 
-console.log('==> guardian_get_balances (base-sepolia)');
+console.log('==> agenta_get_balances (base-sepolia)');
 const balance = await client.callTool({
-	name: 'guardian_get_balances',
+	name: 'agenta_get_balances',
 	arguments: { network: 'base-sepolia' },
 });
 console.log(`    ${(balance.content as Array<{ text: string }>)[0]?.text}\n`);
 
-console.log('==> guardian_list_signers');
-const signers = await client.callTool({ name: 'guardian_list_signers', arguments: {} });
+console.log('==> agenta_list_signers');
+const signers = await client.callTool({ name: 'agenta_list_signers', arguments: {} });
 console.log(`    ${(signers.content as Array<{ text: string }>)[0]?.text}\n`);
 
 // -- Tier 3: Signing --------------------------------------------------------
-console.log('==> guardian_sign_message');
+console.log('==> agenta_sign_message');
 const signed = await client.callTool({
-	name: 'guardian_sign_message',
+	name: 'agenta_sign_message',
 	arguments: { message: `mcp-test::${new Date().toISOString()}` },
 });
 console.log(`    ${(signed.content as Array<{ text: string }>)[0]?.text}\n`);
 
 // -- Tier 1: Read contract (no signing) -------------------------------------
-console.log('==> guardian_read_contract (USDC totalSupply on Base Sepolia)');
+console.log('==> agenta_read_contract (USDC totalSupply on Base Sepolia)');
 const read = await client.callTool({
-	name: 'guardian_read_contract',
+	name: 'agenta_read_contract',
 	arguments: {
 		contractAddress: '0x036CbD53842c5426634e7929541eC2318f3dCF7e', // USDC on Base Sepolia
 		abi: [
@@ -76,9 +76,9 @@ const read = await client.callTool({
 console.log(`    ${(read.content as Array<{ text: string }>)[0]?.text}\n`);
 
 // -- Tier 3: Simulate -------------------------------------------------------
-console.log('==> guardian_simulate (0.001 ETH to burn address)');
+console.log('==> agenta_simulate (0.001 ETH to burn address)');
 const sim = await client.callTool({
-	name: 'guardian_simulate',
+	name: 'agenta_simulate',
 	arguments: {
 		to: '0x0000000000000000000000000000000000000001',
 		value: '0.001',
@@ -88,9 +88,9 @@ const sim = await client.callTool({
 console.log(`    ${(sim.content as Array<{ text: string }>)[0]?.text}\n`);
 
 // -- Tier 2: Send ETH -------------------------------------------------------
-console.log('==> guardian_send_eth (0.000001 ETH on base-sepolia)');
+console.log('==> agenta_send_eth (0.000001 ETH on base-sepolia)');
 const tx = await client.callTool({
-	name: 'guardian_send_eth',
+	name: 'agenta_send_eth',
 	arguments: {
 		to: '0x0000000000000000000000000000000000000001',
 		value: '0.000001',

@@ -1,14 +1,14 @@
 {
-	"name": "guardian-wallet",
+	"name": "agentaos",
 	"private": true,
 	"version": "0.1.0",
-	"description": "Agents deserve wallets without private keys — 2-of-3 threshold ECDSA signing for AI agents",
-	"author": "Agentokratia",
+	"description": "The financial OS for autonomous agents — 2-of-3 threshold ECDSA signing",
+	"author": "AgentaOS <hello@agentaos.ai>",
 	"license": "AGPL-3.0-only",
-	"homepage": "https://github.com/agentokratia/guardian-wallet",
+	"homepage": "https://github.com/AgentaOS/agentaos",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/agentokratia/guardian-wallet.git"
+		"url": "https://github.com/AgentaOS/agentaos.git"
 	},
 	"packageManager": "pnpm@9.15.0",
 	"engines": {

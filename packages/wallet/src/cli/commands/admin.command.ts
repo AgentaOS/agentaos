@@ -1,4 +1,4 @@
-import { CRITERION_CATALOG } from '@agentokratia/guardian-core';
+import { CRITERION_CATALOG } from '@agentaos/core';
 import { confirm, input, select } from '@inquirer/prompts';
 import chalk from 'chalk';
 import { Command, type Command as CommandType } from 'commander';
@@ -64,7 +64,7 @@ interface AuditEntry {
 }
 
 // ---------------------------------------------------------------------------
-// Auth resolution — uses session JWT from `gw login`
+// Auth resolution — uses session JWT from `agenta login`
 // ---------------------------------------------------------------------------
 
 async function getAdminContext(command: CommandType): Promise<AdminContext> {
@@ -72,12 +72,12 @@ async function getAdminContext(command: CommandType): Promise<AdminContext> {
 	const config = loadSignerConfig(signerName);
 
 	if (!config.signerId) {
-		throw new Error('No signer ID in config. Re-run `gw init` or add signerId to config.');
+		throw new Error('No signer ID in config. Re-run `agenta init` or add signerId to config.');
 	}
 
 	const token = await getSession();
 	if (!token) {
-		throw new Error(`Not logged in. Run ${chalk.bold('gw login')} first.`);
+		throw new Error(`Not logged in. Run ${chalk.bold('agenta login')} first.`);
 	}
 
 	const headers: Record<string, string> = {
@@ -236,7 +236,7 @@ async function handlePoliciesList(command: CommandType): Promise<void> {
 
 	if (!doc || !doc.rules || doc.rules.length === 0) {
 		console.log(dim('  No policy configured.'));
-		console.log(dim(`  Run ${chalk.reset('gw admin policies edit')} to create one.`));
+		console.log(dim(`  Run ${chalk.reset('agenta admin policies edit')} to create one.`));
 	} else {
 		console.log(`  ${dim('Status:')} ${success('active')}`);
 		if (doc.version) console.log(`  ${dim('Version:')} ${doc.version}`);
@@ -556,7 +556,7 @@ const policiesCommand = new Command('policies').description('Manage signing poli
 policiesCommand.addCommand(policiesEditCommand);
 
 export const adminCommand = new Command('admin')
-	.description('Admin operations — requires gw login (policies, pause/resume, audit)')
+	.description('Admin operations — requires agenta login (policies, pause/resume, audit)')
 	.addCommand(policiesCommand)
 	.addCommand(pauseCommand)
 	.addCommand(resumeCommand)

@@ -6,16 +6,16 @@ import type { SignerManager } from '../../lib/signer-manager.js';
 
 export function registerWalletOverview(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_wallet_overview',
+		'agenta_wallet_overview',
 		{
 			description:
-				'Get a complete overview of the Guardian wallet — address, balances, tracked token balances, and recent transactions. This is the best starting tool for any conversation about the wallet. Requires a network to show balances.',
+				'Get a complete overview of the AgentaOS wallet — address, balances, tracked token balances, and recent transactions. This is the best starting tool for any conversation about the wallet. Requires a network to show balances.',
 			inputSchema: {
 				network: z
 					.string()
 					.optional()
 					.describe(
-						'Network name from guardian_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required to show balances — call guardian_list_networks first if unknown.',
+						'Network name from agenta_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required to show balances — call agenta_list_networks first if unknown.',
 					),
 			},
 		},
@@ -32,7 +32,7 @@ export function registerWalletOverview(server: McpServer, signerManager: SignerM
 						content: [
 							{
 								type: 'text' as const,
-								text: 'No wallet found. Create an account first in Guardian.',
+								text: 'No wallet found. Create an account first in AgentaOS.',
 							},
 						],
 					};
@@ -41,7 +41,7 @@ export function registerWalletOverview(server: McpServer, signerManager: SignerM
 				// Safe — guarded by !signers.length above
 				const signer = signers[0]!;
 
-				lines.push(`Wallet: ${signer.name || 'Guardian Wallet'}`);
+				lines.push(`Wallet: ${signer.name || 'AgentaOS'}`);
 				lines.push(`Address: ${signer.ethAddress}`);
 				lines.push(`Status: ${signer.status || 'active'}`);
 
@@ -50,7 +50,7 @@ export function registerWalletOverview(server: McpServer, signerManager: SignerM
 				if (!targetNetwork) {
 					lines.push('');
 					lines.push(
-						'No network specified — call guardian_list_networks to see available networks, then pass "network" to see balances.',
+						'No network specified — call agenta_list_networks to see available networks, then pass "network" to see balances.',
 					);
 					return {
 						content: [{ type: 'text' as const, text: lines.join('\n') }],
@@ -91,9 +91,7 @@ export function registerWalletOverview(server: McpServer, signerManager: SignerM
 						}
 
 						if (!tokenBalances.length) {
-							lines.push(
-								'No tracked tokens. Add tokens in Guardian or use guardian_call_contract.',
-							);
+							lines.push('No tracked tokens. Add tokens in AgentaOS or use agenta_call_contract.');
 						}
 					}
 				} catch {

@@ -6,10 +6,10 @@ import { fetchWithX402 } from '../../lib/x402-client.js';
 
 export function registerX402Fetch(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_x402_fetch',
+		'agenta_x402_fetch',
 		{
 			description:
-				'Fetch a 402-protected resource, automatically paying with the Guardian threshold signer via the x402 exact scheme (ERC-3009/Permit2). The network and asset are auto-detected from the 402 payment requirements. The full private key never exists.',
+				'Fetch a 402-protected resource, automatically paying with the AgentaOS threshold signer via the x402 exact scheme (ERC-3009/Permit2). The network and asset are auto-detected from the 402 payment requirements. The full private key never exists.',
 			inputSchema: {
 				url: z.string().url().describe('URL to fetch (may require x402 payment)'),
 				maxAmount: z

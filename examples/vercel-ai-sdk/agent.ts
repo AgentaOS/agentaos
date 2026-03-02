@@ -1,7 +1,7 @@
 /**
- * Guardian Wallet + Vercel AI SDK
+ * AgentaOS + Vercel AI SDK
  *
- * An AI agent that signs Ethereum transactions using Guardian.connect().
+ * An AI agent that signs Ethereum transactions using Agenta.connect().
  * The full private key never exists — signing is 2-of-3 MPC.
  *
  * Usage:
@@ -9,7 +9,7 @@
  *   pnpm example:vercel-ai "Check my wallet balance"
  */
 
-import { Guardian } from '@agentokratia/guardian-signer';
+import { Agenta } from '@agentaos/sdk';
 import { generateText, tool } from 'ai';
 import { http, createPublicClient, formatEther, parseEther } from 'viem';
 import { baseSepolia } from 'viem/chains';
@@ -24,10 +24,10 @@ const gemini = createOpenAI({
 const model = gemini('gemini-2.0-flash');
 // ─────────────────────────────────────────────────────────────────────
 
-const gw = await Guardian.connect({
-	apiSecret: process.env.GUARDIAN_API_SECRET as string,
-	serverUrl: process.env.GUARDIAN_SERVER || 'http://localhost:8080',
-	apiKey: process.env.GUARDIAN_API_KEY as string,
+const gw = await Agenta.connect({
+	apiSecret: process.env.AGENTA_API_SECRET as string,
+	serverUrl: process.env.AGENTA_SERVER || 'http://localhost:8080',
+	apiKey: process.env.AGENTA_API_KEY as string,
 });
 
 const account = gw.toViemAccount();
@@ -75,7 +75,7 @@ const tools = {
 
 const prompt =
 	process.argv[2] ||
-	`You're an AI agent starting up. Check your wallet balance to confirm you're funded. Then sign the message "guardian-agent-online::${new Date().toISOString()}" as proof-of-liveness. Report your status.`;
+	`You're an AI agent starting up. Check your wallet balance to confirm you're funded. Then sign the message "agenta-agent-online::${new Date().toISOString()}" as proof-of-liveness. Report your status.`;
 
 console.log(`\n🤖 Agent prompt: ${prompt}\n`);
 

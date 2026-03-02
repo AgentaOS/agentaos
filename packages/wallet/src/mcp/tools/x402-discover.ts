@@ -5,7 +5,7 @@ import { discoverX402 } from '../../lib/x402-client.js';
 
 export function registerX402Discover(server: McpServer) {
 	server.registerTool(
-		'guardian_x402_discover',
+		'agenta_x402_discover',
 		{
 			description:
 				'Discover x402-protected endpoints on a domain. Probes common paths and the .well-known/x402 endpoint to find paid resources. Returns scheme, network, amount, and asset for each endpoint.',

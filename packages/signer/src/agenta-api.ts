@@ -143,12 +143,12 @@ export interface ResolvedToken {
 }
 
 // ---------------------------------------------------------------------------
-// GuardianApi — all server read operations in one place
+// AgentaApi — all server read operations in one place
 // ---------------------------------------------------------------------------
 
 const NETWORK_CACHE_TTL = 60_000;
 
-export class GuardianApi {
+export class AgentaApi {
 	private cachedNetworks: NetworkInfo[] = [];
 	private lastNetworkFetch = 0;
 
@@ -173,7 +173,7 @@ export class GuardianApi {
 	async getDefaultSigner(): Promise<SignerInfo> {
 		const signers = await this.listSigners();
 		if (!signers.length) {
-			throw new Error('No signers found. Create one from the Guardian dashboard.');
+			throw new Error('No signers found. Create one from the AgentaOS dashboard.');
 		}
 		return signers[0] as SignerInfo;
 	}
@@ -218,12 +218,12 @@ export class GuardianApi {
 
 	async getRpcUrl(network: string): Promise<string> {
 		// Per-network env override
-		const envKey = `GUARDIAN_RPC_URL_${network.toUpperCase().replace(/-/g, '_')}`;
+		const envKey = `AGENTA_RPC_URL_${network.toUpperCase().replace(/-/g, '_')}`;
 		const envVal = process.env[envKey];
 		if (envVal) return envVal;
 
 		// Global env override
-		if (process.env.GUARDIAN_RPC_URL) return process.env.GUARDIAN_RPC_URL;
+		if (process.env.AGENTA_RPC_URL) return process.env.AGENTA_RPC_URL;
 
 		// Dynamic from server
 		const networks = await this.listNetworks();
@@ -231,7 +231,7 @@ export class GuardianApi {
 		if (match?.rpcUrl) return match.rpcUrl;
 
 		throw new Error(
-			`Unknown network: "${network}". Set GUARDIAN_RPC_URL_${network.toUpperCase().replace(/-/g, '_')} or add it to the server's networks table.`,
+			`Unknown network: "${network}". Set AGENTA_RPC_URL_${network.toUpperCase().replace(/-/g, '_')} or add it to the server's networks table.`,
 		);
 	}
 
@@ -337,7 +337,7 @@ export class GuardianApi {
 			const { mainnet } = await import('viem/chains');
 			const { normalize } = await import('viem/ens');
 
-			const rpcUrl = process.env.GUARDIAN_RPC_URL_MAINNET || 'https://cloudflare-eth.com';
+			const rpcUrl = process.env.AGENTA_RPC_URL_MAINNET || 'https://cloudflare-eth.com';
 			const viemClient = createPublicClient({
 				chain: mainnet,
 				transport: http(rpcUrl),

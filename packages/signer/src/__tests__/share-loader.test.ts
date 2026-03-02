@@ -1,4 +1,4 @@
-import type { Share } from '@agentokratia/guardian-core';
+import type { Share } from '@agentaos/core';
 import { describe, expect, it } from 'vitest';
 import { wipeShare } from '../share-loader.js';
 

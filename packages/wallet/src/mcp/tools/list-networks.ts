@@ -4,10 +4,10 @@ import type { SignerManager } from '../../lib/signer-manager.js';
 
 export function registerListNetworks(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_list_networks',
+		'agenta_list_networks',
 		{
 			description:
-				'List all available networks configured on the Guardian server. Returns network name, CAIP-2 networkId (e.g. "eip155:84532"), chain ID, testnet status, and native currency. Pass the "name" value as the "network" parameter to other tools.',
+				'List all available networks configured on the AgentaOS server. Returns network name, CAIP-2 networkId (e.g. "eip155:84532"), chain ID, testnet status, and native currency. Pass the "name" value as the "network" parameter to other tools.',
 		},
 		async () => {
 			const api = signerManager.getApi();

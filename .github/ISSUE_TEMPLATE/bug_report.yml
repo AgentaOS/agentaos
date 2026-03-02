@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report a bug in Guardian Wallet
+description: Report a bug in AgentaOS
 labels: ["bug"]
 body:
   - type: textarea
@@ -14,7 +14,7 @@ body:
     attributes:
       label: Steps to reproduce
       placeholder: |
-        1. Run `gw send ...`
+        1. Run `agenta send ...`
         2. See error ...
     validations:
       required: true
@@ -30,15 +30,15 @@ body:
     attributes:
       label: Package
       options:
-        - guardian-server
-        - guardian-app (dashboard)
-        - guardian-cli
-        - guardian-signer (SDK)
-        - guardian-schemes
-        - guardian-chains
-        - guardian-core
-        - guardian-mpc-wasm
-        - guardian-auth
+        - "@agentaos/server"
+        - "@agentaos/app (dashboard)"
+        - "agenta (CLI)"
+        - "@agentaos/sdk"
+        - "@agentaos/engine"
+        - "@agentaos/chains"
+        - "@agentaos/core"
+        - "@agentaos/crypto"
+        - "@agentaos/auth"
         - Other
     validations:
       required: true

@@ -1,8 +1,12 @@
 // Classes
 export { ThresholdSigner } from './threshold-signer.js';
 export { HttpClient, HttpClientError } from './http-client.js';
-export { GuardianApi } from './guardian-api.js';
-export { Guardian } from './guardian.js';
+export { AgentaApi } from './agenta-api.js';
+export { Agenta } from './agenta.js';
+
+// Backward-compat re-exports (deprecated)
+export { Agenta as Guardian } from './agenta.js';
+export { AgentaApi as GuardianApi } from './agenta-api.js';
 
 // Functions (share-loader)
 export { wipeShare } from './share-loader.js';
@@ -30,7 +34,7 @@ export type {
 	ProcessSignRoundResponse,
 } from './http-client.js';
 
-// Types — GuardianApi
+// Types — AgentaApi
 export type {
 	AuditEntry,
 	AuditMeta,
@@ -49,7 +53,7 @@ export type {
 	SimulateResult,
 	TokenBalance,
 	TokenInfo,
-} from './guardian-api.js';
+} from './agenta-api.js';
 
-// Types — Guardian
-export type { GuardianConnectOptions } from './guardian.js';
+// Types — Agenta
+export type { AgentaConnectOptions, GuardianConnectOptions } from './agenta.js';

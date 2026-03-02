@@ -94,7 +94,7 @@ async function resolveServerUrl(opts: {
 	signerName?: string;
 	cliFlag?: string;
 }): Promise<string | null> {
-	// 1. Local signer config (gw init was run)
+	// 1. Local signer config (agenta init was run)
 	if (opts.signerName) {
 		const configPath = getSignerConfigPath(opts.signerName);
 		if (existsSync(configPath)) {
@@ -106,7 +106,7 @@ async function resolveServerUrl(opts: {
 			}
 		}
 
-		// 2. Recovery metadata (previous gw receive)
+		// 2. Recovery metadata (previous agenta receive)
 		const meta = loadRecoveryMeta(opts.signerName);
 		if (meta) return meta.serverUrl;
 	}
@@ -114,7 +114,7 @@ async function resolveServerUrl(opts: {
 	// 3. --server CLI flag
 	if (opts.cliFlag) return opts.cliFlag;
 
-	// 4. Session file (stored during gw login)
+	// 4. Session file (stored during agenta login)
 	const sessionUrl = await getSessionServerUrl();
 	if (sessionUrl) return sessionUrl;
 
@@ -131,7 +131,7 @@ async function resolveContext(
 	serverFlag: string | undefined,
 	token: string,
 ): Promise<ResolvedContext | null> {
-	// Path A: Local signer config exists (gw init was run on this device)
+	// Path A: Local signer config exists (agenta init was run on this device)
 	if (signerArg) {
 		const configPath = getSignerConfigPath(signerArg);
 		if (existsSync(configPath)) {
@@ -199,7 +199,9 @@ async function resolveFromServer(
 	if (!signersResult.ok) {
 		spinner.fail('Could not connect to server');
 		if (signersResult.status === 401) {
-			console.error(`\n  ${failMark(`Session expired. Run ${chalk.bold('gw login')} again.`)}\n`);
+			console.error(
+				`\n  ${failMark(`Session expired. Run ${chalk.bold('agenta login')} again.`)}\n`,
+			);
 		} else if (signersResult.status === 0) {
 			console.error(
 				`\n  ${failMark(`Could not reach server at ${baseUrl}. Check the URL and try again.`)}\n`,
@@ -218,7 +220,7 @@ async function resolveFromServer(
 	if (signers.length === 0) {
 		console.log('');
 		console.log(
-			`  ${failMark('No accounts found. Create one in Guardian or run')} ${chalk.bold('gw init')} ${dim('on the agent device first.')}`,
+			`  ${failMark('No accounts found. Create one in AgentaOS or run')} ${chalk.bold('agenta init')} ${dim('on the agent device first.')}`,
 		);
 		console.log('');
 		return null;
@@ -274,7 +276,7 @@ async function resolveFromServer(
 }
 
 // ---------------------------------------------------------------------------
-// gw receive [signer] — Receive a share from another device via 6-word code
+// agenta receive [signer] — Receive a share from another device via 6-word code
 // ---------------------------------------------------------------------------
 
 export const receiveCommand = new Command('receive')
@@ -286,7 +288,9 @@ export const receiveCommand = new Command('receive')
 			// 1. Require session
 			const token = await getSession();
 			if (!token) {
-				console.error(`\n  ${failMark(`Not logged in. Run ${chalk.bold('gw login')} first.`)}\n`);
+				console.error(
+					`\n  ${failMark(`Not logged in. Run ${chalk.bold('agenta login')} first.`)}\n`,
+				);
 				process.exitCode = 1;
 				return;
 			}
@@ -340,7 +344,7 @@ export const receiveCommand = new Command('receive')
 				pendingSpinner.fail('Failed to check transfers');
 				if (pendingResult.status === 401) {
 					console.error(
-						`\n  ${failMark(`Session expired. Run ${chalk.bold('gw login')} again.`)}\n`,
+						`\n  ${failMark(`Session expired. Run ${chalk.bold('agenta login')} again.`)}\n`,
 					);
 				} else {
 					console.error(
@@ -356,7 +360,7 @@ export const receiveCommand = new Command('receive')
 				pendingSpinner.info('No pending transfer found');
 				console.log('');
 				console.log(
-					dim(`  Run ${chalk.reset(`gw link ${signerName}`)} on the source device first.`),
+					dim(`  Run ${chalk.reset(`agenta link ${signerName}`)} on the source device first.`),
 				);
 				console.log('');
 				return;
@@ -445,7 +449,7 @@ export const receiveCommand = new Command('receive')
 				confirmSpinner.warn('Could not confirm transfer — share is still stored locally');
 			}
 
-			// 10. Save recovery metadata (so next gw receive skips server discovery)
+			// 10. Save recovery metadata (so next agenta receive skips server discovery)
 			saveRecoveryMeta(signerName, {
 				signerName,
 				signerId,
@@ -458,7 +462,7 @@ export const receiveCommand = new Command('receive')
 			console.log(`  ${successMark(`Share for ${chalk.bold(signerName)} received and stored`)}`);
 			console.log('');
 			console.log(`  ${success('Done!')} This device now holds the recovery key.`);
-			console.log(`  Run ${chalk.bold('gw admin policies')} to manage policies.`);
+			console.log(`  Run ${chalk.bold('agenta admin policies')} to manage policies.`);
 			console.log('');
 		} catch (error: unknown) {
 			if (error instanceof Error && error.name === 'ExitPromptError') {

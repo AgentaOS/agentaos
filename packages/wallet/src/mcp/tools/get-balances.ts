@@ -7,10 +7,10 @@ import type { SignerManager } from '../../lib/signer-manager.js';
 
 export function registerGetBalances(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_get_balances',
+		'agenta_get_balances',
 		{
 			description:
-				'Get the ETH balance and optionally ERC-20 token balances of the Guardian threshold wallet. Returns balances across all configured networks.',
+				'Get the ETH balance and optionally ERC-20 token balances of the AgentaOS threshold wallet. Returns balances across all configured networks.',
 			inputSchema: {
 				tokens: z
 					.array(z.string().regex(/^0x[0-9a-fA-F]{40}$/))
@@ -22,7 +22,7 @@ export function registerGetBalances(server: McpServer, signerManager: SignerMana
 					.string()
 					.optional()
 					.describe(
-						'Network name from guardian_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required — call guardian_list_networks first if unknown.',
+						'Network name from agenta_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required — call agenta_list_networks first if unknown.',
 					),
 			},
 		},

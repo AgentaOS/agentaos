@@ -8,8 +8,8 @@ import {
 } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { CGGMP24Scheme } from '@agentokratia/guardian-schemes';
-import { GuardianApi, HttpClient, ThresholdSigner } from '@agentokratia/guardian-signer';
+import { CGGMP24Scheme } from '@agentaos/engine';
+import { AgentaApi, HttpClient, ThresholdSigner } from '@agentaos/sdk';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -31,7 +31,7 @@ export interface SignerConfig {
 // Paths
 // ---------------------------------------------------------------------------
 
-const CONFIG_DIR = join(homedir(), '.guardian-wallet');
+const CONFIG_DIR = join(homedir(), '.agenta');
 
 export function getConfigDir(): string {
 	return CONFIG_DIR;
@@ -100,10 +100,10 @@ export function resolveSignerName(explicit?: string): string {
 	const signers = listSigners();
 	if (signers.length === 1) return signers[0] as string;
 	if (signers.length === 0) {
-		throw new Error('No accounts configured. Run `gw init` first.');
+		throw new Error('No accounts configured. Run `agenta init` first.');
 	}
 	throw new Error(
-		`Multiple accounts found: ${signers.join(', ')}.\nUse --signer <name> or run \`gw init\` to set a default.`,
+		`Multiple accounts found: ${signers.join(', ')}.\nUse --signer <name> or run \`agenta init\` to set a default.`,
 	);
 }
 
@@ -115,7 +115,7 @@ export function loadSignerConfig(name?: string): SignerConfig {
 	const signerName = resolveSignerName(name);
 	const p = getSignerConfigPath(signerName);
 	if (!existsSync(p)) {
-		throw new Error(`Account "${signerName}" not found. Run \`gw init\` first.`);
+		throw new Error(`Account "${signerName}" not found. Run \`agenta init\` first.`);
 	}
 	return JSON.parse(readFileSync(p, 'utf-8')) as SignerConfig;
 }
@@ -185,7 +185,7 @@ export function listRecoveryMetas(): RecoveryMeta[] {
 export function resolveApiSecret(config: SignerConfig): string {
 	if (config.apiSecret) return config.apiSecret;
 	throw new Error(
-		'No API secret found in config. Run `gw init` to reconfigure with your API Secret from Guardian.',
+		'No API secret found in config. Run `agenta init` to reconfigure with your API Secret from AgentaOS.',
 	);
 }
 
@@ -195,10 +195,10 @@ export function resolveApiSecret(config: SignerConfig): string {
 
 export function createClientFromConfig(config: { serverUrl: string; apiKey: string }): {
 	client: HttpClient;
-	api: GuardianApi;
+	api: AgentaApi;
 } {
 	const client = new HttpClient({ baseUrl: config.serverUrl, apiKey: config.apiKey });
-	const api = new GuardianApi(client);
+	const api = new AgentaApi(client);
 	return { client, api };
 }
 

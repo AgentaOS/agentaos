@@ -6,10 +6,10 @@ import type { SignerManager } from '../../lib/signer-manager.js';
 
 export function registerCallContract(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_call_contract',
+		'agenta_call_contract',
 		{
 			description:
-				'Call a function on any smart contract using Guardian threshold signing (2-of-3 MPC). Provide the contract ABI, function name, and arguments. The full private key never exists. Use guardian_simulate first to estimate gas.',
+				'Call a function on any smart contract using AgentaOS threshold signing (2-of-3 MPC). Provide the contract ABI, function name, and arguments. The full private key never exists. Use agenta_simulate first to estimate gas.',
 			inputSchema: {
 				contractAddress: z
 					.string()
@@ -34,7 +34,7 @@ export function registerCallContract(server: McpServer, signerManager: SignerMan
 					.string()
 					.optional()
 					.describe(
-						'Network name from guardian_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required — call guardian_list_networks first if unknown.',
+						'Network name from agenta_list_networks (e.g. "base-sepolia", "mainnet", "arbitrum"). Required — call agenta_list_networks first if unknown.',
 					),
 			},
 		},

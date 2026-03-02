@@ -6,10 +6,10 @@ import type { SignerManager } from '../../lib/signer-manager.js';
 
 export function registerGetAuditLog(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_get_audit_log',
+		'agenta_get_audit_log',
 		{
 			description:
-				'Get recent signing activity from the Guardian audit log. Shows past transactions, policy evaluations, decoded function calls, and gas costs. Use this to check spending history or verify past actions.',
+				'Get recent signing activity from the AgentaOS audit log. Shows past transactions, policy evaluations, decoded function calls, and gas costs. Use this to check spending history or verify past actions.',
 			inputSchema: {
 				limit: z
 					.number()

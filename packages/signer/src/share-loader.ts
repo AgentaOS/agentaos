@@ -1,4 +1,4 @@
-import type { Share } from '@agentokratia/guardian-core';
+import type { Share } from '@agentaos/core';
 
 // ---------------------------------------------------------------------------
 // Wipe

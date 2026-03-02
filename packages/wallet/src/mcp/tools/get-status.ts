@@ -3,10 +3,10 @@ import type { SignerManager } from '../../lib/signer-manager.js';
 
 export function registerGetStatus(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_get_status',
+		'agenta_get_status',
 		{
 			description:
-				'Get the Guardian server health status and signer information. Use this to verify the server is running and the signer is configured.',
+				'Get the AgentaOS server health status and signer information. Use this to verify the server is running and the signer is configured.',
 		},
 		async () => {
 			const api = signerManager.getApi();

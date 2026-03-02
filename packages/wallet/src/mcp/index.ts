@@ -34,12 +34,12 @@ import { registerX402Discover } from './tools/x402-discover.js';
 import { registerX402Fetch } from './tools/x402-fetch.js';
 
 /**
- * Start the Guardian MCP server with all tools.
+ * Start the AgentaOS MCP server with all tools.
  * Connects via stdio transport.
  */
 export async function runMcp() {
 	const server = new McpServer({
-		name: 'guardian',
+		name: 'agenta',
 		version: '0.1.0',
 	});
 

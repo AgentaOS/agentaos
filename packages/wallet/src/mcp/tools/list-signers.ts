@@ -4,7 +4,7 @@ import type { SignerManager } from '../../lib/signer-manager.js';
 
 export function registerListSigners(server: McpServer, signerManager: SignerManager) {
 	server.registerTool(
-		'guardian_list_signers',
+		'agenta_list_signers',
 		{
 			description:
 				'List all signers accessible with the current API key. Shows name, ID, address, chain, network, and status.',
