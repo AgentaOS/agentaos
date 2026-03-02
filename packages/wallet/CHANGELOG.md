@@ -1,5 +1,14 @@
 # agentaos
 
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @agentaos/engine@0.2.1
+  - @agentaos/sdk@0.2.1
+  - @agentaos/core@0.2.1
+
 ## 0.2.0
 
 ### Minor Changes

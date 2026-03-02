@@ -1,6 +1,6 @@
 {
 	"name": "@agentaos/crypto",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "CGGMP24 threshold ECDSA WASM module for AgentaOS",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",

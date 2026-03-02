@@ -1,5 +1,13 @@
 # @agentaos/engine
 
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [[`38f76db`](https://github.com/AgentaOS/agentaos/commit/38f76db35c018a97ccebeb87b51be1c4e09c2db4)]:
+  - @agentaos/crypto@0.2.1
+  - @agentaos/core@0.2.1
+
 ## 0.2.0
 
 ### Minor Changes
