@@ -16,5 +16,5 @@
 	"access": "public",
 	"baseBranch": "main",
 	"updateInternalDependencies": "patch",
-	"ignore": ["@agentaos/server", "@agentaos/app", "@agentaos/auth"]
+	"ignore": []
 }

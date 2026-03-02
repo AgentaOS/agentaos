@@ -4,7 +4,7 @@
 '@agentaos/engine': minor
 '@agentaos/chains': minor
 '@agentaos/sdk': minor
-'agenta': minor
+'agentaos': minor
 ---
 
 Initial public release — threshold ECDSA signing for autonomous agents
