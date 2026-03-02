@@ -17,18 +17,14 @@ Accept payments. Automate spending. Enforce guardrails on every transaction.
 
 ---
 
-## Why AgentaOS
+## What is AgentaOS
 
-Your AI agent needs to spend money. Today you have two options:
+The financial infrastructure for agents and the businesses they transact with.
 
-1. **Paste a private key into `.env`** — one leak and everything is gone
-2. **Enterprise MPC** — $50k–$500k/yr, weeks of integration, they hold your keys
-
-AgentaOS is the third door.
-
-Every private key is split into 3 shares using threshold cryptography. Any 2 can sign a transaction. The full key is never reconstructed — not in memory, not in logs, not anywhere. Agents get spending power. You keep control.
-
-15 guardrail types enforce your rules at the signing layer. Spending caps, approved vendors, daily budgets, business hours, DeFi slippage protection — all evaluated before a single wei moves.
+- **Agents get wallets.** Your AI agents spend autonomously — pay for APIs, settle invoices, execute trades.
+- **You set the rules.** Spending caps, approved vendors, daily budgets, business hours — enforced on every transaction. Agents cannot bypass them.
+- **Businesses accept agent payments.** One checkout for humans and AI agents. Instant settlement. No integration headaches.
+- **No single point of failure.** Private keys are split across three independent parties. No one — not even you — ever holds the full key.
 
 ---
 
