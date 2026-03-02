@@ -96,7 +96,7 @@ signer.destroy();
 ```typescript
 import { ThresholdSigner } from '@agentaos/sdk';
 
-// From API credentials (app.agentaos.ai → Create Signer → copy credentials)
+// From API credentials (app.agentaos.ai → Create Wallet → copy credentials)
 const signer = await ThresholdSigner.fromSecret({
   apiSecret: process.env.AGENTA_API_SECRET!,
   serverUrl: process.env.AGENTA_SERVER!,
@@ -205,7 +205,7 @@ Connect any AI assistant to AgentaOS. Claude, Cursor, Windsurf — they sign tra
 }
 ```
 
-Your **API Key** and **API Secret** are generated when you create a wallet — either from [app.agentaos.ai](https://app.agentaos.ai) or via `agenta init`. Copy them from the credentials screen.
+Your **API Key** and **API Secret** are generated when you create a wallet at [app.agentaos.ai](https://app.agentaos.ai). Copy them from the credentials screen.
 
 ### Tools
 
