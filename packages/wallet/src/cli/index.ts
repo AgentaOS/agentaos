@@ -1,5 +1,9 @@
+import { createRequire } from 'node:module';
 import { Command } from 'commander';
 import { adminCommand } from './commands/admin.command.js';
+
+const require = createRequire(import.meta.url);
+const { version } = require('../../package.json') as { version: string };
 import { balanceCommand } from './commands/balance.command.js';
 import { deployCommand } from './commands/deploy.command.js';
 import { infoCommand } from './commands/info.command.js';
@@ -20,7 +24,7 @@ export async function runCli(): Promise<void> {
 	program
 		.name('agenta')
 		.description(BRAND_BANNER)
-		.version('0.1.0')
+		.version(version)
 		.option('-s, --signer <name>', 'Signer name (default: auto-detected)')
 		.addHelpText(
 			'after',
