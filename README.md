@@ -7,7 +7,7 @@
 Accept payments. Automate spending. Enforce guardrails on every transaction.
 
 [![npm](https://img.shields.io/npm/v/@agentaos/sdk?label=%40agentaos%2Fsdk)](https://www.npmjs.com/package/@agentaos/sdk)
-[![npm](https://img.shields.io/npm/v/agentaos?label=agentaos%20CLI)](https://www.npmjs.com/package/agentaos)
+[![npm](https://img.shields.io/npm/v/agentaos?label=agenta%20CLI)](https://www.npmjs.com/package/agentaos)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](LICENSE)
 [![MPC](https://img.shields.io/badge/MPC-CGGMP24-8B5CF6.svg)](https://eprint.iacr.org/2021/060)
 [![Paper](https://img.shields.io/badge/Paper-Zenodo-blue.svg)](https://doi.org/10.5281/zenodo.18684027)
@@ -190,7 +190,7 @@ Connect any AI assistant to AgentaOS. Claude, Cursor, Windsurf — they sign tra
 ```json
 {
   "mcpServers": {
-    "agentaos": {
+    "agenta": {
       "command": "npx",
       "args": ["-y", "agentaos", "mcp"],
       "env": {
