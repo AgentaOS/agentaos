@@ -30,15 +30,12 @@ body:
     attributes:
       label: Package
       options:
-        - "@agentaos/server"
-        - "@agentaos/app (dashboard)"
-        - "agenta (CLI)"
+        - "agentaos (CLI)"
         - "@agentaos/sdk"
         - "@agentaos/engine"
         - "@agentaos/chains"
         - "@agentaos/core"
         - "@agentaos/crypto"
-        - "@agentaos/auth"
         - Other
     validations:
       required: true

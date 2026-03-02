@@ -4,7 +4,7 @@
 	"version": "0.1.0",
 	"description": "The financial OS for autonomous agents — 2-of-3 threshold ECDSA signing",
 	"author": "AgentaOS <hello@agentaos.ai>",
-	"license": "AGPL-3.0-only",
+	"license": "Apache-2.0",
 	"homepage": "https://github.com/AgentaOS/agentaos",
 	"repository": {
 		"type": "git",
