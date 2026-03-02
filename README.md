@@ -51,17 +51,17 @@ npm install @agentaos/sdk
 ```
 
 ```typescript
-import { ThresholdSigner } from '@agentaos/sdk';
+import { Agenta } from '@agentaos/sdk';
 import { createWalletClient, http, parseEther } from 'viem';
 import { baseSepolia } from 'viem/chains';
 
-const signer = await ThresholdSigner.fromSecret({
+const agent = await Agenta.connect({
   apiSecret: process.env.AGENTA_API_SECRET!,
   apiKey: process.env.AGENTA_API_KEY!,
 });
 
 const client = createWalletClient({
-  account: signer.toViemAccount(),
+  account: agent.toViemAccount(),
   chain: baseSepolia,
   transport: http(),
 });
@@ -71,7 +71,7 @@ const hash = await client.sendTransaction({
   value: parseEther('0.01'),
 });
 
-signer.destroy();
+agent.destroy();
 ```
 
 ---
@@ -91,25 +91,22 @@ signer.destroy();
 
 ## SDK
 
-### Load a Signer
+### Connect
 
 ```typescript
-import { ThresholdSigner } from '@agentaos/sdk';
+import { Agenta } from '@agentaos/sdk';
 
-// From API credentials (app.agentaos.ai → Create Wallet → copy credentials)
-const signer = await ThresholdSigner.fromSecret({
+// Credentials from app.agentaos.ai → Create Wallet → copy credentials
+const agent = await Agenta.connect({
   apiSecret: process.env.AGENTA_API_SECRET!,
   apiKey: process.env.AGENTA_API_KEY!,
 });
-
-// From a secret file (CLI-style)
-const signer = await ThresholdSigner.fromFile('~/.gw/my-agent.secret');
 ```
 
 ### Send ETH
 
 ```typescript
-const txHash = await signer.signTx({
+const { txHash } = await agent.signTransaction({
   to: '0xRecipient...',
   value: parseEther('0.01'),
 });
@@ -118,7 +115,7 @@ const txHash = await signer.signTx({
 ### Call a Contract
 
 ```typescript
-const txHash = await signer.signTx({
+const { txHash } = await agent.signTransaction({
   to: '0xContract...',
   data: '0xa9059cbb...', // ERC-20 transfer
   value: 0n,
@@ -128,7 +125,7 @@ const txHash = await signer.signTx({
 ### Sign a Message
 
 ```typescript
-const { signature, r, s, v } = await signer.signMessage('Hello from AgentaOS');
+const { signature, r, s, v } = await agent.signMessage('Hello from AgentaOS');
 ```
 
 ### viem Drop-in
@@ -138,7 +135,7 @@ import { createWalletClient, http } from 'viem';
 import { baseSepolia } from 'viem/chains';
 
 const client = createWalletClient({
-  account: signer.toViemAccount(), // LocalAccount — works everywhere viem does
+  account: agent.toViemAccount(), // LocalAccount — works everywhere viem does
   chain: baseSepolia,
   transport: http(),
 });
@@ -151,7 +148,7 @@ const sig = await client.signTypedData({ domain, types, primaryType, message });
 ### Cleanup
 
 ```typescript
-signer.destroy(); // Wipes share material from memory
+agent.destroy(); // Wipes share material from memory
 ```
 
 ---
@@ -164,7 +161,7 @@ npm install -g agentaos
 
 | Command | What it does |
 |---------|--------------|
-| `agenta init` | Interactive setup — server URL, API key, network |
+| `agenta init` | Create or import a signer |
 | `agenta status` | Signer info and connection status |
 | `agenta balance` | ETH balance |
 | `agenta send <to> <amount>` | Send ETH — threshold-signed, policy-checked |
@@ -228,10 +225,15 @@ Your **API Key** and **API Secret** are generated when you create a wallet at [a
 ### Vercel AI SDK
 
 ```typescript
+import { Agenta } from '@agentaos/sdk';
 import { tool } from 'ai';
-import { ThresholdSigner } from '@agentaos/sdk';
 import { parseEther } from 'viem';
 import { z } from 'zod';
+
+const agent = await Agenta.connect({
+  apiSecret: process.env.AGENTA_API_SECRET!,
+  apiKey: process.env.AGENTA_API_KEY!,
+});
 
 const sendETH = tool({
   description: 'Send ETH using threshold signing',
@@ -240,13 +242,11 @@ const sendETH = tool({
     amount: z.string().describe('Amount in ETH'),
   }),
   execute: async ({ to, amount }) => {
-    const signer = await ThresholdSigner.fromSecret({
-      apiSecret: process.env.AGENTA_API_SECRET!,
-      apiKey: process.env.AGENTA_API_KEY!,
+    const result = await agent.signTransaction({
+      to,
+      value: parseEther(amount).toString(),
     });
-    const hash = await signer.signTx({ to, value: parseEther(amount) });
-    signer.destroy();
-    return { txHash: hash };
+    return { txHash: result.txHash };
   },
 });
 ```
@@ -254,23 +254,26 @@ const sendETH = tool({
 ### LangChain
 
 ```typescript
+import { Agenta } from '@agentaos/sdk';
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { ThresholdSigner } from '@agentaos/sdk';
 import { parseEther } from 'viem';
 import { z } from 'zod';
+
+const agent = await Agenta.connect({
+  apiSecret: process.env.AGENTA_API_SECRET!,
+  apiKey: process.env.AGENTA_API_KEY!,
+});
 
 const sendETH = new DynamicStructuredTool({
   name: 'agenta_send_eth',
   description: 'Send ETH using threshold signing',
   schema: z.object({ to: z.string(), amount: z.string() }),
   func: async ({ to, amount }) => {
-    const signer = await ThresholdSigner.fromSecret({
-      apiSecret: process.env.AGENTA_API_SECRET!,
-      apiKey: process.env.AGENTA_API_KEY!,
+    const result = await agent.signTransaction({
+      to,
+      value: parseEther(amount).toString(),
     });
-    const hash = await signer.signTx({ to, value: parseEther(amount) });
-    signer.destroy();
-    return JSON.stringify({ txHash: hash });
+    return JSON.stringify({ txHash: result.txHash });
   },
 });
 ```
