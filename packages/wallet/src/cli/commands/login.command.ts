@@ -45,7 +45,7 @@ async function fetchJson<T>(url: string, body: unknown): Promise<T> {
 
 export const loginCommand = new Command('login')
 	.description('Log in with email + OTP')
-	.option('--server <url>', 'Server URL', 'http://localhost:8080')
+	.option('--server <url>', 'Server URL', process.env.AGENTA_SERVER ?? 'https://api.agentaos.ai')
 	.action(async (opts: { server: string }) => {
 		try {
 			// Check if already logged in

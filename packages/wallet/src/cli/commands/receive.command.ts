@@ -182,7 +182,7 @@ async function resolveFromServer(
 	} else {
 		baseUrl = await input({
 			message: 'Server URL',
-			default: 'http://localhost:8080',
+			default: process.env.AGENTA_SERVER ?? 'https://api.agentaos.ai',
 			theme: promptTheme,
 		});
 	}

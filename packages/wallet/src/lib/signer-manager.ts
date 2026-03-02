@@ -9,7 +9,7 @@ export class SignerManager {
 
 	private getConfig() {
 		const apiSecret = process.env.AGENTA_API_SECRET;
-		const serverUrl = process.env.AGENTA_SERVER || 'http://localhost:8080';
+		const serverUrl = process.env.AGENTA_SERVER || 'https://api.agentaos.ai';
 		const apiKey = process.env.AGENTA_API_KEY;
 
 		if (!apiSecret) throw new Error('AGENTA_API_SECRET is required');

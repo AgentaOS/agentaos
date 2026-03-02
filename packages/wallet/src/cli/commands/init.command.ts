@@ -158,13 +158,7 @@ async function handleCreate(): Promise<void> {
 		},
 	});
 
-	console.log('');
-
-	const serverUrl = await input({
-		message: 'AgentaOS server URL',
-		default: 'http://localhost:8080',
-		theme: promptTheme,
-	});
+	const serverUrl = process.env.AGENTA_SERVER ?? 'https://api.agentaos.ai';
 
 	// ── 2. Security ───────────────────────────────────────────────────────
 	section('Security');
@@ -331,13 +325,7 @@ async function handleImport(): Promise<void> {
 		},
 	});
 
-	console.log('');
-
-	const serverUrl = await input({
-		message: 'AgentaOS server URL',
-		default: 'http://localhost:8080',
-		theme: promptTheme,
-	});
+	const serverUrl = process.env.AGENTA_SERVER ?? 'https://api.agentaos.ai';
 
 	// ── 2. Credentials ───────────────────────────────────────────────────
 	section('Credentials');

@@ -189,7 +189,7 @@ Connect any AI assistant to AgentaOS. Claude, Cursor, Windsurf — they sign tra
       "command": "npx",
       "args": ["-y", "agenta", "mcp"],
       "env": {
-        "AGENTA_SERVER": "http://localhost:8080",
+        "AGENTA_SERVER": "https://api.agentaos.ai",
         "AGENTA_API_KEY": "your-api-key",
         "AGENTA_API_SECRET": "your-api-secret"
       }
