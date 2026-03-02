@@ -1,5 +1,11 @@
 # @agentaos/crypto
 
+## 0.2.1
+
+### Patch Changes
+
+- [`38f76db`](https://github.com/AgentaOS/agentaos/commit/38f76db35c018a97ccebeb87b51be1c4e09c2db4) Thanks [@PancheI](https://github.com/PancheI)! - Fix WASM binaries missing from npm tarball
+
 ## 0.2.0
 
 ### Minor Changes
