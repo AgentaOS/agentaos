@@ -21,7 +21,7 @@ Give your AI agents a wallet where the private key never exists.
 
 AgentaOS splits every private key into 3 shares using the CGGMP24 threshold ECDSA protocol. Any 2 shares can co-sign a transaction. The full key is never reconstructed — not in memory, not in logs, not anywhere.
 
-**This repo contains the open-source SDK and CLI.** For the self-hosted server and dashboard, see [AgentaOS Platform](https://github.com/AgentaOS/platform).
+**This repo contains the open-source SDK and CLI.**
 
 ---
 
@@ -373,20 +373,6 @@ Ethereum, Base, Arbitrum, Optimism, Polygon, and their testnets. All EVM-compati
 
 ---
 
-## Self-Hosting the Server
-
-The SDK connects to an AgentaOS server that manages shares and policies. To run your own:
-
-```bash
-git clone https://github.com/AgentaOS/platform.git
-cd platform
-docker compose up -d
-```
-
-See [AgentaOS Platform](https://github.com/AgentaOS/platform) for full server setup instructions.
-
----
-
 ## Research
 
 The cryptographic foundation is described in:
@@ -420,7 +406,6 @@ Copyright 2025-2026 Aristokrates OU
 ## Links
 
 - **Website:** [agentaos.ai](https://agentaos.ai)
-- **Platform (server + dashboard):** [github.com/AgentaOS/platform](https://github.com/AgentaOS/platform)
 - **npm:** [@agentaos/sdk](https://www.npmjs.com/package/@agentaos/sdk) · [agenta](https://www.npmjs.com/package/agenta)
 - **Security:** [security@agentaos.ai](mailto:security@agentaos.ai)
 - **Issues:** [GitHub Issues](https://github.com/AgentaOS/agentaos/issues)

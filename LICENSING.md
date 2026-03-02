@@ -20,12 +20,6 @@ These packages are safe to use alongside any license — MIT, Apache 2.0,
 proprietary, etc. Integrate them with LangChain, Vercel AI SDK, ethers.js, or
 any other library without restriction.
 
-## Server and Dashboard
-
-The AgentaOS server, dashboard, and auth packages are maintained in a
-[separate repository](https://github.com/AgentaOS/platform) under different
-license terms.
-
 ## Commercial Licensing
 
 For enterprise support or custom licensing inquiries:

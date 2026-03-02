@@ -28,7 +28,7 @@ Please include as much detail as possible: steps to reproduce, affected versions
 ### Out of Scope
 
 - Example code and documentation
-- Server and dashboard vulnerabilities (report to the [platform repo](https://github.com/AgentaOS/platform))
+- Example code and third-party dependencies
 
 ## Core Security Invariant
 
