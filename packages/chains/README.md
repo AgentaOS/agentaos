@@ -2,7 +2,7 @@
 
 **Ethereum chain adapter for AgentaOS.**
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE-APACHE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE)
 [![npm](https://img.shields.io/npm/v/@agentaos/chains)](https://www.npmjs.com/package/@agentaos/chains)
 
 Implements the `IChain` interface from `@agentaos/core` for Ethereum-compatible chains. Handles transaction building, decoding, serialization, and signature assembly using [viem](https://viem.sh/).
@@ -35,4 +35,4 @@ This package is used internally by `@agentaos/server` for transaction processing
 
 ## License
 
-Apache-2.0 -- see [LICENSE-APACHE](../../LICENSE-APACHE).
+Apache-2.0 -- see [LICENSE](../../LICENSE).

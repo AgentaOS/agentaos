@@ -26,8 +26,8 @@ import type { SignMessageResult, SignTransactionResult, ViemAccount } from './th
 export interface AgentaConnectOptions {
 	/** Base64-encoded key share (JSON: { coreShare, auxInfo }) */
 	apiSecret: string;
-	/** AgentaOS server URL (e.g. "http://localhost:8080") */
-	serverUrl: string;
+	/** AgentaOS server URL (defaults to "https://api.agentaos.ai") */
+	serverUrl?: string;
 	/** API key for authentication */
 	apiKey: string;
 }
@@ -50,14 +50,15 @@ export class Agenta {
 	 * Returns a fully-initialized Agenta instance with all methods available.
 	 */
 	static async connect(opts: AgentaConnectOptions): Promise<Agenta> {
+		const serverUrl = opts.serverUrl ?? 'https://api.agentaos.ai';
 		const client = new HttpClient({
-			baseUrl: opts.serverUrl,
+			baseUrl: serverUrl,
 			apiKey: opts.apiKey,
 		});
 		const api = new AgentaApi(client);
 		const signer = await ThresholdSigner.fromSecret({
 			apiSecret: opts.apiSecret,
-			serverUrl: opts.serverUrl,
+			serverUrl,
 			apiKey: opts.apiKey,
 			scheme: new CGGMP24Scheme(),
 		});

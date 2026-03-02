@@ -8,8 +8,7 @@ set -euo pipefail
 # 2-of-3 threshold MPC — the full private key never exists.
 #
 # Prerequisites:
-#   - AgentaOS server running on :8080
-#   - examples/.env configured with API key + secret
+#   - examples/.env configured with API key + secret from app.agentaos.ai
 #   - Foundry installed (forge, cast)
 #
 # Usage:

@@ -5,7 +5,7 @@ Deploy smart contracts using Foundry through AgentaOS signing proxy. The full pr
 ## Prerequisites
 
 - [Foundry](https://book.getfoundry.sh/getting-started/installation) installed (`forge`, `cast`)
-- AgentaOS CLI installed: `npm install -g agenta`
+- AgentaOS CLI installed: `npm install -g agentaos`
 - AgentaOS server running with a configured signer
 
 ## Setup

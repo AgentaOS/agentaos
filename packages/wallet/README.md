@@ -2,8 +2,8 @@
 
 **AgentaOS CLI + MCP Server -- threshold signing for AI agents.**
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE-APACHE)
-[![npm](https://img.shields.io/npm/v/agenta)](https://www.npmjs.com/package/agenta)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE)
+[![npm](https://img.shields.io/npm/v/agentaos)](https://www.npmjs.com/package/agentaos)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](https://nodejs.org)
 
 CLI and [MCP](https://modelcontextprotocol.io/) server for [AgentaOS](https://github.com/AgentaOS/agentaos). Gives AI agents (Claude, GPT, custom) secure on-chain spending power through threshold ECDSA -- the full private key never exists.
@@ -11,9 +11,9 @@ CLI and [MCP](https://modelcontextprotocol.io/) server for [AgentaOS](https://gi
 ## Install
 
 ```bash
-npm install -g agenta
+npm install -g agentaos
 # or
-npx agenta --help
+npx agentaos --help
 ```
 
 ## Quick Start
@@ -149,11 +149,10 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
   "mcpServers": {
     "agenta": {
       "command": "npx",
-      "args": ["-y", "agenta"],
+      "args": ["-y", "agentaos", "mcp"],
       "env": {
-        "AGENTA_API_SECRET": "your-base64-share",
-        "AGENTA_API_KEY": "gw_live_...",
-        "AGENTA_SERVER": "http://localhost:8080"
+        "AGENTA_API_KEY": "your-api-key",
+        "AGENTA_API_SECRET": "your-api-secret"
       }
     }
   }
@@ -169,11 +168,10 @@ Add to `.cursor/mcp.json`:
   "mcpServers": {
     "agenta": {
       "command": "npx",
-      "args": ["-y", "agenta"],
+      "args": ["-y", "agentaos", "mcp"],
       "env": {
-        "AGENTA_API_SECRET": "your-base64-share",
-        "AGENTA_API_KEY": "gw_live_...",
-        "AGENTA_SERVER": "http://localhost:8080"
+        "AGENTA_API_KEY": "your-api-key",
+        "AGENTA_API_SECRET": "your-api-secret"
       }
     }
   }
@@ -189,9 +187,8 @@ Add to `.cursor/mcp.json`:
       "command": "node",
       "args": ["packages/wallet/dist/index.js"],
       "env": {
-        "AGENTA_API_SECRET": "your-base64-share",
-        "AGENTA_API_KEY": "gw_live_...",
-        "AGENTA_SERVER": "http://localhost:8080"
+        "AGENTA_API_KEY": "your-api-key",
+        "AGENTA_API_SECRET": "your-api-secret"
       }
     }
   }
@@ -233,9 +230,9 @@ Environment variables are an alternative to file-based config. Useful for CI/CD,
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `AGENTA_API_SECRET` | Base64-encoded signer key share | Yes |
-| `AGENTA_SERVER` | Server URL (e.g. `http://localhost:8080`) | Yes |
 | `AGENTA_API_KEY` | API key for authentication | Yes |
+| `AGENTA_API_SECRET` | Base64-encoded signer key share | Yes |
+| `AGENTA_SERVER` | Server URL (defaults to `https://api.agentaos.ai`) | No |
 | `AGENTA_NETWORK` | Default network name (e.g. `base-sepolia`, `mainnet`) | No |
 
 ## Security
@@ -249,4 +246,4 @@ Environment variables are an alternative to file-based config. Useful for CI/CD,
 
 ## License
 
-Apache-2.0 -- see [LICENSE-APACHE](../../LICENSE-APACHE).
+Apache-2.0 -- see [LICENSE](../../LICENSE).

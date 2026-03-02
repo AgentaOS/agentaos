@@ -19,7 +19,6 @@ const transport = new StdioClientTransport({
 		...process.env,
 		AGENTA_API_SECRET: process.env.AGENTA_API_SECRET as string,
 		AGENTA_API_KEY: process.env.AGENTA_API_KEY as string,
-		AGENTA_SERVER: process.env.AGENTA_SERVER || 'http://localhost:8080',
 	},
 });
 

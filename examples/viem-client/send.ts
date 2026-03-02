@@ -17,7 +17,6 @@ import { baseSepolia } from 'viem/chains';
 
 const gw = await Agenta.connect({
 	apiSecret: process.env.AGENTA_API_SECRET as string,
-	serverUrl: process.env.AGENTA_SERVER || 'http://localhost:8080',
 	apiKey: process.env.AGENTA_API_KEY as string,
 });
 

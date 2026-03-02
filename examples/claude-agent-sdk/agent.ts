@@ -19,7 +19,7 @@
  *   (Or set ANTHROPIC_API_KEY in examples/.env if you prefer API key auth.)
  *
  * Requires:
- *   AGENTA_* env vars in examples/.env (server URL, API key, secret)
+ *   AGENTA_* env vars in examples/.env (API key, secret)
  */
 
 import { Agenta } from '@agentaos/sdk';
@@ -158,7 +158,6 @@ function log(msg: string): void {
 
 const gw = await Agenta.connect({
 	apiSecret: process.env.AGENTA_API_SECRET as string,
-	serverUrl: process.env.AGENTA_SERVER || 'http://localhost:8080',
 	apiKey: process.env.AGENTA_API_KEY as string,
 });
 

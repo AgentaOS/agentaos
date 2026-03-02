@@ -1,24 +1,21 @@
 # AgentaOS — Full Lifecycle Demo
 
-End-to-end demonstration of AgentaOS Wallet: DKG, policies, signing, and audit.
+End-to-end demonstration of AgentaOS: signer creation, policies, signing, and audit.
 
 ## Prerequisites
 
-- Docker & Docker Compose
 - Node.js 20+
-- AgentaOS CLI: `npm install -g agenta`
+- AgentaOS CLI: `npm install -g agentaos`
+- A signer created at [app.agentaos.ai](https://app.agentaos.ai)
 
 ## Run
 
 ```bash
-# 1. Start infrastructure
-cd /path/to/agenta
-docker compose up -d
+# 1. Configure your credentials
+cp examples/.env.example examples/.env
+#    Fill in AGENTA_API_KEY and AGENTA_API_SECRET from app.agentaos.ai
 
-# 2. Open dashboard and create a signer
-open http://localhost:3000
-
-# 3. Run the demo script
+# 2. Run the demo script
 cd examples/full-lifecycle
 chmod +x demo.sh
 ./demo.sh
@@ -26,26 +23,25 @@ chmod +x demo.sh
 
 ## What the Demo Does
 
-1. **Initialize** — configures the CLI to point at your AgentaOS server
-2. **Health check** — verifies the server is running
-3. **Status** — shows signer info (address, chain, scheme)
-4. **Balance** — checks the signer's ETH balance
-5. **Audit log** — fetches recent signing requests
-6. **CSV export** — exports the full audit trail
+1. **Health check** — verifies the server is reachable
+2. **Status** — shows signer info (address, chain, scheme)
+3. **Balance** — checks the signer's ETH balance
+4. **Sign message** — signs a proof-of-liveness attestation
+5. **Send transaction** — sends a small ETH transfer
+6. **Audit log** — fetches recent signing requests
+7. **CSV export** — exports the full audit trail
 
 ## Manual Flow
 
 ```bash
-# Create a signer via the dashboard (http://localhost:3000)
-# This runs the DKG ceremony and gives you:
-#   - A share file (my-agent.share.enc)
-#   - An API key (gw_live_...)
+# Create a signer at app.agentaos.ai
+# The wizard gives you an API Key and API Secret (copy both).
 
 # Configure the CLI
 agenta init
 
 # Send a transaction
-agenta send 0.001 ETH to 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+agenta send 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 0.001
 
 # Sign a message
 agenta sign-message "Hello from AgentaOS"
@@ -59,16 +55,11 @@ agenta balance
 
 ## Policy Enforcement
 
-Add policies via the dashboard or API:
+Add policies via [app.agentaos.ai](https://app.agentaos.ai):
 
 ```bash
-# Add a spending limit (max 0.1 ETH per tx)
-curl -X POST "${SERVER}/api/v1/signers/${SIGNER_ID}/policies" \
-  -H "Content-Type: application/json" \
-  -H "Cookie: session=..." \
-  -d '{"type": "spending_limit", "config": {"maxAmount": "100000000000000000"}}'
-
-# Now try to send more than 0.1 ETH — it will be blocked with 403
-agenta send 0.5 ETH to 0x...
+# After adding a spending limit (max 0.1 ETH per tx) in the browser app,
+# try to send more than 0.1 ETH — it will be blocked with 403
+agenta send 0x... 0.5
 # Error: Policy violation: spending_limit — amount exceeds limit
 ```

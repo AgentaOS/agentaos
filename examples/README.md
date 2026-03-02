@@ -4,34 +4,27 @@ Working integration examples for AgentaOS. Each one sends a real transaction on 
 
 ## Prerequisites
 
-- Node.js 20+, pnpm 9+, Docker
-- Rust + wasm-pack (for building MPC WASM)
-- Foundry (for the forge-proxy example)
+- Node.js 20+, pnpm 9+
+- A signer created at [app.agentaos.ai](https://app.agentaos.ai)
+- Foundry (for the forge-proxy example only)
 
-## Full setup (from zero to running an example)
+## Quick start
 
 ```bash
 # 1. Clone and install
 git clone https://github.com/AgentaOS/agentaos.git
-cd agenta
-cp .env.example .env
+cd agentaos
 pnpm install
 pnpm build
 
-# 2. Start the database and server
-npx supabase start
-pnpm --filter @agentaos/server dev    # terminal 1
-pnpm --filter @agentaos/app dev       # terminal 2
-
-# 3. Create a signer
-#    Open http://localhost:3000, sign in, create a signer.
+# 2. Create a signer at app.agentaos.ai
 #    The wizard gives you an API Key and API Secret (copy both).
 
-# 4. Configure examples
+# 3. Configure examples
 cp examples/.env.example examples/.env
-#    Fill in AGENTA_API_KEY and AGENTA_API_SECRET from step 3.
+#    Fill in AGENTA_API_KEY and AGENTA_API_SECRET from step 2.
 
-# 5. Run
+# 4. Run
 pnpm example:viem 0xRecipient 0.001
 ```
 
@@ -39,9 +32,8 @@ pnpm example:viem 0xRecipient 0.001
 
 | Variable | Required | Where to get it |
 |----------|----------|-----------------|
-| `AGENTA_SERVER` | Yes | Default: `http://localhost:8080` |
-| `AGENTA_API_KEY` | Yes | Shown when you create a signer in the dashboard |
-| `AGENTA_API_SECRET` | Yes | API Secret copied from the dashboard during signer creation |
+| `AGENTA_API_KEY` | Yes | Shown when you create a signer at [app.agentaos.ai](https://app.agentaos.ai) |
+| `AGENTA_API_SECRET` | Yes | API Secret copied during signer creation |
 | `GOOGLE_API_KEY` | LangChain / Vercel AI only | [aistudio.google.com](https://aistudio.google.com/apikey) |
 | `ANTHROPIC_API_KEY` | Claude agent / MCP agent only | [console.anthropic.com](https://console.anthropic.com) |
 

@@ -18,8 +18,8 @@ import { wipeShare } from './share-loader.js';
 export interface FromSecretOptions {
 	/** Base64-encoded key material (the "API secret"). JSON: { coreShare, auxInfo } */
 	readonly apiSecret: string;
-	/** Base URL of the threshold signing server (e.g. `http://localhost:8080`). */
-	readonly serverUrl: string;
+	/** Base URL of the threshold signing server (defaults to `https://api.agentaos.ai`). */
+	readonly serverUrl?: string;
 	/** API key for authenticating with the server (`gw_live_*` / `gw_test_*`). */
 	readonly apiKey: string;
 	/** Threshold signing scheme implementation. Defaults to CGGMP24. */
@@ -128,7 +128,7 @@ export class ThresholdSigner {
 			};
 
 			const httpClient = new HttpClient({
-				baseUrl: opts.serverUrl,
+				baseUrl: opts.serverUrl ?? 'https://api.agentaos.ai',
 				apiKey: opts.apiKey,
 				timeout: opts.timeout,
 			});

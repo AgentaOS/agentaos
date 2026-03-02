@@ -13,8 +13,7 @@ set -euo pipefail
 #   7. Export audit CSV
 #
 # Prerequisites:
-#   - AgentaOS server running on :8080
-#   - examples/.env configured with API key + secret
+#   - examples/.env configured with API key + secret from app.agentaos.ai
 #
 # Usage:
 #   ./demo.sh
@@ -31,7 +30,7 @@ if [ -f "${ENV_FILE}" ]; then
     set +a
 fi
 
-SERVER="${AGENTA_SERVER:-http://localhost:8080}"
+SERVER="${AGENTA_SERVER:-https://api.agentaos.ai}"
 API_PREFIX="${SERVER}/api/v1"
 
 echo "=========================================="

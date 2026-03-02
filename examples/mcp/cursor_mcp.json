@@ -2,12 +2,10 @@
 	"mcpServers": {
 		"agenta": {
 			"command": "npx",
-			"args": ["-y", "agenta"],
+			"args": ["-y", "agentaos", "mcp"],
 			"env": {
 				"AGENTA_API_SECRET": "base64-encoded-key-material",
-				"AGENTA_API_KEY": "gw_live_abc123...",
-				"AGENTA_SERVER": "http://localhost:8080",
-				"AGENTA_NETWORK": "base-sepolia"
+				"AGENTA_API_KEY": "gw_live_abc123..."
 			}
 		}
 	}

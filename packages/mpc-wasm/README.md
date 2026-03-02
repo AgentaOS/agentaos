@@ -2,7 +2,7 @@
 
 **CGGMP24 threshold ECDSA WASM module for AgentaOS.**
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE-APACHE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE)
 [![npm](https://img.shields.io/npm/v/@agentaos/crypto)](https://www.npmjs.com/package/@agentaos/crypto)
 
 Rust-compiled WebAssembly module implementing CGGMP24 threshold ECDSA (2-of-3) over secp256k1. Built from the [LFDT-Lockness/cggmp21](https://github.com/LFDT-Lockness/cggmp21) Rust crate.
@@ -36,4 +36,4 @@ This module is consumed by `@agentaos/engine`. Direct usage is not recommended -
 
 ## License
 
-Apache-2.0 -- see [LICENSE-APACHE](../../LICENSE-APACHE).
+Apache-2.0 -- see [LICENSE](../../LICENSE).

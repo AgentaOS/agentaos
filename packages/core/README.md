@@ -2,7 +2,7 @@
 
 **Type definitions and interfaces for AgentaOS.**
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE-APACHE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE)
 [![npm](https://img.shields.io/npm/v/@agentaos/core)](https://www.npmjs.com/package/@agentaos/core)
 
 Zero-dependency package that defines the contracts all Agenta packages implement. Contains TypeScript interfaces, type definitions, and enums -- no runtime code.
@@ -63,4 +63,4 @@ server   -> imports core, engine, chains
 
 ## License
 
-Apache-2.0 -- see [LICENSE-APACHE](../../LICENSE-APACHE).
+Apache-2.0 -- see [LICENSE](../../LICENSE).

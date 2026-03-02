@@ -2,7 +2,7 @@
 
 **AgentaOS SDK -- threshold signing where the key never exists.**
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE-APACHE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE)
 [![npm](https://img.shields.io/npm/v/@agentaos/sdk)](https://www.npmjs.com/package/@agentaos/sdk)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](https://nodejs.org)
 
@@ -25,7 +25,6 @@ import { Agenta } from '@agentaos/sdk';
 
 const agent = await Agenta.connect({
   apiSecret: process.env.AGENTA_API_SECRET,  // base64 key share
-  serverUrl: process.env.AGENTA_SERVER,       // e.g. "http://localhost:8080"
   apiKey: process.env.AGENTA_API_KEY,         // API key for auth
 });
 
@@ -53,7 +52,6 @@ import { ThresholdSigner } from '@agentaos/sdk';
 
 const signer = await ThresholdSigner.fromSecret({
   apiSecret: process.env.AGENTA_API_SECRET,
-  serverUrl: 'http://localhost:8080',
   apiKey: process.env.AGENTA_API_KEY,
 });
 
@@ -133,7 +131,7 @@ Low-level API client for server read operations. Used internally by `Agenta`, bu
 ```typescript
 import { AgentaApi, HttpClient } from '@agentaos/sdk';
 
-const client = new HttpClient({ baseUrl: 'http://localhost:8080', apiKey: '...' });
+const client = new HttpClient({ apiKey: '...' });
 const api = new AgentaApi(client);
 
 const health = await api.getHealth();
@@ -153,9 +151,9 @@ const networks = await api.listNetworks();
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `AGENTA_API_SECRET` | Base64-encoded key share | Yes |
-| `AGENTA_SERVER` | Server URL (e.g. `http://localhost:8080`) | Yes |
 | `AGENTA_API_KEY` | API key for authentication | Yes |
+| `AGENTA_SERVER` | Server URL (defaults to `https://api.agentaos.ai`) | No |
 
 ## License
 
-Apache-2.0 -- see [LICENSE-APACHE](../../LICENSE-APACHE).
+Apache-2.0 -- see [LICENSE](../../LICENSE).

@@ -2,7 +2,7 @@
 
 **CGGMP24 threshold ECDSA signing scheme for AgentaOS.**
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE-APACHE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE)
 [![npm](https://img.shields.io/npm/v/@agentaos/engine)](https://www.npmjs.com/package/@agentaos/engine)
 
 Implements the `IThresholdScheme` interface from `@agentaos/core` using CGGMP24 (Canetti-Gennaro-Goldfeder-Makriyannis-Peled 2024) threshold ECDSA over secp256k1. Wraps a Rust WASM module for the cryptographic operations.
@@ -41,4 +41,4 @@ This package is used internally by `@agentaos/sdk` and `@agentaos/server`. Most 
 
 ## License
 
-Apache-2.0 -- see [LICENSE-APACHE](../../LICENSE-APACHE).
+Apache-2.0 -- see [LICENSE](../../LICENSE).

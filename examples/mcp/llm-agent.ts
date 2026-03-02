@@ -116,7 +116,6 @@ async function main() {
 			...process.env,
 			AGENTA_API_SECRET: process.env.AGENTA_API_SECRET || 'dGVzdA==',
 			AGENTA_API_KEY: process.env.AGENTA_API_KEY || 'gw_test_dummy',
-			AGENTA_SERVER: process.env.AGENTA_SERVER || 'http://localhost:8080',
 		},
 	});
 
