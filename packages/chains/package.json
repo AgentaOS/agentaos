@@ -37,7 +37,7 @@
 	},
 	"dependencies": {
 		"@agentaos/core": "workspace:*",
-		"viem": "^2.21.0"
+		"viem": "^2.47.0"
 	},
 	"devDependencies": {}
 }
