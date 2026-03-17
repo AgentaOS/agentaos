@@ -1,5 +1,6 @@
 import { CGGMP24Scheme } from '@agentaos/engine';
 import { AgentaApi, HttpClient, ThresholdSigner } from '@agentaos/sdk';
+import { loadSignerConfig, resolveApiSecret, resolveSignerName } from './config.js';
 
 export class SignerManager {
 	private signer: ThresholdSigner | null = null;
@@ -8,12 +9,28 @@ export class SignerManager {
 	private api: AgentaApi | null = null;
 
 	private getConfig() {
+		const signerName = process.env.AGENTA_SIGNER;
+
+		// Path 1: load from ~/.agenta/signers/{name}.json
+		if (signerName) {
+			const config = loadSignerConfig(resolveSignerName(signerName));
+			return {
+				apiSecret: resolveApiSecret(config),
+				serverUrl: config.serverUrl,
+				apiKey: config.apiKey,
+			};
+		}
+
+		// Path 2: direct env vars (CI/CD, Docker, remote agents)
 		const apiSecret = process.env.AGENTA_API_SECRET;
 		const serverUrl = process.env.AGENTA_SERVER || 'https://api.agentaos.ai';
 		const apiKey = process.env.AGENTA_API_KEY;
 
-		if (!apiSecret) throw new Error('AGENTA_API_SECRET is required');
-		if (!apiKey) throw new Error('AGENTA_API_KEY is required');
+		if (!apiSecret || !apiKey) {
+			throw new Error(
+				'Set AGENTA_SIGNER to use a local signer (from `agenta init`), or set both AGENTA_API_KEY and AGENTA_API_SECRET.',
+			);
+		}
 
 		return { apiSecret, serverUrl, apiKey };
 	}
