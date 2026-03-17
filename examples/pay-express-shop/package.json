@@ -1,0 +1,16 @@
+{
+	"name": "agentaos-example-express-shop",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "tsx watch server.ts"
+	},
+	"dependencies": {
+		"@agentaos/pay": "workspace:*",
+		"express": "^4.21.0"
+	},
+	"devDependencies": {
+		"@types/express": "^5.0.0",
+		"tsx": "^4.21.0"
+	}
+}

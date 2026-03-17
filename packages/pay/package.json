@@ -1,0 +1,38 @@
+{
+	"name": "@agentaos/pay",
+	"version": "0.2.1",
+	"description": "AgentaOS Payment SDK — accept regulated stablecoin payments programmatically",
+	"license": "Apache-2.0",
+	"author": "AgentaOS <hello@agentaos.ai>",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/AgentaOS/agentaos.git",
+		"directory": "packages/pay"
+	},
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"files": ["dist"],
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"devDependencies": {
+		"@types/node": "^20.0.0"
+	},
+	"scripts": {
+		"build": "tsc",
+		"lint": "biome check src/",
+		"test": "vitest run --passWithNoTests",
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf dist"
+	}
+}
