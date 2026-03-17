@@ -157,7 +157,11 @@ importers:
 
   packages/mpc-wasm: {}
 
-  packages/pay: {}
+  packages/pay:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.32
 
   packages/schemes:
     dependencies:

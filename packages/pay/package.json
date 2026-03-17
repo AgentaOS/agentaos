@@ -25,6 +25,9 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"devDependencies": {
+		"@types/node": "^20.0.0"
+	},
 	"scripts": {
 		"build": "tsc",
 		"lint": "biome check src/",
