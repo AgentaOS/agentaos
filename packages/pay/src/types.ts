@@ -93,7 +93,6 @@ export interface PaymentLink {
 	description: string | null;
 	status: 'active' | 'cancelled';
 	checkoutUrl: string;
-	x402Url: string;
 	metadata: Record<string, unknown>;
 	checkoutFields: CheckoutField[];
 	webhookUrl: string | null;
@@ -153,6 +152,7 @@ export interface Checkout {
 	orgId: string;
 	sessionId: string;
 	checkoutUrl: string;
+	x402Url: string;
 	status: 'open' | 'completed' | 'expired' | 'cancelled';
 	amountOverride: number | null;
 	currency: string;

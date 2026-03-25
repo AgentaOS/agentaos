@@ -87,7 +87,8 @@ const checkout = await agentaos.checkouts.create({
 |-------|------|-------------|
 | `id` | `string` | Session UUID |
 | `sessionId` | `string` | Public session ID (used in checkout URL) |
-| `checkoutUrl` | `string` | URL to send your customer to |
+| `checkoutUrl` | `string` | URL to send your human customer to |
+| `x402Url` | `string` | x402 protocol URL for AI agent payments |
 | `status` | `'open' \| 'completed' \| 'expired' \| 'cancelled'` | Current status |
 | `amountOverride` | `number \| null` | Amount for this session |
 | `currency` | `string` | Settlement currency |
@@ -152,7 +153,6 @@ console.log(link.checkoutUrl);
 |-------|------|-------------|
 | `id` | `string` | Link UUID |
 | `checkoutUrl` | `string` | Shareable payment URL |
-| `x402Url` | `string` | x402 protocol URL (for agent payments) |
 | `amount` | `number` | Payment amount |
 | `currency` | `string` | Settlement currency |
 | `status` | `'active' \| 'cancelled'` | Link status |
