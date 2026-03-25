@@ -23,6 +23,7 @@ interface RequestOptions {
 	idempotencyKey?: string;
 	debug?: boolean;
 	logger?: (level: string, message: string) => void;
+	authMode?: 'api-key' | 'jwt';
 }
 
 function buildUrl(
@@ -114,9 +115,13 @@ export async function request<T>(options: RequestOptions): Promise<T> {
 	const url = buildUrl(baseUrl, path, query);
 
 	const headers: Record<string, string> = {
-		'x-api-key': apiKey,
 		accept: 'application/json',
 	};
+	if (options.authMode === 'jwt') {
+		headers.authorization = `Bearer ${apiKey}`;
+	} else {
+		headers['x-api-key'] = apiKey;
+	}
 
 	if (method === 'POST' && body !== undefined) {
 		headers['content-type'] = 'application/json';
@@ -223,9 +228,12 @@ export async function requestRaw(options: RequestOptions): Promise<Buffer> {
 	const { baseUrl, apiKey, path, query, timeout } = options;
 	const url = buildUrl(baseUrl, path, query);
 
-	const headers: Record<string, string> = {
-		'x-api-key': apiKey,
-	};
+	const headers: Record<string, string> = {};
+	if (options.authMode === 'jwt') {
+		headers.authorization = `Bearer ${apiKey}`;
+	} else {
+		headers['x-api-key'] = apiKey;
+	}
 
 	const controller = new AbortController();
 	const timer = setTimeout(() => controller.abort(), timeout);
@@ -266,9 +274,12 @@ export async function requestText(options: RequestOptions): Promise<string> {
 	const { baseUrl, apiKey, path, query, timeout } = options;
 	const url = buildUrl(baseUrl, path, query);
 
-	const headers: Record<string, string> = {
-		'x-api-key': apiKey,
-	};
+	const headers: Record<string, string> = {};
+	if (options.authMode === 'jwt') {
+		headers.authorization = `Bearer ${apiKey}`;
+	} else {
+		headers['x-api-key'] = apiKey;
+	}
 
 	const controller = new AbortController();
 	const timer = setTimeout(() => controller.abort(), timeout);

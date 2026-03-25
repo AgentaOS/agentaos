@@ -547,12 +547,71 @@ const auditCommand = new Command('audit')
 // Main command group
 // ---------------------------------------------------------------------------
 
-const policiesCommand = new Command('policies').description('Manage signing policies').action(
-	withErrorHandler(async (_opts: unknown, command: CommandType) => {
-		await handlePoliciesList(command);
-	}),
-);
+const policiesCommand = new Command('policies').description('Manage signing policies');
 
+// agenta sub policies get [--json]
+policiesCommand
+	.command('get')
+	.description('Show current policy')
+	.option('--json', 'Output as JSON (agent-friendly)')
+	.action(
+		withErrorHandler(async (opts: { json?: boolean }, command: CommandType) => {
+			if (opts.json) {
+				const ctx = await getAdminContext(command);
+				let doc: PolicyDocument | null = null;
+				try {
+					doc = await adminFetch<PolicyDocument>(
+						ctx.config.serverUrl,
+						`/signers/${ctx.signerId}/policy`,
+						ctx.headers,
+					);
+				} catch {
+					/* no policy */
+				}
+				console.log(JSON.stringify(doc ?? { rules: [] }));
+			} else {
+				await handlePoliciesList(command);
+			}
+		}),
+	);
+
+// agenta sub policies set --file <path> | --json <json>
+policiesCommand
+	.command('set')
+	.description('Set policy from JSON file or string')
+	.option('--file <path>', 'Read policy from JSON file')
+	.option('--json <json>', 'Policy as inline JSON string')
+	.action(
+		withErrorHandler(async (opts: { file?: string; json?: string }, command: CommandType) => {
+			if (!opts.file && !opts.json) {
+				throw new Error('Specify --file <path> or --json \'{"rules":[...]}\'');
+			}
+
+			let rules: Record<string, unknown>[];
+			if (opts.file) {
+				const { readFileSync, existsSync } = await import('node:fs');
+				if (!existsSync(opts.file)) throw new Error(`File not found: ${opts.file}`);
+				const content = readFileSync(opts.file, 'utf-8');
+				const parsed = JSON.parse(content) as PolicyDocument;
+				rules = parsed.rules ?? [];
+			} else {
+				const parsed = JSON.parse(opts.json!) as PolicyDocument;
+				rules = parsed.rules ?? [];
+			}
+
+			const ctx = await getAdminContext(command);
+			await adminFetch<void>(
+				ctx.config.serverUrl,
+				`/signers/${ctx.signerId}/policy`,
+				ctx.headers,
+				'PUT',
+				{ rules },
+			);
+			console.log(JSON.stringify({ success: true, ruleCount: rules.length }));
+		}),
+	);
+
+// Keep interactive edit as hidden subcommand for backward compat
 policiesCommand.addCommand(policiesEditCommand);
 
 export const adminCommand = new Command('admin')
@@ -561,3 +620,5 @@ export const adminCommand = new Command('admin')
 	.addCommand(pauseCommand)
 	.addCommand(resumeCommand)
 	.addCommand(auditCommand);
+
+export { policiesCommand, pauseCommand, resumeCommand, auditCommand };

@@ -1,4 +1,4 @@
-import { input, password } from '@inquirer/prompts';
+import { execFile } from 'node:child_process';
 import chalk from 'chalk';
 import { Command } from 'commander';
 import ora from 'ora';
@@ -10,13 +10,13 @@ import {
 	getSessionServerUrl,
 	storeSession,
 } from '../../lib/keychain.js';
-import { dim, failMark, promptTheme, section, success, successMark } from '../theme.js';
+import { dim, failMark, section, successMark } from '../theme.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function fetchJson<T>(url: string, body: unknown): Promise<T> {
+async function postJson<T>(url: string, body: unknown): Promise<T> {
 	const response = await fetch(url, {
 		method: 'POST',
 		headers: { 'content-type': 'application/json' },
@@ -26,7 +26,6 @@ async function fetchJson<T>(url: string, body: unknown): Promise<T> {
 
 	if (!response.ok) {
 		const text = await response.text();
-		// Extract human-readable message from JSON error responses
 		try {
 			const json = JSON.parse(text) as { message?: string };
 			if (json.message) throw new Error(json.message);
@@ -39,16 +38,22 @@ async function fetchJson<T>(url: string, body: unknown): Promise<T> {
 	return response.json() as Promise<T>;
 }
 
+/** Open a URL in the default browser (best-effort, no dependency). */
+function openBrowser(url: string): void {
+	const cmd =
+		process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open';
+	execFile(cmd, [url], () => {});
+}
+
 // ---------------------------------------------------------------------------
-// agenta login
+// agenta login — device-code flow (browser-based, human-interactive)
 // ---------------------------------------------------------------------------
 
 export const loginCommand = new Command('login')
-	.description('Log in with email + OTP')
+	.description('Log in via browser')
 	.option('--server <url>', 'Server URL', process.env.AGENTA_SERVER ?? 'https://api.agentaos.ai')
 	.action(async (opts: { server: string }) => {
 		try {
-			// Check if already logged in
 			const existing = await getSession();
 			if (existing) {
 				console.log(
@@ -57,68 +62,85 @@ export const loginCommand = new Command('login')
 				return;
 			}
 
-			section('Login');
-
-			const email = await input({
-				message: 'Email',
-				theme: promptTheme,
-				validate: (v) => {
-					if (!v.includes('@')) return 'Enter a valid email address';
-					return true;
-				},
-			});
-
 			const baseUrl = opts.server.replace(/\/+$/, '');
 
-			// Send OTP
-			const spinner = ora({ text: 'Sending verification code…', indent: 2 }).start();
-			try {
-				await fetchJson(`${baseUrl}/api/v1/auth/login`, { email, sendOtp: true });
-				spinner.succeed('Verification code sent');
-			} catch (err) {
-				spinner.fail('Failed to send verification code');
-				throw err;
+			section('Login');
+
+			const { deviceCode, userCode, verificationUrl, interval } = await postJson<{
+				deviceCode: string;
+				userCode: string;
+				verificationUrl: string;
+				interval: number;
+			}>(`${baseUrl}/api/v1/auth/device-code`, {});
+
+			console.log('');
+			console.log('  Open this URL in your browser:');
+			console.log(`  ${chalk.bold.underline(verificationUrl)}`);
+			console.log('');
+			console.log(`  Verification code: ${chalk.bold(userCode)}`);
+			console.log('');
+
+			openBrowser(verificationUrl);
+
+			const spinner = ora({ text: 'Waiting for browser confirmation…', indent: 2 }).start();
+			const deadline = Date.now() + 10 * 60 * 1000;
+
+			while (Date.now() < deadline) {
+				await new Promise((r) => setTimeout(r, interval * 1000));
+
+				const result = await postJson<{
+					status: 'pending' | 'completed' | 'expired' | 'denied';
+					token?: string;
+					refreshToken?: string;
+					email?: string;
+					orgName?: string;
+					walletAddress?: string;
+				}>(`${baseUrl}/api/v1/auth/device-code/poll`, { deviceCode });
+
+				if (result.status === 'completed' && result.token) {
+					await storeSession(result.token, baseUrl, result.refreshToken);
+
+					if (result.refreshToken) {
+						try {
+							const refreshRes = await postJson<{ token?: string; refreshToken?: string }>(
+								`${baseUrl}/api/v1/auth/refresh`,
+								{ refreshToken: result.refreshToken },
+							);
+							if (refreshRes.token) {
+								await storeSession(refreshRes.token, baseUrl, refreshRes.refreshToken);
+							}
+						} catch {
+							/* best-effort */
+						}
+					}
+
+					spinner.succeed('Logged in');
+					console.log('');
+					console.log(`  ${successMark(`Authenticated as ${chalk.bold(result.email ?? 'user')}`)}`);
+					if (result.orgName) console.log(`  ${dim('Organization:')} ${result.orgName}`);
+					if (result.walletAddress) {
+						const short = `${result.walletAddress.slice(0, 6)}...${result.walletAddress.slice(-4)}`;
+						console.log(`  ${dim('Wallet:')} ${short}`);
+					}
+					console.log(`  ${dim(`Session stored in ${getConfigDir()}`)}`);
+					console.log('');
+					console.log(`  ${dim('Next:')} ${chalk.bold('agenta status')}`);
+					console.log('');
+					return;
+				}
+
+				if (result.status === 'expired') {
+					spinner.fail('Login expired. Run agenta login again.');
+					return;
+				}
+
+				if (result.status === 'denied') {
+					spinner.fail('Login denied.');
+					return;
+				}
 			}
 
-			console.log('');
-
-			const code = await password({
-				message: 'Enter the 6-digit code from your email',
-				mask: '*',
-				theme: promptTheme,
-			});
-
-			if (!code) throw new Error('Code is required');
-
-			// Verify OTP
-			const verifySpinner = ora({ text: 'Verifying…', indent: 2 }).start();
-			let result: {
-				token: string;
-				refreshToken?: string;
-				userId: string;
-				email: string;
-				address?: string;
-			};
-			try {
-				result = await fetchJson(`${baseUrl}/api/v1/auth/verify-otp`, { email, code });
-			} catch (err) {
-				verifySpinner.fail('Verification failed');
-				throw err;
-			}
-
-			// Store JWT + refresh token + server URL (so `agenta receive` works without `agenta init`)
-			await storeSession(result.token, baseUrl, result.refreshToken);
-			verifySpinner.succeed('Logged in');
-
-			console.log('');
-			console.log(`  ${successMark(`Authenticated as ${chalk.bold(result.email)}`)}`);
-			console.log(`  ${dim(`Session stored in ${getConfigDir()}`)}`);
-			console.log('');
-			console.log(`  ${success('Done!')} Run ${chalk.bold('agenta init')} to create a wallet,`);
-			console.log(
-				`         or ${chalk.bold('agenta receive')} to import a share from another device.`,
-			);
-			console.log('');
+			spinner.fail('Login timed out.');
 		} catch (error: unknown) {
 			if (error instanceof Error && error.name === 'ExitPromptError') {
 				console.log(dim('\n  Cancelled.\n'));
@@ -138,7 +160,6 @@ export const logoutCommand = new Command('logout')
 	.description('Log out (clear session)')
 	.action(async () => {
 		try {
-			// Revoke refresh tokens server-side before clearing local session
 			const token = await getSession();
 			const refreshToken = await getRefreshToken();
 			const serverUrl = await getSessionServerUrl();
@@ -154,7 +175,7 @@ export const logoutCommand = new Command('logout')
 						signal: AbortSignal.timeout(5_000),
 					});
 				} catch {
-					// Best-effort — still clear local session even if server unreachable
+					// Best-effort
 				}
 			}
 

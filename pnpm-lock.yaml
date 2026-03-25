@@ -202,6 +202,9 @@ importers:
       '@agentaos/engine':
         specifier: workspace:*
         version: link:../schemes
+      '@agentaos/pay':
+        specifier: workspace:^
+        version: link:../pay
       '@agentaos/sdk':
         specifier: workspace:*
         version: link:../signer

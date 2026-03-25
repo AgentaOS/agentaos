@@ -140,6 +140,8 @@ export interface CreateCheckoutParams {
 	cancelUrl?: string;
 	/** seconds, 300-86400, default 1800 */
 	expiresIn?: number;
+	/** CAIP-2 network IDs (e.g. ['eip155:8453']). Defaults to Base mainnet. */
+	supportedNetworks?: string[];
 }
 
 export interface ListCheckoutParams extends ListParams {

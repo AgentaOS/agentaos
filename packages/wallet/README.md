@@ -19,21 +19,21 @@ npx agentaos --help
 ## Quick Start
 
 ```bash
-# Create a new signer (no dashboard required)
-agenta init
+# Sign in via browser (creates account + wallet)
+agenta login
 
-# Check status
+# Check account status
 agenta status
 
-# Send ETH
-agenta send 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 0.001
+# Create a payment checkout
+agenta pay checkout -a 50 -c EUR
 
-# Manage policies
-agenta admin unlock
-agenta admin policies
+# Create an agent sub-account
+agenta sub init --create --name trading-bot
+
+# Send ETH from sub-account
+agenta sub send 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 0.001
 ```
-
-`agenta init` walks you through everything interactively -- create a new signer on the server, or import an existing one from the dashboard.
 
 ## CLI
 
@@ -41,61 +41,72 @@ agenta admin policies
 agenta --help
 ```
 
-### Commands
+### Account
 
 | Command | Description |
 |---------|-------------|
-| `agenta init` | Create a new signer or import an existing one |
-| `agenta status` | Show signer info, server health, and balances |
-| `agenta info` | Show raw signer config (debug) |
-| `agenta balance` | Show ETH and token balances |
-| `agenta send <to> <amount>` | Send ETH to an address |
-| `agenta sign-message <message>` | Sign a message (EIP-191) |
-| `agenta deploy <bytecode>` | Deploy a contract |
-| `agenta proxy` | Start a JSON-RPC signing proxy for Foundry/Hardhat |
-| `agenta admin` | Admin commands (policies, pause/resume, audit) |
+| `agenta login` | Sign in via browser (device-code flow) |
+| `agenta status` | Account, wallet, and readiness overview |
+| `agenta logout` | Clear session |
 
-### Multi-Signer
+### Payments
 
-Each signer gets its own config file under `~/.agenta/signers/`.
+| Command | Description |
+|---------|-------------|
+| `agenta pay checkout -a <amount>` | Create a checkout session |
+| `agenta pay get <sessionId>` | Get checkout details |
+| `agenta pay list` | List checkouts |
+
+### Agent Sub-accounts
+
+| Command | Description |
+|---------|-------------|
+| `agenta sub init --create --name <name>` | Create a sub-account |
+| `agenta sub init --import --name <name> --api-key ... --api-secret ...` | Import existing |
+| `agenta sub info <name>` | Show sub-account details |
+| `agenta sub balance` | ETH and token balances |
+| `agenta sub send <to> <amount>` | Send ETH — threshold-signed, policy-checked |
+| `agenta sub sign-message <msg>` | Sign a message (EIP-191) |
+| `agenta sub deploy <bytecode>` | Deploy a contract |
+| `agenta sub proxy` | JSON-RPC signing proxy for Foundry/Hardhat |
+| `agenta sub policies get` | View signing policies |
+| `agenta sub policies set --file p.json` | Set policies from JSON |
+| `agenta sub pause` / `resume` | Pause or resume signing |
+| `agenta sub audit` | View signing audit log |
+
+All commands support `--json` for machine-readable output.
+
+### Multiple Sub-accounts
+
+Each sub-account gets its own config under `~/.agenta/signers/`.
 
 ```bash
-# Create multiple signers
-agenta init               # creates "my-agent"
-agenta init               # creates "trading-bot"
+agenta sub init --create --name my-agent
+agenta sub init --create --name trading-bot
 
-# Use a specific signer
-agenta --signer trading-bot send 0x... 0.01
-agenta --signer my-agent balance
-
-# Default signer is auto-detected (single signer) or set during init
+# Use a specific sub-account
+agenta --signer trading-bot sub send 0x... 0.01
+agenta --signer my-agent sub balance
 ```
 
-### Admin Commands
+### Policies
 
-Manage policies, pause/resume, and view audit logs for your signers. Requires an admin unlock (user share from OS keychain).
+Manage signing policies for your sub-accounts. Requires `agenta login`.
 
 ```bash
-# Unlock admin access (retrieves user share from keychain, computes auth token)
-agenta admin unlock
+# View current policy
+agenta sub policies get --json
 
-# Policy management
-agenta admin policies                    # list policies
-agenta admin policies add                # interactive policy creation
-agenta admin policies remove <id>        # remove a policy
-agenta admin policies toggle <id>        # enable/disable a policy
+# Set policy from JSON file
+agenta sub policies set --file policy.json
 
-# Signer control
-agenta admin pause                       # pause signer (blocks all signing)
-agenta admin resume                      # resume signer
+# Pause/resume signing
+agenta sub pause
+agenta sub resume
 
 # Audit log
-agenta admin audit                       # last 20 signing requests
-agenta admin audit --limit 50            # more results
-agenta admin audit --status blocked      # filter by status
-
-# Lock admin (remove token from disk)
-agenta admin lock
+agenta sub audit                         # last 20 signing requests
+agenta sub audit --limit 50             # more results
 ```
 
 ### Config Layout
@@ -197,10 +208,10 @@ Add to `.cursor/mcp.json`:
 
 ## JSON-RPC Proxy
 
-The `agenta proxy` command starts a local HTTP server that acts as an Ethereum JSON-RPC endpoint. It intercepts signing methods (`eth_sendTransaction`, `eth_signTransaction`, `eth_sign`, `personal_sign`) and routes them through Agenta's threshold signing, while forwarding all other calls to the upstream RPC.
+The `agenta sub proxy` command starts a local HTTP server that acts as an Ethereum JSON-RPC endpoint. It intercepts signing methods (`eth_sendTransaction`, `eth_signTransaction`, `eth_sign`, `personal_sign`) and routes them through Agenta's threshold signing, while forwarding all other calls to the upstream RPC.
 
 ```bash
-agenta proxy --port 8545 --rpc-url https://sepolia.base.org
+agenta sub proxy --port 8545 --rpc-url https://sepolia.base.org
 
 # Use with Foundry
 forge script Deploy.s.sol --rpc-url http://localhost:8545

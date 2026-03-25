@@ -27,6 +27,10 @@ const EXPECTED_TOOLS = [
 	'agenta_x402_check',
 	'agenta_x402_discover',
 	'agenta_x402_fetch',
+	// Merchant payments
+	'agenta_pay_create_checkout',
+	'agenta_pay_get_checkout',
+	'agenta_pay_list_checkouts',
 ];
 
 describe('AgentaOS Terminal MCP Server', () => {

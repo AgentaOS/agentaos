@@ -31,7 +31,8 @@
 	"scripts": {
 		"build": "tsc",
 		"lint": "biome check src/",
-		"test": "vitest run --passWithNoTests",
+		"test": "vitest run --passWithNoTests --exclude='**/*.integration.test.*'",
+		"test:integration": "vitest run --testPathPattern=integration",
 		"typecheck": "tsc --noEmit",
 		"clean": "rm -rf dist"
 	},
