@@ -39,9 +39,11 @@ Go to [app.agentaos.ai](https://app.agentaos.ai), create a wallet, set your guar
 
 ```bash
 npm install -g agentaos
-agenta login
-agenta init
-agenta send 0xRecipient 0.01
+agenta login                                    # opens browser — sign in + activate wallet
+agenta status                                   # account overview
+agenta pay checkout -a 50 -c EUR                # create a payment checkout
+agenta sub init --create --name trading-bot     # create an agent sub-account
+agenta sub send 0xRecipient 0.01                # send ETH from sub-account
 ```
 
 ### From code
@@ -82,6 +84,7 @@ agent.destroy();
 |---------|-----|--------------|
 | [`@agentaos/sdk`](packages/signer) | [![npm](https://img.shields.io/npm/v/@agentaos/sdk)](https://www.npmjs.com/package/@agentaos/sdk) | Threshold signing SDK — load shares, sign transactions, viem integration |
 | [`agentaos`](packages/wallet) | [![npm](https://img.shields.io/npm/v/agentaos)](https://www.npmjs.com/package/agentaos) | CLI + MCP server for AI assistants |
+| [`@agentaos/pay`](packages/pay) | [![npm](https://img.shields.io/npm/v/@agentaos/pay)](https://www.npmjs.com/package/@agentaos/pay) | Payment SDK — create checkouts, track payments |
 | [`@agentaos/core`](packages/core) | [![npm](https://img.shields.io/npm/v/@agentaos/core)](https://www.npmjs.com/package/@agentaos/core) | Interfaces and types (zero deps) |
 | [`@agentaos/engine`](packages/schemes) | [![npm](https://img.shields.io/npm/v/@agentaos/engine)](https://www.npmjs.com/package/@agentaos/engine) | CGGMP24 threshold ECDSA scheme |
 | [`@agentaos/chains`](packages/chains) | [![npm](https://img.shields.io/npm/v/@agentaos/chains)](https://www.npmjs.com/package/@agentaos/chains) | Ethereum chain adapter (viem) |
@@ -159,21 +162,43 @@ agent.destroy(); // Wipes share material from memory
 npm install -g agentaos
 ```
 
+**Account**
+
 | Command | What it does |
 |---------|--------------|
-| `agenta init` | Create or import a signer |
-| `agenta status` | Signer info and connection status |
-| `agenta balance` | ETH balance |
-| `agenta send <to> <amount>` | Send ETH — threshold-signed, policy-checked |
-| `agenta sign-message <msg>` | Sign an arbitrary message |
-| `agenta deploy <bytecode>` | Deploy a smart contract |
-| `agenta proxy` | JSON-RPC signing proxy for Foundry/Hardhat |
+| `agenta login` | Sign in via browser (device-code flow) |
+| `agenta status` | Account, wallet, and readiness overview |
+| `agenta logout` | Clear session |
+
+**Payments** — accept payments from humans and AI agents
+
+| Command | What it does |
+|---------|--------------|
+| `agenta pay checkout -a 50` | Create a checkout session |
+| `agenta pay get <sessionId>` | Get checkout details |
+| `agenta pay list` | List your checkouts |
+
+**Agent Sub-accounts** — autonomous wallets with guardrails
+
+| Command | What it does |
+|---------|--------------|
+| `agenta sub init --create --name bot1` | Create a sub-account |
+| `agenta sub init --import --name bot1 --api-key ... --api-secret ...` | Import existing |
+| `agenta sub send <to> <amount>` | Send ETH — threshold-signed, policy-checked |
+| `agenta sub balance` | ETH + token balances |
+| `agenta sub policies get` | View signing policies |
+| `agenta sub policies set --file p.json` | Set policies from JSON |
+| `agenta sub pause` / `resume` | Pause or resume signing |
+| `agenta sub proxy` | JSON-RPC signing proxy for Foundry/Hardhat |
+
+All commands support `--json` for machine-readable output (AI agents, CI/CD).
 
 ```bash
-agenta init
-agenta send 0xRecipient 0.01 --network base-sepolia
-agenta sign-message "proof-of-liveness"
-agenta proxy --port 8545  # then: forge script Deploy.s.sol --rpc-url http://localhost:8545 --broadcast
+agenta login
+agenta pay checkout -a 50 -c EUR -d "Invoice #42"
+agenta sub init --create --name trading-bot
+agenta sub send 0xRecipient 0.01 --network base-sepolia
+agenta sub proxy --port 8545  # then: forge script Deploy.s.sol --rpc-url http://localhost:8545 --broadcast
 ```
 
 ---
@@ -189,34 +214,51 @@ Connect any AI assistant to AgentaOS. Claude, Cursor, Windsurf — they sign tra
   "mcpServers": {
     "agenta": {
       "command": "npx",
-      "args": ["-y", "agentaos", "mcp"],
+      "args": ["-y", "agentaos"],
       "env": {
         "AGENTA_API_KEY": "your-api-key",
-        "AGENTA_API_SECRET": "your-api-secret"
+        "AGENTA_API_SECRET": "your-api-secret",
+        "AGENTAOS_GATEWAY_KEY": "sk_live_your-gateway-key"
       }
     }
   }
 }
 ```
 
-Your **API Key** and **API Secret** are generated when you create a wallet at [app.agentaos.ai](https://app.agentaos.ai). Copy them from the credentials screen.
+- **API Key** + **API Secret** — for wallet tools. Generated when you create a sub-account.
+- **Gateway Key** — for payment tools. Generated at [app.agentaos.ai](https://app.agentaos.ai) → API Keys.
 
-### Tools
+### Tools (21 total)
+
+**Payments**
 
 | Tool | What it does |
 |------|--------------|
-| `wallet_overview` | Address, balance, network |
-| `get_balances` | ETH + ERC-20 balances |
-| `send_eth` | Send ETH |
-| `send_token` | Send ERC-20 tokens |
-| `sign_message` | Sign a message |
-| `sign_typed_data` | Sign EIP-712 typed data |
-| `call_contract` | Write to a contract |
-| `read_contract` | Read contract state |
-| `simulate` | Simulate a transaction |
-| `list_signers` | List configured signers |
-| `list_networks` | Supported networks |
-| `get_audit_log` | Signing history |
+| `agenta_pay_create_checkout` | Create a checkout session |
+| `agenta_pay_get_checkout` | Get checkout status |
+| `agenta_pay_list_checkouts` | List checkouts |
+
+**Wallet**
+
+| Tool | What it does |
+|------|--------------|
+| `agenta_wallet_overview` | Address, balance, network |
+| `agenta_get_balances` | ETH + ERC-20 balances |
+| `agenta_send_eth` | Send ETH |
+| `agenta_send_token` | Send ERC-20 tokens |
+| `agenta_sign_message` | Sign a message |
+| `agenta_sign_typed_data` | Sign EIP-712 typed data |
+| `agenta_call_contract` | Write to a contract |
+| `agenta_read_contract` | Read contract state |
+| `agenta_simulate` | Simulate a transaction |
+
+**x402 (agent-to-agent payments)**
+
+| Tool | What it does |
+|------|--------------|
+| `agenta_x402_check` | Check if a URL requires payment |
+| `agenta_x402_discover` | Discover x402 payment requirements |
+| `agenta_x402_fetch` | Fetch a resource with x402 payment |
 
 ---
 
@@ -281,7 +323,7 @@ const sendETH = new DynamicStructuredTool({
 ### Foundry / Hardhat
 
 ```bash
-agenta proxy --port 8545
+agenta sub proxy --port 8545
 forge script Deploy.s.sol --rpc-url http://localhost:8545 --broadcast
 ```
 
@@ -330,8 +372,9 @@ Ethereum, Base, Arbitrum, Optimism, Polygon — mainnet and testnet. All EVM cha
 
 | Variable | Description |
 |----------|-------------|
-| `AGENTA_API_KEY` | API key — generated when you create a wallet |
+| `AGENTA_API_KEY` | API key — generated when you create a sub-account |
 | `AGENTA_API_SECRET` | API secret — your signing credential, shown once at creation |
+| `AGENTAOS_GATEWAY_KEY` | Gateway key for payment tools (`sk_live_...` or `sk_test_...`) |
 | `AGENTA_SERVER` | Optional — defaults to `https://api.agentaos.ai` |
 
 ---

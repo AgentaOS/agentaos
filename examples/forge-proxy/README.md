@@ -11,10 +11,11 @@ Deploy smart contracts using Foundry through AgentaOS signing proxy. The full pr
 ## Setup
 
 ```bash
-# Configure AgentaOS CLI
-agenta init
+# Sign in and create a sub-account
+agenta login
+agenta sub init --create --name forge-deployer
 
-# Verify your signer is active
+# Verify status
 agenta status
 ```
 
@@ -27,7 +28,7 @@ chmod +x deploy.sh
 
 ## How It Works
 
-1. `agenta proxy` starts an RPC proxy on port 8545
+1. `agenta sub proxy` starts an RPC proxy on port 8545
 2. The proxy intercepts `eth_sendTransaction` and `eth_signTransaction` calls
 3. Each transaction is signed via the interactive CGGMP24 protocol (2-of-3 MPC)
 4. The AgentaOS server enforces all configured policies before co-signing
@@ -39,7 +40,7 @@ This means you can use **any** Ethereum tooling (Foundry, Hardhat, ethers.js) wi
 
 ```bash
 # Start proxy in one terminal
-agenta proxy --port 8545
+agenta sub proxy --port 8545
 
 # In another terminal, deploy with Forge
 forge create --rpc-url http://localhost:8545 --unlocked \

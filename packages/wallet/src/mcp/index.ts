@@ -33,6 +33,11 @@ import { registerX402Check } from './tools/x402-check.js';
 import { registerX402Discover } from './tools/x402-discover.js';
 import { registerX402Fetch } from './tools/x402-fetch.js';
 
+// Merchant payment tools (agenta_pay_*) — uses @agentaos/pay SDK
+import { registerPayCreateCheckout } from './tools/pay-create-checkout.js';
+import { registerPayGetCheckout } from './tools/pay-get-checkout.js';
+import { registerPayListCheckouts } from './tools/pay-list-checkouts.js';
+
 /**
  * Start the AgentaOS MCP server with all tools.
  * Connects via stdio transport.
@@ -74,6 +79,11 @@ export async function runMcp() {
 	registerX402Check(server);
 	registerX402Discover(server);
 	registerX402Fetch(server, signerManager);
+
+	// Merchant payment tools — no signerManager needed, uses @agentaos/pay SDK
+	registerPayCreateCheckout(server);
+	registerPayGetCheckout(server);
+	registerPayListCheckouts(server);
 
 	// Graceful shutdown — wipe key material
 	const shutdown = () => {

@@ -26,8 +26,11 @@ export class AgentaOS {
 			);
 		}
 
-		// Validate key format
-		if (!apiKey || (!apiKey.startsWith('sk_live_') && !apiKey.startsWith('sk_test_'))) {
+		// Detect auth mode: API key (sk_live_/sk_test_) or JWT (Bearer token from CLI)
+		const isApiKey = apiKey.startsWith('sk_live_') || apiKey.startsWith('sk_test_');
+		const isJwt = !isApiKey && apiKey.includes('.') && apiKey.split('.').length === 3;
+
+		if (!isApiKey && !isJwt) {
 			throw new Error(
 				'Invalid API key format. Must start with sk_live_ or sk_test_.\n' +
 					'Get your key at: https://app.agentaos.ai → Settings → API Keys',
@@ -40,6 +43,7 @@ export class AgentaOS {
 			maxRetries: options?.maxRetries ?? DEFAULT_MAX_RETRIES,
 			debug: options?.debug ?? false,
 			logger: options?.logger as ((level: string, message: string) => void) | undefined,
+			authMode: isApiKey ? ('api-key' as const) : ('jwt' as const),
 		};
 
 		this.checkouts = new CheckoutsResource(baseUrl, apiKey, resourceOptions);

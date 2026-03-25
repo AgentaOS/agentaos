@@ -9,6 +9,7 @@ export class BaseResource {
 			maxRetries: number;
 			debug?: boolean;
 			logger?: (level: string, message: string) => void;
+			authMode?: 'api-key' | 'jwt';
 		},
 	) {}
 
@@ -26,6 +27,7 @@ export class BaseResource {
 			maxRetries: this.options.maxRetries,
 			debug: this.options.debug,
 			logger: this.options.logger,
+			authMode: this.options.authMode,
 		});
 	}
 
@@ -41,6 +43,7 @@ export class BaseResource {
 			idempotencyKey,
 			debug: this.options.debug,
 			logger: this.options.logger,
+			authMode: this.options.authMode,
 		});
 	}
 
@@ -54,6 +57,7 @@ export class BaseResource {
 			maxRetries: this.options.maxRetries,
 			debug: this.options.debug,
 			logger: this.options.logger,
+			authMode: this.options.authMode,
 		});
 	}
 
@@ -71,6 +75,7 @@ export class BaseResource {
 			maxRetries: this.options.maxRetries,
 			debug: this.options.debug,
 			logger: this.options.logger,
+			authMode: this.options.authMode,
 		});
 	}
 
@@ -88,6 +93,7 @@ export class BaseResource {
 			maxRetries: this.options.maxRetries,
 			debug: this.options.debug,
 			logger: this.options.logger,
+			authMode: this.options.authMode,
 		});
 	}
 }

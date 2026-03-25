@@ -46,26 +46,26 @@ echo ""
 echo ""
 
 # Step 2: CLI init + status
-echo "==> Step 2: Initialize CLI + check signer status"
-${CLI} init --server "${SERVER}" --non-interactive 2>/dev/null || echo "    (already initialized)"
+echo "==> Step 2: Initialize sub-account + check status"
+${CLI} sub init --create --name demo --server "${SERVER}" 2>/dev/null || echo "    (already initialized)"
 ${CLI} status
 echo ""
 
 # Step 3: Balance
-echo "==> Step 3: Check signer balance"
-${CLI} balance
+echo "==> Step 3: Check sub-account balance"
+${CLI} sub balance
 echo ""
 
 # Step 4: Sign a message
 echo "==> Step 4: Sign proof-of-liveness message"
 MSG="agenta-lifecycle-demo::$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "    Message: ${MSG}"
-${CLI} sign-message "${MSG}"
+${CLI} sub sign-message "${MSG}"
 echo ""
 
 # Step 5: Send a transaction
 echo "==> Step 5: Send 0.000001 ETH (Base Sepolia)"
-${CLI} send 0x0000000000000000000000000000000000000001 0.000001
+${CLI} sub send 0x0000000000000000000000000000000000000001 0.000001
 echo ""
 
 # Step 6: Audit log

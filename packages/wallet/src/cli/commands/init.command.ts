@@ -1,34 +1,18 @@
 import { existsSync } from 'node:fs';
-import { createInterface } from 'node:readline';
-import { input, password, select } from '@inquirer/prompts';
 import chalk from 'chalk';
 import { Command } from 'commander';
-import ora from 'ora';
 import {
 	type SignerConfig,
 	createClientFromConfig,
-	getDefaultSignerName,
 	getSignerConfigPath,
-	listSigners,
-	loadSignerConfig,
 	saveSignerConfig,
 	setDefaultSigner,
 	validateSignerName,
 } from '../../lib/config.js';
-import { getSession, isKeychainAvailable, storeUserShare } from '../../lib/keychain.js';
-import {
-	BRAND_BANNER,
-	brand,
-	brandBold,
-	brandDot,
-	dim,
-	failMark,
-	hint,
-	promptTheme,
-	section,
-	success,
-	successMark,
-} from '../theme.js';
+import { ensureSession } from '../../lib/ensure-session.js';
+import { storeUserShare } from '../../lib/keychain.js';
+import { isJsonMode } from '../output.js';
+import { brand, dim, failMark, successMark } from '../theme.js';
 
 interface PublicCreateResponse {
 	signerId: string;
@@ -39,186 +23,91 @@ interface PublicCreateResponse {
 }
 
 // ---------------------------------------------------------------------------
-// Visual helpers
-// ---------------------------------------------------------------------------
-
-// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape stripping is intentional
-const ANSI_RE = /\u001B\[[0-9;]*m/g;
-
-function pad(str: string, width: number): string {
-	const visible = str.replace(ANSI_RE, '');
-	return str + ' '.repeat(Math.max(0, width - visible.length));
-}
-
-function fmtAddr(address: string): string {
-	if (!address || address.length < 10) return dim('—');
-	return dim(`${address.slice(0, 6)}…${address.slice(-4)}`);
-}
-
-function walletCard(name: string, address: string, extra?: string): void {
-	console.log('');
-	console.log(`  ${brand('●')} ${brandBold(name)}`);
-	console.log(`    ${dim(address)}`);
-	if (extra) console.log(`    ${dim(extra)}`);
-}
-
-function step(icon: string, text: string): void {
-	console.log(`  ${icon} ${text}`);
-}
-
-// ---------------------------------------------------------------------------
-// Command
+// agenta sub init --create --name <name>
+// agenta sub init --import --name <name> --api-key <key> --api-secret <secret>
 // ---------------------------------------------------------------------------
 
 export const initCommand = new Command('init')
-	.description('Set up your AgentaOS wallet')
-	.action(async () => {
-		console.log(BRAND_BANNER);
+	.description('Create or import a sub-account')
+	.requiredOption('--name <name>', 'Sub-account name')
+	.option('--create', 'Create a new sub-account')
+	.option('--import', 'Import an existing sub-account')
+	.option('--server <url>', 'Server URL')
+	.option('--api-key <key>', 'API key (for --import)')
+	.option('--api-secret <secret>', 'API secret base64 (for --import)')
+	.option('--storage <type>', 'Recovery key storage: keychain or file', 'keychain')
+	.action(
+		async (opts: {
+			name: string;
+			create?: boolean;
+			import?: boolean;
+			server?: string;
+			apiKey?: string;
+			apiSecret?: string;
+			storage?: string;
+		}) => {
+			try {
+				// Validate name
+				const nameErr = validateSignerName(opts.name);
+				if (nameErr) throw new Error(nameErr);
+				if (existsSync(getSignerConfigPath(opts.name)))
+					throw new Error(`"${opts.name}" already exists.`);
 
-		try {
-			const existing = listSigners();
-			const defaultName = getDefaultSignerName();
+				if (!opts.create && !opts.import) {
+					throw new Error('Specify --create or --import. Run agenta sub init --help for usage.');
+				}
 
-			const choices: { name: string; value: string; description: string }[] = [
-				{
-					name: 'Create a new wallet',
-					value: 'create',
-					description: 'Get started — takes about 10 seconds',
-				},
-				{
-					name: 'I already have a wallet',
-					value: 'import',
-					description: 'Connect using an API Key and API Secret',
-				},
-			];
-			if (existing.length > 1) {
-				choices.push({
-					name: 'Switch active wallet',
-					value: 'switch',
-					description: `Current: ${defaultName ?? 'none'}`,
-				});
+				if (opts.storage && opts.storage !== 'keychain' && opts.storage !== 'file') {
+					throw new Error(`Invalid --storage "${opts.storage}". Use "keychain" or "file".`);
+				}
+				const storage = (opts.storage ?? 'keychain') as 'keychain' | 'file';
+
+				if (opts.create) {
+					await handleCreate(opts.name, opts.server, storage);
+				} else if (opts.import) {
+					if (!opts.apiKey) throw new Error('--api-key is required for --import');
+					if (!opts.apiSecret) throw new Error('--api-secret is required for --import');
+					await handleImport(opts.name, opts.apiKey, opts.apiSecret, opts.server, storage);
+				}
+			} catch (error: unknown) {
+				const message = error instanceof Error ? error.message : 'Unknown error';
+				if (isJsonMode()) {
+					console.error(JSON.stringify({ error: message }));
+				} else {
+					console.error(`\n  ${failMark(message)}\n`);
+				}
+				process.exitCode = 1;
 			}
-
-			const choice = await select({
-				message: 'What would you like to do?',
-				choices,
-				loop: false,
-				theme: promptTheme,
-			});
-
-			switch (choice) {
-				case 'create':
-					await handleCreate();
-					break;
-				case 'import':
-					await handleImport();
-					break;
-				case 'switch':
-					await handleSwitch();
-					break;
-			}
-		} catch (error: unknown) {
-			if (error instanceof Error && error.name === 'ExitPromptError') {
-				console.log(dim('\n  Cancelled.\n'));
-				return;
-			}
-			const message = error instanceof Error ? error.message : 'Unknown error';
-			console.error(`\n  ${failMark(message)}\n`);
-			process.exitCode = 1;
-		}
-	});
+		},
+	);
 
 // ---------------------------------------------------------------------------
 // Create
 // ---------------------------------------------------------------------------
 
-async function handleCreate(): Promise<void> {
-	// ── 0. Require login ─────────────────────────────────────────────────
-	const token = await getSession();
-	if (!token) {
-		console.log('');
-		console.log(`  ${failMark(`Not logged in. Run ${chalk.bold('agenta login')} first.`)}`);
-		console.log('');
-		process.exitCode = 1;
-		return;
-	}
+async function handleCreate(
+	name: string,
+	serverOverride?: string,
+	storage: 'keychain' | 'file' = 'keychain',
+): Promise<void> {
+	const session = await ensureSession();
+	if (!session.ok) throw new Error('Not logged in. Run agenta login first.');
 
-	// ── 1. Basics ─────────────────────────────────────────────────────────
-	section('Basics');
+	const serverUrl = serverOverride || session.serverUrl;
 
-	const name = await input({
-		message: 'Wallet name',
-		theme: promptTheme,
-		validate: (v) => {
-			const err = validateSignerName(v);
-			if (err) return err;
-			if (existsSync(getSignerConfigPath(v)))
-				return `"${v}" already exists. Pick a different name.`;
-			return true;
-		},
-	});
-
-	const serverUrl = process.env.AGENTA_SERVER ?? 'https://api.agentaos.ai';
-
-	// ── 2. Security ───────────────────────────────────────────────────────
-	section('Security');
-	hint('Your recovery key lets you manage policies and sign without the server.');
-
-	const keychainOk = await isKeychainAvailable();
-	let storage: 'keychain' | 'file' = 'file';
-
-	if (keychainOk) {
-		console.log('');
-		storage = await select<'keychain' | 'file'>({
-			message: 'Recovery key storage',
-			choices: [
-				{
-					name: 'System keychain (recommended)',
-					value: 'keychain',
-					description: 'Encrypted by your OS, Touch ID protected',
-				},
-				{
-					name: 'Local file',
-					value: 'file',
-					description: `Saved in ${getSignerConfigPath(name).replace(/\.json$/, '.user-share')}`,
-				},
-			],
-			loop: false,
-			theme: promptTheme,
-		});
-	} else {
-		hint('System keychain not available — recovery key will be saved as a local file.');
-	}
-
-	// ── 3. Generate ───────────────────────────────────────────────────────
-	section('Creating wallet');
-	hint('Running distributed key generation — this takes a few seconds.');
-	console.log('');
-	const spinner = ora({ text: 'Generating wallet…', indent: 2 }).start();
-
-	const url = `${serverUrl.replace(/\/+$/, '')}/api/v1/signers`;
-	const response = await fetch(url, {
+	const response = await fetch(`${serverUrl.replace(/\/+$/, '')}/api/v1/signers`, {
 		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${token}`,
-		},
+		headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.token}` },
 		body: JSON.stringify({ name }),
 		signal: AbortSignal.timeout(120_000),
 	});
 
 	if (!response.ok) {
 		const text = await response.text();
-		spinner.fail('Failed');
 		throw new Error(`Server returned ${response.status}: ${text}`);
 	}
 
 	const result = (await response.json()) as PublicCreateResponse;
-	spinner.succeed('Wallet created');
-
-	// ── Save everything ───────────────────────────────────────────────────
-	// Store user share FIRST — if this fails, we haven't written config yet.
-	// Once config is saved, the signer is "registered" locally.
 	await storeUserShare(name, result.userShare, storage);
 
 	const config: SignerConfig = {
@@ -234,121 +123,43 @@ async function handleCreate(): Promise<void> {
 	saveSignerConfig(name, config);
 	setDefaultSigner(name);
 
-	// ── Summary ───────────────────────────────────────────────────────────
-	walletCard(name, result.ethAddress, `API key: ${result.apiKey.slice(0, 16)}…`);
-
-	console.log('');
-	step(
-		successMark(
-			storage === 'keychain' ? 'Recovery key → system keychain' : 'Recovery key → local file',
-		),
-		'',
-	);
-	step(successMark('Set as active wallet'), '');
-
-	console.log('');
-	console.log(`  ${dim(`Config: ${getSignerConfigPath(name)}`)}`);
-	console.log('');
-	console.log(`  ${success('Done!')} Run ${chalk.bold('agenta status')} to see your wallets.`);
-	console.log(`         Run ${chalk.bold('agenta admin policies')} to manage policies.`);
-	console.log('');
-}
-
-// ---------------------------------------------------------------------------
-// Secret input — hidden with live character counter
-// ---------------------------------------------------------------------------
-
-function readSecret(label: string): Promise<string> {
-	return new Promise((resolve) => {
-		const rl = createInterface({ input: process.stdin, terminal: false });
-
-		// Mute stdin echo so the huge base64 blob never renders
-		if (process.stdin.isTTY) process.stdin.setRawMode(true);
-		process.stdout.write(`  ${chalk.bold('?')} ${chalk.bold(label)}: `);
-
-		let buf = '';
-		const onData = (key: Buffer) => {
-			const ch = key.toString();
-			// Enter
-			if (ch === '\r' || ch === '\n') {
-				if (process.stdin.isTTY) process.stdin.setRawMode(false);
-				process.stdin.removeListener('data', onData);
-				rl.close();
-				// Clear the counter line and move to next line
-				process.stdout.write('\r\x1b[K');
-				process.stdout.write(
-					`  ${chalk.bold('?')} ${chalk.bold(label)}: ${chalk.dim(`[${buf.length.toLocaleString()} chars]`)}\n`,
-				);
-				resolve(buf);
-				return;
-			}
-			// Ctrl+C
-			if (ch === '\x03') {
-				if (process.stdin.isTTY) process.stdin.setRawMode(false);
-				rl.close();
-				process.exit(1);
-			}
-			// Backspace
-			if (ch === '\x7f' || ch === '\b') {
-				buf = buf.slice(0, -1);
-			} else {
-				buf += ch;
-			}
-			// Rewrite the prompt with live char count
-			process.stdout.write('\r\x1b[K');
-			process.stdout.write(
-				`  ${chalk.bold('?')} ${chalk.bold(label)}: ${chalk.dim(`[${buf.length.toLocaleString()} chars]`)}`,
-			);
-		};
-		process.stdin.on('data', onData);
-		process.stdin.resume();
-	});
+	const out = {
+		name,
+		address: result.ethAddress || null,
+		signerId: result.signerId || null,
+		apiKey: result.apiKey || null,
+		configPath: getSignerConfigPath(name),
+	};
+	if (isJsonMode()) {
+		console.log(JSON.stringify(out));
+	} else {
+		console.log(`\n  ${successMark('Sub-account created')}`);
+		console.log(`  ${chalk.bold('Name:')}    ${name}`);
+		console.log(`  ${chalk.bold('Address:')} ${brand(result.ethAddress)}`);
+		console.log(`  ${chalk.bold('ID:')}      ${dim(result.signerId)}`);
+		console.log(`  ${chalk.bold('API Key:')} ${dim(result.apiKey)}`);
+		console.log(`  ${chalk.bold('Config:')}  ${dim(getSignerConfigPath(name))}\n`);
+	}
 }
 
 // ---------------------------------------------------------------------------
 // Import
 // ---------------------------------------------------------------------------
 
-async function handleImport(): Promise<void> {
-	// ── 1. Basics ─────────────────────────────────────────────────────────
-	section('Basics');
+async function handleImport(
+	name: string,
+	apiKey: string,
+	apiSecret: string,
+	serverOverride?: string,
+	storage: 'keychain' | 'file' = 'keychain',
+): Promise<void> {
+	const { getSessionServerUrl } = await import('../../lib/keychain.js');
+	const serverUrl =
+		serverOverride ||
+		(await getSessionServerUrl()) ||
+		process.env.AGENTA_SERVER ||
+		'https://api.agentaos.ai';
 
-	const name = await input({
-		message: 'Wallet name',
-		theme: promptTheme,
-		validate: (v) => {
-			const err = validateSignerName(v);
-			if (err) return err;
-			if (existsSync(getSignerConfigPath(v)))
-				return `"${v}" already exists. Pick a different name.`;
-			return true;
-		},
-	});
-
-	const serverUrl = process.env.AGENTA_SERVER ?? 'https://api.agentaos.ai';
-
-	// ── 2. Credentials ───────────────────────────────────────────────────
-	section('Credentials');
-	hint('Find your API Key and API Secret in AgentaOS.');
-	console.log('');
-
-	const apiKey = await input({
-		message: 'API Key',
-		theme: promptTheme,
-		validate: (v) => (v.trim() ? true : 'API Key is required.'),
-	});
-
-	console.log('');
-
-	const apiSecret = await readSecret('API Secret');
-	if (!apiSecret) throw new Error('API Secret is required.');
-	console.log(
-		`  ${chalk.green('✓')} Received ${apiSecret.length.toLocaleString()} chars ${chalk.dim(`(${apiSecret.slice(0, 8)}…${apiSecret.slice(-4)})`)}`,
-	);
-
-	// ── 3. Connect ────────────────────────────────────────────────────────
-	section('Connecting');
-	const spinner = ora({ text: 'Verifying with server…', indent: 2 }).start();
 	let signerId: string | undefined;
 	let ethAddress = '';
 
@@ -359,13 +170,21 @@ async function handleImport(): Promise<void> {
 		if (s) {
 			signerId = s.id;
 			ethAddress = s.ethAddress;
-			spinner.succeed('Connected');
-		} else {
-			spinner.warn('Connected — no wallet found for this API key');
 		}
-	} catch {
-		spinner.warn('Server unreachable — config saved, you can connect later');
+	} catch (err: unknown) {
+		const msg = err instanceof Error ? err.message : '';
+		if (
+			msg.includes('401') ||
+			msg.includes('403') ||
+			msg.includes('nauthorized') ||
+			msg.includes('orbidden')
+		) {
+			throw new Error('Invalid API key or secret');
+		}
+		// Server unreachable — save config anyway
 	}
+
+	await storeUserShare(name, apiSecret, storage);
 
 	const config: SignerConfig = {
 		version: 1,
@@ -380,65 +199,20 @@ async function handleImport(): Promise<void> {
 	saveSignerConfig(name, config);
 	setDefaultSigner(name);
 
-	if (ethAddress) {
-		walletCard(name, ethAddress);
+	const out = {
+		name,
+		address: ethAddress || null,
+		signerId: signerId || null,
+		apiKey: apiKey || null,
+		configPath: getSignerConfigPath(name),
+	};
+	if (isJsonMode()) {
+		console.log(JSON.stringify(out));
+	} else {
+		console.log(`\n  ${successMark('Config saved')}`);
+		console.log(`  ${chalk.bold('Name:')}    ${name}`);
+		if (ethAddress) console.log(`  ${chalk.bold('Address:')} ${brand(ethAddress)}`);
+		if (signerId) console.log(`  ${chalk.bold('ID:')}      ${dim(signerId)}`);
+		console.log(`  ${chalk.bold('Config:')}  ${dim(getSignerConfigPath(name))}\n`);
 	}
-
-	console.log('');
-	step(successMark('Config saved'), '');
-	step(successMark('Set as active wallet'), '');
-
-	console.log('');
-	console.log(`  ${dim(`Config: ${getSignerConfigPath(name)}`)}`);
-	console.log('');
-	console.log(`  ${success('Done!')} Run ${chalk.bold('agenta status')} to see your wallets.`);
-	console.log('');
-}
-
-// ---------------------------------------------------------------------------
-// Switch
-// ---------------------------------------------------------------------------
-
-async function handleSwitch(): Promise<void> {
-	const current = listSigners();
-	if (current.length === 0) {
-		console.log(chalk.yellow('\n  No wallets found. Create one first.\n'));
-		return;
-	}
-
-	const defaultName = getDefaultSignerName();
-	const nw = Math.max(4, ...current.map((n) => n.length)) + 3;
-
-	const choices = current.map((name) => {
-		const isCurrent = name === defaultName;
-		let addr = '';
-		try {
-			const config = loadSignerConfig(name);
-			if (config.ethAddress) addr = fmtAddr(config.ethAddress);
-		} catch {
-			// ignore
-		}
-
-		const dot = brandDot(isCurrent);
-		const label = isCurrent ? brandBold(name) : name;
-		const tag = isCurrent ? dim(' (current)') : '';
-
-		return {
-			name: `${dot} ${pad(label, nw)} ${addr}${tag}`,
-			value: name,
-		};
-	});
-
-	const selected = await select({
-		message: 'Switch to',
-		choices,
-		default: defaultName ?? undefined,
-		loop: false,
-		theme: promptTheme,
-	});
-
-	setDefaultSigner(selected);
-	console.log('');
-	step(successMark(`${chalk.bold(selected)} is now active`), '');
-	console.log('');
 }

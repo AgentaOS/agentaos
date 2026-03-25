@@ -34,32 +34,34 @@ chmod +x demo.sh
 ## Manual Flow
 
 ```bash
-# Create a signer at app.agentaos.ai
-# The wizard gives you an API Key and API Secret (copy both).
+# Sign in and activate wallet
+agenta login
 
-# Configure the CLI
-agenta init
+# Create a sub-account
+agenta sub init --create --name demo
 
 # Send a transaction
-agenta send 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 0.001
+agenta sub send 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 0.001
 
 # Sign a message
-agenta sign-message "Hello from AgentaOS"
+agenta sub sign-message "Hello from AgentaOS"
 
 # Check status
 agenta status
 
 # Check balance
-agenta balance
+agenta sub balance
+
+# Create a payment checkout
+agenta pay checkout -a 50 -c EUR
 ```
 
 ## Policy Enforcement
 
-Add policies via [app.agentaos.ai](https://app.agentaos.ai):
+Set policies via the CLI or [app.agentaos.ai](https://app.agentaos.ai):
 
 ```bash
-# After adding a spending limit (max 0.1 ETH per tx) in the browser app,
-# try to send more than 0.1 ETH — it will be blocked with 403
-agenta send 0x... 0.5
+# After adding a spending limit, try to exceed it — blocked with 403
+agenta sub send 0x... 0.5
 # Error: Policy violation: spending_limit — amount exceeds limit
 ```
