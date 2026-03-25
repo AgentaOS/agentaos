@@ -1,5 +1,25 @@
 # @agentaos/chains
 
+## 1.0.0
+
+### Major Changes
+
+- [#16](https://github.com/AgentaOS/agentaos/pull/16) [`beb6eea`](https://github.com/AgentaOS/agentaos/commit/beb6eeaa1d0a0cfa8df5d42b511b305913e0ec1c) Thanks [@PancheI](https://github.com/PancheI)! - Device-code CLI login, MCP payment tools, CLI restructure
+
+  - `agenta login` opens browser for authentication + wallet activation
+  - `agenta pay checkout/get/list` — create and manage payment checkouts
+  - `agenta sub` namespace — all sub-account commands (init, send, balance, policies, etc.)
+  - `agenta status` — full account overview with `--json` mode for AI agents
+  - Non-interactive `agenta sub init --create/--import` with flag-based interface
+  - Auto-refresh JWT on expiry or scope upgrade
+  - MCP: 3 new payment tools (create_checkout, get_checkout, list_checkouts) — 21 total
+  - All commands support `--json` for machine-readable output
+
+### Patch Changes
+
+- Updated dependencies [[`beb6eea`](https://github.com/AgentaOS/agentaos/commit/beb6eeaa1d0a0cfa8df5d42b511b305913e0ec1c)]:
+  - @agentaos/core@1.0.0
+
 ## 0.2.1
 
 ### Patch Changes
