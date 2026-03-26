@@ -1,5 +1,13 @@
 # @agentaos/engine
 
+## 1.1.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @agentaos/core@1.1.0
+  - @agentaos/crypto@1.1.0
+
 ## 1.0.0
 
 ### Major Changes

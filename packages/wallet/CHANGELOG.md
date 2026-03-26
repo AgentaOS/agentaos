@@ -1,5 +1,24 @@
 # agentaos
 
+## 1.1.0
+
+### Minor Changes
+
+- [#19](https://github.com/AgentaOS/agentaos/pull/19) [`62ad7d8`](https://github.com/AgentaOS/agentaos/commit/62ad7d8e46c760527cd740d31d85a652e4606473) Thanks [@PancheI](https://github.com/PancheI)! - Split init into create/import, add x402 CLI commands, add switch
+
+  - `agenta sub create` / `agenta sub import` replace `agenta sub init`
+  - `agenta sub switch` to change active sub-account
+  - `agenta sub x402 check/discover/fetch` for x402 payment protocol
+  - `--json` flag on all commands for AI-parseable output
+  - Non-interactive CLI (no prompts, flags only)
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @agentaos/core@1.1.0
+  - @agentaos/engine@1.1.0
+  - @agentaos/sdk@1.1.0
+
 ## 1.0.0
 
 ### Major Changes
