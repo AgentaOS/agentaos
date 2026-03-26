@@ -1,6 +1,6 @@
 {
 	"name": "@agentaos/core",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Type definitions and interfaces for AgentaOS threshold wallet",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",
