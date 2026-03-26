@@ -42,7 +42,7 @@ npm install -g agentaos
 agenta login                                    # opens browser — sign in + activate wallet
 agenta status                                   # account overview
 agenta pay checkout -a 50 -c EUR                # create a payment checkout
-agenta sub init --create --name trading-bot     # create an agent sub-account
+agenta sub create --name trading-bot     # create an agent sub-account
 agenta sub send 0xRecipient 0.01                # send ETH from sub-account
 ```
 
@@ -182,8 +182,8 @@ npm install -g agentaos
 
 | Command | What it does |
 |---------|--------------|
-| `agenta sub init --create --name bot1` | Create a sub-account |
-| `agenta sub init --import --name bot1 --api-key ... --api-secret ...` | Import existing |
+| `agenta sub create --name bot1` | Create a sub-account |
+| `agenta sub import --name bot1 --api-key ... --api-secret ...` | Import existing |
 | `agenta sub send <to> <amount>` | Send ETH — threshold-signed, policy-checked |
 | `agenta sub balance` | ETH + token balances |
 | `agenta sub policies get` | View signing policies |
@@ -196,7 +196,7 @@ All commands support `--json` for machine-readable output (AI agents, CI/CD).
 ```bash
 agenta login
 agenta pay checkout -a 50 -c EUR -d "Invoice #42"
-agenta sub init --create --name trading-bot
+agenta sub create --name trading-bot
 agenta sub send 0xRecipient 0.01 --network base-sepolia
 agenta sub proxy --port 8545  # then: forge script Deploy.s.sol --rpc-url http://localhost:8545 --broadcast
 ```

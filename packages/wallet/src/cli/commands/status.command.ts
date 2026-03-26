@@ -181,7 +181,7 @@ export const statusCommand = new Command('status')
 				);
 			} else {
 				console.log(
-					`  ${dim('Agent accounts:')} ${dim('Run')} ${chalk.bold('agenta init')} ${dim('to create a sub-account')}`,
+					`  ${dim('Agent accounts:')} ${dim('Run')} ${chalk.bold('agenta sub create')} ${dim('to create a sub-account')}`,
 				);
 			}
 
@@ -196,7 +196,7 @@ export const statusCommand = new Command('status')
 					`  ${dim('Next:')} ${chalk.bold('agenta pay checkout -a 50')} ${dim('to create a checkout')}`,
 				);
 				console.log(
-					`        ${chalk.bold('agenta init')} ${dim('to create an agent sub-account')}`,
+					`        ${chalk.bold('agenta sub create')} ${dim('to create an agent sub-account')}`,
 				);
 			} else {
 				console.log(
@@ -325,7 +325,7 @@ async function outputStatusJson(session: SessionResult): Promise<void> {
 		count: signerNames.length,
 		hint:
 			signerNames.length === 0
-				? 'Run agenta sub init --create --name <name> to create a sub-account.'
+				? 'Run agenta sub create --name <name> to create a sub-account.'
 				: `${signerNames.length} sub-account(s). Run agenta sub info <name> for details.`,
 		items: signerNames.map((name) => {
 			try {
