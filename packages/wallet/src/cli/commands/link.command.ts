@@ -30,7 +30,9 @@ export const linkCommand = new Command('link')
 			const config = loadSignerConfig(signerName);
 			const signerId = config.signerId;
 			if (!signerId) {
-				throw new Error('No signer ID in config. Re-run `agenta init` or add signerId to config.');
+				throw new Error(
+					'No signer ID in config. Re-run `agenta sub create` or add signerId to config.',
+				);
 			}
 
 			const baseUrl = (opts.server ?? config.serverUrl).replace(/\/+$/, '');
@@ -44,7 +46,7 @@ export const linkCommand = new Command('link')
 			const userShare = await getUserShare(signerName);
 			if (!userShare) {
 				spinner.fail('No recovery key found');
-				console.error(dim('\n  Was this wallet created via `agenta init`?\n'));
+				console.error(dim('\n  Was this wallet created via `agenta sub create`?\n'));
 				process.exitCode = 1;
 				return;
 			}

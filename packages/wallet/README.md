@@ -29,7 +29,7 @@ agenta status
 agenta pay checkout -a 50 -c EUR
 
 # Create an agent sub-account
-agenta sub init --create --name trading-bot
+agenta sub create --name trading-bot
 
 # Send ETH from sub-account
 agenta sub send 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 0.001
@@ -61,8 +61,8 @@ agenta --help
 
 | Command | Description |
 |---------|-------------|
-| `agenta sub init --create --name <name>` | Create a sub-account |
-| `agenta sub init --import --name <name> --api-key ... --api-secret ...` | Import existing |
+| `agenta sub create --name <name>` | Create a sub-account |
+| `agenta sub import --name <name> --api-key ... --api-secret ...` | Import existing |
 | `agenta sub info <name>` | Show sub-account details |
 | `agenta sub balance` | ETH and token balances |
 | `agenta sub send <to> <amount>` | Send ETH — threshold-signed, policy-checked |
@@ -81,8 +81,8 @@ All commands support `--json` for machine-readable output.
 Each sub-account gets its own config under `~/.agenta/signers/`.
 
 ```bash
-agenta sub init --create --name my-agent
-agenta sub init --create --name trading-bot
+agenta sub create --name my-agent
+agenta sub create --name trading-bot
 
 # Use a specific sub-account
 agenta --signer trading-bot sub send 0x... 0.01

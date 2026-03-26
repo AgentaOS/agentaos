@@ -72,7 +72,9 @@ async function getAdminContext(command: CommandType): Promise<AdminContext> {
 	const config = loadSignerConfig(signerName);
 
 	if (!config.signerId) {
-		throw new Error('No signer ID in config. Re-run `agenta init` or add signerId to config.');
+		throw new Error(
+			'No signer ID in config. Re-run `agenta sub create` or add signerId to config.',
+		);
 	}
 
 	const token = await getSession();

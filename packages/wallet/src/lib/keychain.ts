@@ -23,7 +23,7 @@ import { getConfigDir } from './config.js';
 //
 // If the keychain read fails (headless SSH without GUI, locked keychain),
 // getUserShare() falls through to the .user-share file fallback.
-// During `agenta init`, headless users should pick "Local file" storage.
+// During `agenta sub create`, headless users should pick "Local file" storage.
 //
 // For SSH sessions: `security unlock-keychain` once per session, then
 // the approval dialog still fires per-item access (because -T '').

@@ -94,7 +94,7 @@ async function resolveServerUrl(opts: {
 	signerName?: string;
 	cliFlag?: string;
 }): Promise<string | null> {
-	// 1. Local signer config (agenta init was run)
+	// 1. Local signer config (agenta sub create was run)
 	if (opts.signerName) {
 		const configPath = getSignerConfigPath(opts.signerName);
 		if (existsSync(configPath)) {
@@ -131,7 +131,7 @@ async function resolveContext(
 	serverFlag: string | undefined,
 	token: string,
 ): Promise<ResolvedContext | null> {
-	// Path A: Local signer config exists (agenta init was run on this device)
+	// Path A: Local signer config exists (agenta sub create was run on this device)
 	if (signerArg) {
 		const configPath = getSignerConfigPath(signerArg);
 		if (existsSync(configPath)) {
@@ -220,7 +220,7 @@ async function resolveFromServer(
 	if (signers.length === 0) {
 		console.log('');
 		console.log(
-			`  ${failMark('No accounts found. Create one in AgentaOS or run')} ${chalk.bold('agenta init')} ${dim('on the agent device first.')}`,
+			`  ${failMark('No accounts found. Create one in AgentaOS or run')} ${chalk.bold('agenta sub create')} ${dim('on the agent device first.')}`,
 		);
 		console.log('');
 		return null;

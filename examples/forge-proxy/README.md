@@ -13,7 +13,7 @@ Deploy smart contracts using Foundry through AgentaOS signing proxy. The full pr
 ```bash
 # Sign in and create a sub-account
 agenta login
-agenta sub init --create --name forge-deployer
+agenta sub create --name forge-deployer
 
 # Verify status
 agenta status

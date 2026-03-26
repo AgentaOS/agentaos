@@ -38,7 +38,7 @@ chmod +x demo.sh
 agenta login
 
 # Create a sub-account
-agenta sub init --create --name demo
+agenta sub create --name demo
 
 # Send a transaction
 agenta sub send 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 0.001
