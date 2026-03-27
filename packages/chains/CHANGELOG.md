@@ -1,5 +1,12 @@
 # @agentaos/chains
 
+## 1.1.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @agentaos/core@1.1.1
+
 ## 1.1.0
 
 ### Patch Changes

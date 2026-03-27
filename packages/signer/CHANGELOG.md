@@ -1,5 +1,13 @@
 # @agentaos/sdk
 
+## 1.1.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @agentaos/core@1.1.1
+  - @agentaos/engine@1.1.1
+
 ## 1.1.0
 
 ### Patch Changes
