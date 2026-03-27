@@ -1,5 +1,19 @@
 # agentaos
 
+## 1.1.1
+
+### Patch Changes
+
+- [#22](https://github.com/AgentaOS/agentaos/pull/22) [`1c3b97c`](https://github.com/AgentaOS/agentaos/commit/1c3b97cab3c6a8c6d2d14f8c78585f62be560959) Thanks [@PancheI](https://github.com/PancheI)! - x402 fetch falls back to local signer config
+
+  - `agenta sub x402 fetch` no longer requires `AGENTA_API_SECRET` env var when the secret is already saved locally from `agenta sub create`
+  - `SignerManager` checks env vars first (MCP/CI), then falls back to `~/.agenta/signers/` config (CLI)
+
+- Updated dependencies []:
+  - @agentaos/core@1.1.1
+  - @agentaos/engine@1.1.1
+  - @agentaos/sdk@1.1.1
+
 ## 1.1.0
 
 ### Minor Changes
