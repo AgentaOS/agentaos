@@ -1,3 +1,12 @@
+export interface Eip7702Authorization {
+	readonly address: string;
+	readonly chainId: number;
+	readonly nonce: number;
+	readonly r: string;
+	readonly s: string;
+	readonly yParity: number;
+}
+
 export interface TransactionRequest {
 	readonly to?: string;
 	readonly value?: bigint;
@@ -8,6 +17,8 @@ export interface TransactionRequest {
 	readonly maxFeePerGas?: bigint;
 	readonly maxPriorityFeePerGas?: bigint;
 	readonly nonce?: number;
+	/** EIP-7702 authorization list — produces a Type 4 transaction when present. */
+	readonly authorizationList?: readonly Eip7702Authorization[];
 }
 
 export interface DecodedAction {
@@ -42,6 +53,7 @@ export interface IChain {
 		to?: string;
 		value?: bigint;
 		data?: Uint8Array;
+		authorizationList?: readonly Eip7702Authorization[];
 	}): Promise<bigint>;
 	getGasPrice(): Promise<bigint>;
 	estimateFeesPerGas(): Promise<FeeEstimate>;

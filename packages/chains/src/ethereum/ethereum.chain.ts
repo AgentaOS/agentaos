@@ -31,28 +31,55 @@ export class EthereumChain implements IChain {
 		const to = request.to as `0x${string}` | undefined;
 		const data = request.data ? toHex(request.data) : undefined;
 
-		const serialized = request.maxFeePerGas
-			? serializeTransaction({
-					type: 'eip1559' as const,
-					to,
-					value: request.value,
-					data,
-					chainId: request.chainId,
-					gas: request.gasLimit,
-					maxFeePerGas: request.maxFeePerGas,
-					maxPriorityFeePerGas: request.maxPriorityFeePerGas,
-					nonce: request.nonce,
-				})
-			: serializeTransaction({
-					type: 'legacy' as const,
-					to,
-					value: request.value,
-					data,
-					chainId: request.chainId,
-					gas: request.gasLimit,
-					gasPrice: request.gasPrice,
-					nonce: request.nonce,
-				});
+		let serialized: `0x${string}`;
+
+		if (request.authorizationList && request.authorizationList.length > 0) {
+			// Type 4 (EIP-7702) transaction
+			serialized = serializeTransaction({
+				type: 'eip7702' as const,
+				to,
+				value: request.value,
+				data,
+				chainId: request.chainId,
+				gas: request.gasLimit,
+				maxFeePerGas: request.maxFeePerGas,
+				maxPriorityFeePerGas: request.maxPriorityFeePerGas,
+				nonce: request.nonce,
+				authorizationList: request.authorizationList.map((auth) => ({
+					address: auth.address as `0x${string}`,
+					chainId: auth.chainId,
+					nonce: auth.nonce,
+					r: auth.r as `0x${string}`,
+					s: auth.s as `0x${string}`,
+					yParity: auth.yParity,
+				})),
+			});
+		} else if (request.maxFeePerGas) {
+			// Type 2 (EIP-1559) transaction
+			serialized = serializeTransaction({
+				type: 'eip1559' as const,
+				to,
+				value: request.value,
+				data,
+				chainId: request.chainId,
+				gas: request.gasLimit,
+				maxFeePerGas: request.maxFeePerGas,
+				maxPriorityFeePerGas: request.maxPriorityFeePerGas,
+				nonce: request.nonce,
+			});
+		} else {
+			// Type 0 (legacy) transaction
+			serialized = serializeTransaction({
+				type: 'legacy' as const,
+				to,
+				value: request.value,
+				data,
+				chainId: request.chainId,
+				gas: request.gasLimit,
+				gasPrice: request.gasPrice,
+				nonce: request.nonce,
+			});
+		}
 
 		return hexToBytes(serialized);
 	}
@@ -74,35 +101,65 @@ export class EthereumChain implements IChain {
 
 		const sig = { r: rHex, s: sHex, v: BigInt(v), yParity } as const;
 
-		const serialized =
-			tx.type === 'eip1559'
-				? serializeTransaction(
-						{
-							type: 'eip1559' as const,
-							to,
-							value: tx.value,
-							data,
-							chainId: tx.chainId,
-							gas: tx.gas,
-							maxFeePerGas: tx.maxFeePerGas,
-							maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
-							nonce: tx.nonce,
-						},
-						sig,
-					)
-				: serializeTransaction(
-						{
-							type: 'legacy' as const,
-							to,
-							value: tx.value,
-							data,
-							chainId: tx.chainId,
-							gas: tx.gas,
-							gasPrice: tx.gasPrice,
-							nonce: tx.nonce,
-						},
-						sig,
-					);
+		let serialized: `0x${string}`;
+
+		if (tx.type === 'eip7702') {
+			serialized = serializeTransaction(
+				{
+					type: 'eip7702' as const,
+					to,
+					value: tx.value,
+					data,
+					chainId: tx.chainId,
+					gas: tx.gas,
+					maxFeePerGas: tx.maxFeePerGas,
+					maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
+					nonce: tx.nonce,
+					authorizationList: (
+						tx as unknown as {
+							authorizationList: {
+								address: `0x${string}`;
+								chainId: number;
+								nonce: number;
+								r: `0x${string}`;
+								s: `0x${string}`;
+								yParity: number;
+							}[];
+						}
+					).authorizationList,
+				},
+				sig,
+			);
+		} else if (tx.type === 'eip1559') {
+			serialized = serializeTransaction(
+				{
+					type: 'eip1559' as const,
+					to,
+					value: tx.value,
+					data,
+					chainId: tx.chainId,
+					gas: tx.gas,
+					maxFeePerGas: tx.maxFeePerGas,
+					maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
+					nonce: tx.nonce,
+				},
+				sig,
+			);
+		} else {
+			serialized = serializeTransaction(
+				{
+					type: 'legacy' as const,
+					to,
+					value: tx.value,
+					data,
+					chainId: tx.chainId,
+					gas: tx.gas,
+					gasPrice: tx.gasPrice,
+					nonce: tx.nonce,
+				},
+				sig,
+			);
+		}
 
 		return hexToBytes(serialized);
 	}
@@ -146,14 +203,33 @@ export class EthereumChain implements IChain {
 		to?: string;
 		value?: bigint;
 		data?: Uint8Array;
+		authorizationList?: readonly {
+			address: string;
+			chainId: number;
+			nonce: number;
+			r: string;
+			s: string;
+			yParity: number;
+		}[];
 	}): Promise<bigint> {
 		const data = request.data ? toHex(request.data) : undefined;
-		return this.client.estimateGas({
+		const params: Record<string, unknown> = {
 			account: request.from as `0x${string}` | undefined,
 			to: request.to as `0x${string}` | undefined,
 			value: request.value,
 			data,
-		});
+		};
+		if (request.authorizationList && request.authorizationList.length > 0) {
+			params.authorizationList = request.authorizationList.map((auth) => ({
+				address: auth.address as `0x${string}`,
+				chainId: auth.chainId,
+				nonce: auth.nonce,
+				r: auth.r as `0x${string}`,
+				s: auth.s as `0x${string}`,
+				yParity: auth.yParity,
+			}));
+		}
+		return this.client.estimateGas(params as Parameters<typeof this.client.estimateGas>[0]);
 	}
 
 	async getGasPrice(): Promise<bigint> {
