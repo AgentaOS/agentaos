@@ -1,6 +1,6 @@
 {
 	"name": "@agentaos/sdk",
-	"version": "1.1.1",
+	"version": "1.2.0",
 	"description": "SDK for threshold signing — the key never exists",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",

@@ -1,5 +1,16 @@
 # @agentaos/chains
 
+## 1.2.0
+
+### Minor Changes
+
+- [#26](https://github.com/AgentaOS/agentaos/pull/26) [`7affbd4`](https://github.com/AgentaOS/agentaos/commit/7affbd4509e606a08c0910e59f3325ecbe491257) Thanks [@PancheI](https://github.com/PancheI)! - Add EIP-7702 (Type 4) transaction support — authorization list handling for account delegation transactions.
+
+### Patch Changes
+
+- Updated dependencies [[`7affbd4`](https://github.com/AgentaOS/agentaos/commit/7affbd4509e606a08c0910e59f3325ecbe491257)]:
+  - @agentaos/core@1.2.0
+
 ## 1.1.1
 
 ### Patch Changes

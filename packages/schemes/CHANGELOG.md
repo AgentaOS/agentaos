@@ -1,5 +1,13 @@
 # @agentaos/engine
 
+## 1.2.0
+
+### Patch Changes
+
+- Updated dependencies [[`7affbd4`](https://github.com/AgentaOS/agentaos/commit/7affbd4509e606a08c0910e59f3325ecbe491257)]:
+  - @agentaos/core@1.2.0
+  - @agentaos/crypto@1.2.0
+
 ## 1.1.1
 
 ### Patch Changes
