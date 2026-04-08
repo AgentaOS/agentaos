@@ -5,6 +5,7 @@ export type {
 } from './threshold-scheme.interface.js';
 export type {
 	DecodedAction,
+	Eip7702Authorization,
 	FeeEstimate,
 	IChain,
 	TransactionRequest,
