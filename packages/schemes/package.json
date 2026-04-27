@@ -37,10 +37,10 @@
 		"clean": "rm -rf dist"
 	},
 	"dependencies": {
-		"@noble/curves": "^2.0.1",
+		"@noble/curves": "^2.2.0",
 		"@agentaos/core": "workspace:*",
 		"@agentaos/crypto": "workspace:*",
-		"viem": "^2.21.0"
+		"viem": "^2.48.4"
 	},
 	"devDependencies": {}
 }
