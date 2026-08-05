@@ -11,7 +11,15 @@
 	},
 	"homepage": "https://github.com/AgentaOS/agentaos",
 	"bugs": "https://github.com/AgentaOS/agentaos/issues",
-	"keywords": ["threshold", "wallet", "mpc", "ecdsa", "cggmp24", "wasm", "signing"],
+	"keywords": [
+		"threshold",
+		"wallet",
+		"mpc",
+		"ecdsa",
+		"cggmp24",
+		"wasm",
+		"signing"
+	],
 	"type": "module",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
@@ -21,7 +29,9 @@
 			"import": "./dist/index.js"
 		}
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"engines": {
 		"node": ">=20.0.0"
 	},
@@ -29,7 +39,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"build": "tsc",
+		"build": "tsc -p tsconfig.build.json",
 		"lint": "biome check src/",
 		"test": "vitest run --passWithNoTests --exclude='**/*.integration.test.*'",
 		"test:integration": "vitest run --testPathPattern=integration",
@@ -37,10 +47,9 @@
 		"clean": "rm -rf dist"
 	},
 	"dependencies": {
-		"@noble/curves": "^2.0.1",
 		"@agentaos/core": "workspace:*",
 		"@agentaos/crypto": "workspace:*",
+		"@noble/curves": "^2.0.1",
 		"viem": "^2.21.0"
-	},
-	"devDependencies": {}
+	}
 }

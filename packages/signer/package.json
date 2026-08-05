@@ -11,7 +11,16 @@
 	},
 	"homepage": "https://github.com/AgentaOS/agentaos",
 	"bugs": "https://github.com/AgentaOS/agentaos/issues",
-	"keywords": ["threshold", "wallet", "mpc", "ecdsa", "sdk", "signer", "agent", "viem"],
+	"keywords": [
+		"threshold",
+		"wallet",
+		"mpc",
+		"ecdsa",
+		"sdk",
+		"signer",
+		"agent",
+		"viem"
+	],
 	"type": "module",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
@@ -21,7 +30,9 @@
 			"import": "./dist/index.js"
 		}
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"engines": {
 		"node": ">=20.0.0"
 	},
@@ -29,7 +40,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"build": "tsc",
+		"build": "tsc -p tsconfig.build.json",
 		"lint": "biome check src/",
 		"test": "vitest run",
 		"typecheck": "tsc --noEmit",

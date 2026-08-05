@@ -11,13 +11,26 @@
 	},
 	"homepage": "https://github.com/AgentaOS/agentaos",
 	"bugs": "https://github.com/AgentaOS/agentaos/issues",
-	"keywords": ["mcp", "threshold", "wallet", "mpc", "ethereum", "agent", "signing", "cli", "x402"],
+	"keywords": [
+		"mcp",
+		"threshold",
+		"wallet",
+		"mpc",
+		"ethereum",
+		"agent",
+		"signing",
+		"cli",
+		"x402"
+	],
 	"type": "module",
 	"bin": {
 		"agentaos": "./dist/index.js",
 		"agenta": "./dist/index.js"
 	},
-	"files": ["dist", "!dist/__tests__"],
+	"files": [
+		"dist",
+		"!dist/__tests__"
+	],
 	"engines": {
 		"node": ">=20.0.0"
 	},
@@ -25,7 +38,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"build": "tsc",
+		"build": "tsc -p tsconfig.build.json",
 		"dev": "tsx src/index.ts",
 		"lint": "biome check src/",
 		"test": "vitest run --passWithNoTests",

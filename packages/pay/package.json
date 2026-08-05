@@ -18,7 +18,9 @@
 			"import": "./dist/index.js"
 		}
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"engines": {
 		"node": ">=20.0.0"
 	},
@@ -29,7 +31,7 @@
 		"@types/node": "^20.0.0"
 	},
 	"scripts": {
-		"build": "tsc",
+		"build": "tsc -p tsconfig.build.json",
 		"lint": "biome check src/",
 		"test": "vitest run --passWithNoTests",
 		"typecheck": "tsc --noEmit",
