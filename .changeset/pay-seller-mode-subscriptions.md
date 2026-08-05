@@ -1,17 +1,23 @@
 ---
-"@agentaos/pay": minor
+"@agentaos/pay": major
 ---
 
-Support the new gateway API surface (additive).
+2.0.0 — target the new server-owned gateway API.
 
-**New request fields**
-- `type: 'one_time' | 'subscription'` + `billingInterval: 'month' | 'year'` on `paymentLinks.create` for recurring links (`billingInterval` is required when `type` is `'subscription'`, forbidden otherwise; subscriptions require a Merchant-of-Record account, i.e. a verified business).
-- `dueDate` (YYYY-MM-DD) on `checkouts.create` for invoice-authored sessions.
+This release targets the new AgentaOS API generation and requires it. Seller mode
+is now DERIVED AND OWNED BY THE SERVER — never a client input: the SDK sends no
+seller mode and reads the resolved value off responses for display.
 
-**Seller mode is now server-derived — not a parameter.** How a link/checkout settles (`'mor'` = card + bank via Merchant of Record, `'crypto'` = on-chain to your wallet) is derived from your account (Merchant of Record once your business is verified, otherwise on-chain to the wallet on file). It is no longer a create parameter; the resolved value is returned on the response for rendering.
+**BREAKING (for raw-HTTP integrations — existing SDK callers upgrade cleanly).**
+`POST /payment-links` no longer accepts `acceptsWallet` / `acceptsSepa` (or a
+client-supplied seller mode) — it returns a 400. Seller mode is derived from the
+account (Merchant of Record once the business is verified, otherwise on-chain to
+the wallet on file). The published SDK never sent those fields, so SDK/CLI callers
+are unaffected on the wire; the major bump reflects that 2.x targets the new API.
 
-**New response fields**
-- `PaymentLink`: `sellerMode`, `type`, `billingInterval`.
-- `Checkout`: `sellerMode`, `invoiceId`, `invoiceNumber`.
-
-**API migration note for raw-HTTP integrations (not SDK users).** `POST /payment-links` no longer accepts `acceptsWallet` / `acceptsSepa` — the whitelist rejects them with a 400. Seller mode is derived from the account; the `accepts_wallet` / `accepts_sepa` response keys are replaced by `sellerMode`. The published SDK never sent or read those fields.
+**New surface**
+- Subscription payment links: `type: 'one_time' | 'subscription'` + `billingInterval`
+  on `paymentLinks.create` (subscriptions require a verified/MoR account).
+- `dueDate` on `checkouts.create` for invoice-authored sessions.
+- Response fields: `sellerMode`, `type`, `billingInterval` on `PaymentLink`;
+  `sellerMode`, `invoiceId`, `invoiceNumber` on `Checkout`.
