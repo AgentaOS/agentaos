@@ -67,6 +67,7 @@ const checkout = await agentaos.checkouts.create({
   webhookUrl: 'https://shop.com/webhooks',   // Server notification on payment (HTTPS)
   expiresIn: 1800,                           // Seconds until expiry (300-86400, default 1800)
   taxRateId: 'uuid',                         // Pre-created tax rate UUID
+  dueDate: '2026-09-30',                     // Invoice due date (YYYY-MM-DD), presentation only
 
   // --- Optional: pre-populate buyer info ---
   buyerEmail: 'john@example.com',
@@ -90,8 +91,11 @@ const checkout = await agentaos.checkouts.create({
 | `checkoutUrl` | `string` | URL to send your human customer to |
 | `x402Url` | `string` | x402 protocol URL for AI agent payments |
 | `status` | `'open' \| 'completed' \| 'expired' \| 'cancelled'` | Current status |
+| `sellerMode` | `'mor' \| 'crypto'` | How this session settles |
 | `amountOverride` | `number \| null` | Amount for this session |
 | `currency` | `string` | Settlement currency |
+| `invoiceId` | `string \| null` | Issued invoice UUID (null until an invoice exists) |
+| `invoiceNumber` | `string \| null` | Human-readable invoice number |
 | `expiresAt` | `string` | ISO 8601 expiration time |
 | `createdAt` | `string` | ISO 8601 creation time |
 
@@ -124,13 +128,15 @@ await agentaos.checkouts.cancel('mZrESFyR7RC9RPsJfZCVkg');
 
 Reusable payment templates. Share the `checkoutUrl` — each visitor gets a new session.
 
+> **Seller mode is derived from your account — it is not a parameter.** Once your business is verified you accept card + bank via Merchant of Record; otherwise payments settle on-chain to the wallet on file. You never pass it; the server resolves it and returns it as `sellerMode` on the response (a `checkouts.create` with `linkId` inherits the link's mode).
+
 ### `paymentLinks.create(params)`
 
 ```typescript
 const link = await agentaos.paymentLinks.create({
   amount: 29.99,
   currency: 'EUR',
-  description: 'Monthly subscription',
+  description: 'Pro plan',
   successUrl: 'https://shop.com/success',
   cancelUrl: 'https://shop.com/cancel',
   webhookUrl: 'https://shop.com/webhooks',
@@ -147,6 +153,18 @@ console.log(link.checkoutUrl);
 // → https://app.agentaos.ai/pay/7rr6S9ml4BMp829wV5WeAA
 ```
 
+**Recurring (subscription) link** — set `type: 'subscription'` and a `billingInterval` (requires a verified account, since subscriptions bill card/bank via Merchant of Record):
+
+```typescript
+const subscription = await agentaos.paymentLinks.create({
+  amount: 29.99,
+  currency: 'EUR',
+  description: 'Pro plan — monthly',
+  type: 'subscription',
+  billingInterval: 'month',     // 'month' | 'year' — REQUIRED for subscriptions
+});
+```
+
 **Response:**
 
 | Field | Type | Description |
@@ -156,6 +174,9 @@ console.log(link.checkoutUrl);
 | `amount` | `number` | Payment amount |
 | `currency` | `string` | Settlement currency |
 | `status` | `'active' \| 'cancelled'` | Link status |
+| `sellerMode` | `'mor' \| 'crypto'` | How this link settles |
+| `type` | `'one_time' \| 'subscription'` | Link type |
+| `billingInterval` | `'month' \| 'year' \| null` | Cadence for subscriptions; null for one-time |
 | `paymentCount` | `number` | Times this link has been paid |
 | `createdAt` | `string` | ISO 8601 |
 

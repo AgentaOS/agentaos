@@ -5,6 +5,9 @@ const BASE_PATH = '/api/v1/gateway/payment-links';
 
 export class PaymentLinksResource extends BaseResource {
 	async create(params: CreatePaymentLinkParams): Promise<PaymentLink> {
+		// Seller mode (Merchant of Record vs on-chain crypto) is NOT a parameter —
+		// the server derives it from the merchant's account. The response carries
+		// the resolved `sellerMode` for rendering.
 		return this.post<PaymentLink>(BASE_PATH, params);
 	}
 

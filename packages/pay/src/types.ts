@@ -83,6 +83,10 @@ export interface CreatePaymentLinkParams {
 	/** UUID of pre-created tax rate */
 	taxRateId?: string;
 	checkoutFields?: CheckoutField[];
+	/** 'one_time' (default) or 'subscription' for recurring billing. */
+	type?: 'one_time' | 'subscription';
+	/** Billing cadence — REQUIRED when type is 'subscription', omit otherwise. */
+	billingInterval?: 'month' | 'year';
 }
 
 export interface PaymentLink {
@@ -92,6 +96,12 @@ export interface PaymentLink {
 	currency: string;
 	description: string | null;
 	status: 'active' | 'cancelled';
+	/** Settlement mode: 'mor' (card + bank) or 'crypto' (on-chain to your wallet). */
+	sellerMode: 'mor' | 'crypto';
+	/** 'one_time' or 'subscription'. */
+	type: 'one_time' | 'subscription';
+	/** Set only for subscription links; null for one-time links. */
+	billingInterval: 'month' | 'year' | null;
 	checkoutUrl: string;
 	metadata: Record<string, unknown>;
 	checkoutFields: CheckoutField[];
@@ -142,6 +152,8 @@ export interface CreateCheckoutParams {
 	expiresIn?: number;
 	/** CAIP-2 network IDs (e.g. ['eip155:8453']). Defaults to Base mainnet. */
 	supportedNetworks?: string[];
+	/** Invoice due date (YYYY-MM-DD). Presentation only — stamped on the issued invoice. */
+	dueDate?: string;
 }
 
 export interface ListCheckoutParams extends ListParams {
@@ -156,11 +168,16 @@ export interface Checkout {
 	checkoutUrl: string;
 	x402Url: string;
 	status: 'open' | 'completed' | 'expired' | 'cancelled';
+	/** Settlement mode: 'mor' (card + bank) or 'crypto' (on-chain to your wallet). */
+	sellerMode: 'mor' | 'crypto';
 	amountOverride: number | null;
 	currency: string;
 	metadata: Record<string, unknown>;
 	successUrl: string | null;
 	cancelUrl: string | null;
+	/** Set once an invoice has been issued for this session; null until then. */
+	invoiceId: string | null;
+	invoiceNumber: string | null;
 	expiresAt: string;
 	createdAt: string;
 	updatedAt: string;
