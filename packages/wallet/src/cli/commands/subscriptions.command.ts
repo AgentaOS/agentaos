@@ -25,8 +25,9 @@ export const subscriptionsCommand = new Command('subscriptions').description(
 subscriptionsCommand
 	.command('list')
 	.description('List subscriptions')
+	.option('--limit <n>', 'Results per page (default 10)', '10')
 	.option('--json', 'Output as JSON')
-	.action(async () => {
+	.action(async (opts: { limit: string }) => {
 		const client = await requirePayClient();
 		if (!client) return;
 
@@ -34,23 +35,28 @@ subscriptionsCommand
 		const spinner = json ? null : ora({ text: 'Fetching subscriptions...', indent: 2 }).start();
 
 		try {
-			const subs = await client.subscriptions.list();
+			const data = await client.subscriptions.list({
+				limit: Number.parseInt(opts.limit, 10) || 10,
+			});
 			spinner?.stop();
 
 			if (json) {
-				console.log(JSON.stringify(subs));
+				console.log(
+					JSON.stringify({ total: data.total, hasMore: data.hasMore, items: data.items }),
+				);
 				return;
 			}
-			if (!subs.length) {
+			if (!data.items.length) {
 				console.log(dim('\n  No subscriptions found.\n'));
 				return;
 			}
-			console.log(`\n  ${chalk.bold(`Subscriptions (${subs.length})`)}\n`);
-			for (const s of subs) {
+			console.log(`\n  ${chalk.bold(`Subscriptions (${data.total} total)`)}\n`);
+			for (const s of data.items) {
 				const amt = `${formatAmount(s.unitAmountMinor, s.currency)}${s.billingInterval ? `/${s.billingInterval}` : ''}`;
 				const who = s.customerEmail ?? s.customerName ?? '—';
 				console.log(`  ${s.status.padEnd(10)} ${amt.padEnd(14)} ${who.padEnd(28)} ${dim(s.id)}`);
 			}
+			if (data.hasMore) console.log(dim(`\n  ${data.items.length} of ${data.total} shown.`));
 			console.log('');
 		} catch (error: unknown) {
 			const msg = error instanceof Error ? error.message : 'Unknown error';

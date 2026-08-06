@@ -214,21 +214,29 @@ describe('invoices', () => {
 });
 
 describe('subscriptions', () => {
-	it('list → GET /api/v1/gateway/subscriptions returning a camelized array', async () => {
-		const calls = stubRoutes([
-			{
-				id: 'sub_1',
-				customer_email: 'a@b.com',
-				unit_amount_minor: 1999,
-				current_period_end: '2026-09-01T00:00:00Z',
-				stripe_subscription_id: 'sub_x',
-			},
-		]);
-		const subs = await client().subscriptions.list();
+	it('list → GET /api/v1/gateway/subscriptions with pagination params, returning a camelized envelope', async () => {
+		const calls = stubRoutes({
+			items: [
+				{
+					id: 'sub_1',
+					customer_email: 'a@b.com',
+					unit_amount_minor: 1999,
+					current_period_end: '2026-09-01T00:00:00Z',
+					stripe_subscription_id: 'sub_x',
+				},
+			],
+			total: 1,
+			has_more: false,
+		});
+		const page = await client().subscriptions.list({ limit: 5, offset: 10 });
+		const url = new URL(calls[0]?.url ?? '');
 		expect(calls[0]?.method).toBe('GET');
-		expect(pathOf(calls[0])).toBe('/api/v1/gateway/subscriptions');
-		expect(Array.isArray(subs)).toBe(true);
-		expect(subs[0]).toMatchObject({
+		expect(url.pathname).toBe('/api/v1/gateway/subscriptions');
+		expect(url.searchParams.get('limit')).toBe('5');
+		expect(url.searchParams.get('offset')).toBe('10');
+		expect(page.total).toBe(1);
+		expect(page.hasMore).toBe(false);
+		expect(page.items[0]).toMatchObject({
 			customerEmail: 'a@b.com',
 			unitAmountMinor: 1999,
 			currentPeriodEnd: '2026-09-01T00:00:00Z',
@@ -253,15 +261,21 @@ describe('subscriptions', () => {
 });
 
 describe('customers', () => {
-	it('list → GET /api/v1/gateway/customers returning a camelized array', async () => {
-		const calls = stubRoutes([
-			{ id: 'cus_1', email: 'a@b.com', vat_number: 'DE123', stripe_customer_id: 'cus_x' },
-		]);
-		const customers = await client().customers.list();
+	it('list → GET /api/v1/gateway/customers with pagination params, returning a camelized envelope', async () => {
+		const calls = stubRoutes({
+			items: [{ id: 'cus_1', email: 'a@b.com', vat_number: 'DE123', stripe_customer_id: 'cus_x' }],
+			total: 1,
+			has_more: false,
+		});
+		const page = await client().customers.list({ limit: 5, offset: 10 });
+		const url = new URL(calls[0]?.url ?? '');
 		expect(calls[0]?.method).toBe('GET');
-		expect(pathOf(calls[0])).toBe('/api/v1/gateway/customers');
-		expect(Array.isArray(customers)).toBe(true);
-		expect(customers[0]).toMatchObject({
+		expect(url.pathname).toBe('/api/v1/gateway/customers');
+		expect(url.searchParams.get('limit')).toBe('5');
+		expect(url.searchParams.get('offset')).toBe('10');
+		expect(page.total).toBe(1);
+		expect(page.hasMore).toBe(false);
+		expect(page.items[0]).toMatchObject({
 			email: 'a@b.com',
 			vatNumber: 'DE123',
 			stripeCustomerId: 'cus_x',

@@ -14,8 +14,9 @@ export const customersCommand = new Command('customers').description('Customer m
 customersCommand
 	.command('list')
 	.description('List customers')
+	.option('--limit <n>', 'Results per page (default 10)', '10')
 	.option('--json', 'Output as JSON')
-	.action(async () => {
+	.action(async (opts: { limit: string }) => {
 		const client = await requirePayClient();
 		if (!client) return;
 
@@ -23,25 +24,28 @@ customersCommand
 		const spinner = json ? null : ora({ text: 'Fetching customers...', indent: 2 }).start();
 
 		try {
-			const customers = await client.customers.list();
+			const data = await client.customers.list({ limit: Number.parseInt(opts.limit, 10) || 10 });
 			spinner?.stop();
 
 			if (json) {
-				console.log(JSON.stringify(customers));
+				console.log(
+					JSON.stringify({ total: data.total, hasMore: data.hasMore, items: data.items }),
+				);
 				return;
 			}
-			if (!customers.length) {
+			if (!data.items.length) {
 				console.log(dim('\n  No customers found.\n'));
 				return;
 			}
-			console.log(`\n  ${chalk.bold(`Customers (${customers.length})`)}\n`);
-			for (const c of customers) {
+			console.log(`\n  ${chalk.bold(`Customers (${data.total} total)`)}\n`);
+			for (const c of data.items) {
 				const name = c.name ?? '—';
 				const country = c.country ?? '';
 				console.log(
 					`  ${(c.email ?? '—').padEnd(30)} ${name.padEnd(24)} ${country.padEnd(4)} ${dim(c.id)}`,
 				);
 			}
+			if (data.hasMore) console.log(dim(`\n  ${data.items.length} of ${data.total} shown.`));
 			console.log('');
 		} catch (error: unknown) {
 			const msg = error instanceof Error ? error.message : 'Unknown error';

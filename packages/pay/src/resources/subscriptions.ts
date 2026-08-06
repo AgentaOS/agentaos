@@ -1,4 +1,10 @@
-import type { CancelSubscriptionParams, CancelSubscriptionResult, Subscription } from '../types.js';
+import type {
+	CancelSubscriptionParams,
+	CancelSubscriptionResult,
+	ListParams,
+	PaginatedList,
+	Subscription,
+} from '../types.js';
 import { BaseResource } from './base.js';
 
 const BASE_PATH = '/api/v1/gateway/subscriptions';
@@ -10,9 +16,12 @@ const BASE_PATH = '/api/v1/gateway/subscriptions';
  * the dashboard. There is no `create` here by design.
  */
 export class SubscriptionsResource extends BaseResource {
-	/** List every subscription in the current environment (test/live from the API key). */
-	async list(): Promise<Subscription[]> {
-		return this.get<Subscription[]>(BASE_PATH);
+	/** List subscriptions in the current environment (test/live from the API key), paginated. */
+	async list(params?: ListParams): Promise<PaginatedList<Subscription>> {
+		return this.get<PaginatedList<Subscription>>(
+			BASE_PATH,
+			params as Record<string, string | number | undefined>,
+		);
 	}
 
 	/**

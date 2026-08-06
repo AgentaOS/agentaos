@@ -204,13 +204,19 @@ await agentaos.paymentLinks.cancel('uuid');
 
 Read + manage subscriptions. Subscriptions are **created by buyers** on the hosted checkout (paying a payment link with `type: 'subscription'`) — this resource is the merchant-side management surface (list, cancel), mirroring the dashboard. There is no `create` here by design.
 
-### `subscriptions.list()`
+### `subscriptions.list(params?)`
+
+Paginated — returns `{ items, total, hasMore }` (`total` is the full count, `hasMore` tells you whether another page remains).
 
 ```typescript
-const subscriptions = await agentaos.subscriptions.list();
+const page = await agentaos.subscriptions.list({
+  limit: 20,   // 1-100, default 20
+  offset: 0,
+});
+console.log(page.total, page.hasMore);
 ```
 
-**Response item:**
+**Each item in `page.items`:**
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -252,13 +258,19 @@ await agentaos.subscriptions.cancel('uuid', { atPeriodEnd: false });
 
 Read the customers who have paid you (mirrors the dashboard Customers list).
 
-### `customers.list()`
+### `customers.list(params?)`
+
+Paginated — returns `{ items, total, hasMore }` (`total` is the full count, `hasMore` tells you whether another page remains).
 
 ```typescript
-const customers = await agentaos.customers.list();
+const page = await agentaos.customers.list({
+  limit: 20,   // 1-100, default 20
+  offset: 0,
+});
+console.log(page.total, page.hasMore);
 ```
 
-**Response item:**
+**Each item in `page.items`:**
 
 | Field | Type | Description |
 |-------|------|-------------|
