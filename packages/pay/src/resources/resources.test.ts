@@ -159,11 +159,11 @@ describe('invoices', () => {
 		expect(pathOf(calls[0])).toBe('/api/v1/gateway/invoices/inv_5');
 	});
 
-	it('void → DELETE /api/v1/gateway/invoices/:id', async () => {
+	it('void → POST /api/v1/gateway/invoices/:id/void', async () => {
 		const calls = stubRoutes();
 		await client().invoices.void('inv_5');
-		expect(calls[0]?.method).toBe('DELETE');
-		expect(pathOf(calls[0])).toBe('/api/v1/gateway/invoices/inv_5');
+		expect(calls[0]?.method).toBe('POST');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/invoices/inv_5/void');
 	});
 
 	it('downloadPdf → GET /api/v1/gateway/invoices/:id/pdf returning a Buffer', async () => {

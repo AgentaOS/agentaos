@@ -16,7 +16,7 @@ export class InvoicesResource extends BaseResource {
 	}
 
 	async void(id: string): Promise<{ success: boolean }> {
-		return this.del<{ success: boolean }>(`${BASE_PATH}/${id}`);
+		return this.post<{ success: boolean }>(`${BASE_PATH}/${id}/void`);
 	}
 
 	async downloadPdf(id: string): Promise<Buffer> {
