@@ -10,7 +10,7 @@ import { brand, dim } from '../theme.js';
 // Shared
 // ---------------------------------------------------------------------------
 
-async function requirePayClient(): Promise<AgentaOS | null> {
+export async function requirePayClient(): Promise<AgentaOS | null> {
 	const session = await ensureSession();
 	if (!session.ok) {
 		outputError(

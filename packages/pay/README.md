@@ -200,6 +200,78 @@ await agentaos.paymentLinks.cancel('uuid');
 
 ---
 
+## Subscriptions
+
+Read + manage subscriptions. Subscriptions are **created by buyers** on the hosted checkout (paying a payment link with `type: 'subscription'`) — this resource is the merchant-side management surface (list, cancel), mirroring the dashboard. There is no `create` here by design.
+
+### `subscriptions.list()`
+
+```typescript
+const subscriptions = await agentaos.subscriptions.list();
+```
+
+**Response item:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Subscription UUID |
+| `customerEmail` | `string \| null` | Subscriber email |
+| `customerName` | `string \| null` | Subscriber name |
+| `planName` | `string \| null` | The plan (subscription payment link) name or description |
+| `billingInterval` | `'month' \| 'year' \| null` | Billing cadence |
+| `status` | `'incomplete' \| 'incomplete_expired' \| 'trialing' \| 'active' \| 'past_due' \| 'canceled' \| 'unpaid' \| 'paused'` | Current status |
+| `unitAmountMinor` | `number` | Per-cycle amount in integer minor units (e.g. `1999` = €19.99) |
+| `currency` | `string` | Settlement currency |
+| `currentPeriodEnd` | `string \| null` | ISO 8601 end of the current paid period; null before the first cycle books |
+| `stripeSubscriptionId` | `string \| null` | Underlying Stripe subscription ID |
+
+### `subscriptions.cancel(id, params?)`
+
+Defaults to cancel-at-period-end — the subscriber keeps the current paid period, no refund. Pass `{ atPeriodEnd: false }` to cancel immediately. Idempotent on an already-canceled subscription.
+
+```typescript
+// Cancel at period end (default) — subscriber keeps access until currentPeriodEnd
+await agentaos.subscriptions.cancel('uuid');
+
+// Cancel immediately — access revoked now, no refund
+await agentaos.subscriptions.cancel('uuid', { atPeriodEnd: false });
+```
+
+**Response:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | `SubscriptionStatus` | Status after the cancellation |
+| `currentPeriodEnd` | `string \| null` | ISO 8601 end of the current paid period |
+| `cancelAtPeriodEnd` | `boolean` | Whether the subscription is scheduled to cancel at period end |
+| `effectiveCancelDate` | `string \| null` | ISO 8601 date the cancellation takes effect |
+
+---
+
+## Customers
+
+Read the customers who have paid you (mirrors the dashboard Customers list).
+
+### `customers.list()`
+
+```typescript
+const customers = await agentaos.customers.list();
+```
+
+**Response item:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Customer UUID |
+| `email` | `string` | Customer email |
+| `name` | `string \| null` | Customer name |
+| `country` | `string \| null` | ISO 3166-1 alpha-2 country code |
+| `vatNumber` | `string \| null` | VAT number on file |
+| `stripeCustomerId` | `string \| null` | Underlying Stripe customer ID |
+| `createdAt` | `string` | ISO 8601 |
+
+---
+
 ## Transactions
 
 Unified ledger of all confirmed inbound (received) and outbound (sent) payments.
@@ -304,6 +376,24 @@ const csv = await agentaos.invoices.exportCsv({
   status: 'issued',
 });
 fs.writeFileSync('invoices.csv', csv);
+```
+
+### `invoices.getReceipt(id)`
+
+Download the receipt PDF for a paid invoice. Falls back to the invoice PDF for invoices issued before receipts existed.
+
+```typescript
+const receipt = await agentaos.invoices.getReceipt('uuid');
+fs.writeFileSync('receipt.pdf', receipt);
+```
+
+### `invoices.sendReceipt(id)`
+
+Re-send the receipt email to the buyer on file. Paid invoices only.
+
+```typescript
+const result = await agentaos.invoices.sendReceipt('uuid');
+console.log(result.sentTo); // buyer email the receipt was sent to
 ```
 
 ---

@@ -194,4 +194,77 @@ describe('invoices', () => {
 		expect(url.searchParams.get('status')).toBe('issued');
 		expect(csv).toBe('number,amount\nINV-1,100');
 	});
+
+	it('getReceipt → GET /api/v1/gateway/invoices/:id/receipt returning a Buffer', async () => {
+		const calls = stubRoutes('%PDF-receipt-bytes');
+		const buffer = await client().invoices.getReceipt('inv_5');
+		expect(calls[0]?.method).toBe('GET');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/invoices/inv_5/receipt');
+		expect(Buffer.isBuffer(buffer)).toBe(true);
+		expect(buffer.toString('utf-8')).toBe('%PDF-receipt-bytes');
+	});
+
+	it('sendReceipt → POST /api/v1/gateway/invoices/:id/send-receipt (camelized)', async () => {
+		const calls = stubRoutes({ ok: true, sent_to: 'buyer@example.com' });
+		const res = await client().invoices.sendReceipt('inv_5');
+		expect(calls[0]?.method).toBe('POST');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/invoices/inv_5/send-receipt');
+		expect(res).toMatchObject({ ok: true, sentTo: 'buyer@example.com' });
+	});
+});
+
+describe('subscriptions', () => {
+	it('list → GET /api/v1/gateway/subscriptions returning a camelized array', async () => {
+		const calls = stubRoutes([
+			{
+				id: 'sub_1',
+				customer_email: 'a@b.com',
+				unit_amount_minor: 1999,
+				current_period_end: '2026-09-01T00:00:00Z',
+				stripe_subscription_id: 'sub_x',
+			},
+		]);
+		const subs = await client().subscriptions.list();
+		expect(calls[0]?.method).toBe('GET');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/subscriptions');
+		expect(Array.isArray(subs)).toBe(true);
+		expect(subs[0]).toMatchObject({
+			customerEmail: 'a@b.com',
+			unitAmountMinor: 1999,
+			currentPeriodEnd: '2026-09-01T00:00:00Z',
+			stripeSubscriptionId: 'sub_x',
+		});
+	});
+
+	it('cancel → POST /api/v1/gateway/subscriptions/:id/cancel with atPeriodEnd:true by default', async () => {
+		const calls = stubRoutes({ status: 'active', cancel_at_period_end: true });
+		const res = await client().subscriptions.cancel('sub_1');
+		expect(calls[0]?.method).toBe('POST');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/subscriptions/sub_1/cancel');
+		expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual({ atPeriodEnd: true });
+		expect(res).toMatchObject({ cancelAtPeriodEnd: true });
+	});
+
+	it('cancel({ atPeriodEnd: false }) → sends the immediate-cancel body', async () => {
+		const calls = stubRoutes({ status: 'canceled', cancel_at_period_end: false });
+		await client().subscriptions.cancel('sub_1', { atPeriodEnd: false });
+		expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual({ atPeriodEnd: false });
+	});
+});
+
+describe('customers', () => {
+	it('list → GET /api/v1/gateway/customers returning a camelized array', async () => {
+		const calls = stubRoutes([
+			{ id: 'cus_1', email: 'a@b.com', vat_number: 'DE123', stripe_customer_id: 'cus_x' },
+		]);
+		const customers = await client().customers.list();
+		expect(calls[0]?.method).toBe('GET');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/customers');
+		expect(Array.isArray(customers)).toBe(true);
+		expect(customers[0]).toMatchObject({
+			email: 'a@b.com',
+			vatNumber: 'DE123',
+			stripeCustomerId: 'cus_x',
+		});
+	});
 });

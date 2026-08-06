@@ -262,6 +262,69 @@ export interface Invoice {
 }
 
 // ---------------------------------------------------------------------------
+// Subscriptions
+// ---------------------------------------------------------------------------
+
+/** Raw Stripe subscription status, mirrored onto the local record by the poll. */
+export type SubscriptionStatus =
+	| 'incomplete'
+	| 'incomplete_expired'
+	| 'trialing'
+	| 'active'
+	| 'past_due'
+	| 'canceled'
+	| 'unpaid'
+	| 'paused';
+
+export interface Subscription {
+	id: string;
+	customerEmail: string | null;
+	customerName: string | null;
+	/** The plan (subscription payment-link) name or description. */
+	planName: string | null;
+	billingInterval: 'month' | 'year' | null;
+	status: SubscriptionStatus;
+	/** Per-cycle amount in integer minor units (e.g. 1999 = €19.99). */
+	unitAmountMinor: number;
+	currency: string;
+	/** ISO 8601 end of the current paid period; null before the first cycle books. */
+	currentPeriodEnd: string | null;
+	stripeSubscriptionId: string | null;
+}
+
+export interface CancelSubscriptionParams {
+	/**
+	 * Cancel at the end of the current paid period (default true) — the
+	 * subscriber keeps what they paid for, no refund. Pass false to cancel
+	 * immediately.
+	 */
+	atPeriodEnd?: boolean;
+}
+
+export interface CancelSubscriptionResult {
+	status: SubscriptionStatus;
+	currentPeriodEnd: string | null;
+	cancelAtPeriodEnd: boolean;
+	/** ISO 8601 date the cancellation takes effect. */
+	effectiveCancelDate: string | null;
+}
+
+// ---------------------------------------------------------------------------
+// Customers
+// ---------------------------------------------------------------------------
+
+export interface Customer {
+	id: string;
+	email: string;
+	name: string | null;
+	/** ISO 3166-1 alpha-2 country code. */
+	country: string | null;
+	vatNumber: string | null;
+	stripeCustomerId: string | null;
+	createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
 // Webhook Events
 // ---------------------------------------------------------------------------
 
