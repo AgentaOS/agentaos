@@ -14,6 +14,7 @@ import { customersCommand } from './commands/customers.command.js';
 import { deployCommand } from './commands/deploy.command.js';
 import { infoCommand } from './commands/info.command.js';
 import { createCommand, importCommand } from './commands/init.command.js';
+import { invoicesCommand } from './commands/invoices.command.js';
 import { linkCommand } from './commands/link.command.js';
 import { loginCommand, logoutCommand } from './commands/login.command.js';
 import { networkCommand } from './commands/network.command.js';
@@ -81,6 +82,11 @@ ${dim('Subscriptions & customers (manage):')}
   $ agenta subscriptions cancel <id>     Cancel (at period end; --now for immediate)
   $ agenta customers list                List customers
 
+${dim('Invoices & receipts:')}
+  $ agenta invoices list                 List invoices
+  $ agenta invoices receipt <id>         Download the receipt PDF
+  $ agenta invoices send-receipt <id>    Re-send the receipt email
+
 ${dim('Agent sub-accounts (send & sign):')}
   $ agenta sub create --name bot1             Create a sub-account
   $ agenta sub import --name bot1 \\
@@ -111,6 +117,7 @@ ${dim('Docs: https://github.com/AgentaOS/agentaos')}
 	program.addCommand(payCommand);
 	program.addCommand(subscriptionsCommand);
 	program.addCommand(customersCommand);
+	program.addCommand(invoicesCommand);
 	program.addCommand(subCommand);
 
 	await program.parseAsync();

@@ -31,6 +31,10 @@ const EXPECTED_TOOLS = [
 	'agenta_pay_create_checkout',
 	'agenta_pay_get_checkout',
 	'agenta_pay_list_checkouts',
+	'agenta_pay_list_subscriptions',
+	'agenta_pay_cancel_subscription',
+	'agenta_pay_list_customers',
+	'agenta_pay_send_receipt',
 ];
 
 describe('AgentaOS Terminal MCP Server', () => {
