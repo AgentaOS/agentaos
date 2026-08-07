@@ -1,6 +1,6 @@
 {
 	"name": "agentaos",
-	"version": "1.2.0",
+	"version": "2.0.0",
 	"description": "AgentaOS — CLI + MCP server for threshold signing. The key never exists.",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",
@@ -11,26 +11,13 @@
 	},
 	"homepage": "https://github.com/AgentaOS/agentaos",
 	"bugs": "https://github.com/AgentaOS/agentaos/issues",
-	"keywords": [
-		"mcp",
-		"threshold",
-		"wallet",
-		"mpc",
-		"ethereum",
-		"agent",
-		"signing",
-		"cli",
-		"x402"
-	],
+	"keywords": ["mcp", "threshold", "wallet", "mpc", "ethereum", "agent", "signing", "cli", "x402"],
 	"type": "module",
 	"bin": {
 		"agentaos": "./dist/index.js",
 		"agenta": "./dist/index.js"
 	},
-	"files": [
-		"dist",
-		"!dist/__tests__"
-	],
+	"files": ["dist", "!dist/__tests__"],
 	"engines": {
 		"node": ">=20.0.0"
 	},
