@@ -28,8 +28,7 @@
 		"build": "tsc -p tsconfig.build.json",
 		"dev": "tsx src/index.ts",
 		"lint": "biome check src/",
-		"test": "vitest run --passWithNoTests --exclude='**/*.integration.test.*'",
-		"test:integration": "vitest run src/__tests__/*.integration.test.ts",
+		"test": "vitest run --passWithNoTests",
 		"typecheck": "tsc --noEmit",
 		"clean": "rm -rf dist"
 	},
