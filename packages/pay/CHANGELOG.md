@@ -39,6 +39,10 @@
   - `invoices.getReceipt(id)` (receipt PDF) and `invoices.sendReceipt(id)`.
   - CLI parity: `agenta subscriptions list|cancel`, `agenta customers list`.
 
+  **Pagination:** every `list()` returns a `{ items, total, hasMore }` envelope
+  (uniform across payment links, checkouts, transactions, invoices, customers,
+  and subscriptions) — read results off `.items`.
+
 ## 1.0.1
 
 ### Patch Changes
