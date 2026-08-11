@@ -177,6 +177,12 @@ npm install -g agentaos
 | `agenta pay checkout -a 50` | Create a checkout session |
 | `agenta pay get <sessionId>` | Get checkout details |
 | `agenta pay list` | List your checkouts |
+| `agenta subscriptions list` | List subscriptions |
+| `agenta subscriptions cancel <id>` | Cancel a subscription (at period end; `--now` for immediate) |
+| `agenta customers list` | List customers |
+| `agenta invoices list` | List invoices |
+| `agenta invoices receipt <id>` | Download the receipt PDF |
+| `agenta invoices send-receipt <id>` | Re-send the receipt email |
 
 **Agent Sub-accounts** — autonomous wallets with guardrails
 
@@ -228,7 +234,7 @@ Connect any AI assistant to AgentaOS. Claude, Cursor, Windsurf — they sign tra
 - **API Key** + **API Secret** — for wallet tools. Generated when you create a sub-account.
 - **Gateway Key** — for payment tools. Generated at [app.agentaos.ai](https://app.agentaos.ai) → API Keys.
 
-### Tools (21 total)
+### Tools (25 total)
 
 **Payments**
 
@@ -237,6 +243,10 @@ Connect any AI assistant to AgentaOS. Claude, Cursor, Windsurf — they sign tra
 | `agenta_pay_create_checkout` | Create a checkout session |
 | `agenta_pay_get_checkout` | Get checkout status |
 | `agenta_pay_list_checkouts` | List checkouts |
+| `agenta_pay_list_subscriptions` | List subscriptions |
+| `agenta_pay_cancel_subscription` | Cancel a subscription (at period end or immediately) |
+| `agenta_pay_list_customers` | List customers who have paid you |
+| `agenta_pay_send_receipt` | Re-send a paid invoice's receipt email to the buyer |
 
 **Wallet**
 

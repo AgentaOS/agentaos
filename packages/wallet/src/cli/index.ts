@@ -10,9 +10,11 @@ import {
 	resumeCommand,
 } from './commands/admin.command.js';
 import { balanceCommand } from './commands/balance.command.js';
+import { customersCommand } from './commands/customers.command.js';
 import { deployCommand } from './commands/deploy.command.js';
 import { infoCommand } from './commands/info.command.js';
 import { createCommand, importCommand } from './commands/init.command.js';
+import { invoicesCommand } from './commands/invoices.command.js';
 import { linkCommand } from './commands/link.command.js';
 import { loginCommand, logoutCommand } from './commands/login.command.js';
 import { networkCommand } from './commands/network.command.js';
@@ -22,6 +24,7 @@ import { receiveCommand } from './commands/receive.command.js';
 import { sendCommand } from './commands/send.command.js';
 import { signMessageCommand } from './commands/sign.command.js';
 import { statusCommand } from './commands/status.command.js';
+import { subscriptionsCommand } from './commands/subscriptions.command.js';
 import { switchCommand } from './commands/switch.command.js';
 import { x402Command } from './commands/x402.command.js';
 import { BRAND_BANNER, dim } from './theme.js';
@@ -74,6 +77,16 @@ ${dim('Payments (accept & track):')}
   $ agenta pay get <sessionId>           Get checkout details
   $ agenta pay list                      List your checkouts
 
+${dim('Subscriptions & customers (manage):')}
+  $ agenta subscriptions list            List subscriptions
+  $ agenta subscriptions cancel <id>     Cancel (at period end; --now for immediate)
+  $ agenta customers list                List customers
+
+${dim('Invoices & receipts:')}
+  $ agenta invoices list                 List invoices
+  $ agenta invoices receipt <id>         Download the receipt PDF
+  $ agenta invoices send-receipt <id>    Re-send the receipt email
+
 ${dim('Agent sub-accounts (send & sign):')}
   $ agenta sub create --name bot1             Create a sub-account
   $ agenta sub import --name bot1 \\
@@ -102,6 +115,9 @@ ${dim('Docs: https://github.com/AgentaOS/agentaos')}
 	program.addCommand(logoutCommand);
 	program.addCommand(statusCommand);
 	program.addCommand(payCommand);
+	program.addCommand(subscriptionsCommand);
+	program.addCommand(customersCommand);
+	program.addCommand(invoicesCommand);
 	program.addCommand(subCommand);
 
 	await program.parseAsync();

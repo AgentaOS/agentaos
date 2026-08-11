@@ -1,6 +1,6 @@
 {
 	"name": "@agentaos/engine",
-	"version": "1.2.0",
+	"version": "2.0.0",
 	"description": "CGGMP24 threshold ECDSA signing scheme (WASM)",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",
@@ -29,7 +29,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"build": "tsc",
+		"build": "tsc -p tsconfig.build.json",
 		"lint": "biome check src/",
 		"test": "vitest run --passWithNoTests --exclude='**/*.integration.test.*'",
 		"test:integration": "vitest run --testPathPattern=integration",
@@ -37,10 +37,12 @@
 		"clean": "rm -rf dist"
 	},
 	"dependencies": {
-		"@noble/curves": "^2.0.1",
 		"@agentaos/core": "workspace:*",
 		"@agentaos/crypto": "workspace:*",
+		"@noble/curves": "^2.0.1",
 		"viem": "^2.21.0"
 	},
-	"devDependencies": {}
+	"devDependencies": {
+		"@types/node": "^20.0.0"
+	}
 }

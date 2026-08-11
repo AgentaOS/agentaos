@@ -16,7 +16,7 @@ export class InvoicesResource extends BaseResource {
 	}
 
 	async void(id: string): Promise<{ success: boolean }> {
-		return this.del<{ success: boolean }>(`${BASE_PATH}/${id}`);
+		return this.post<{ success: boolean }>(`${BASE_PATH}/${id}/void`);
 	}
 
 	async downloadPdf(id: string): Promise<Buffer> {
@@ -36,5 +36,18 @@ export class InvoicesResource extends BaseResource {
 			`${BASE_PATH}/export`,
 			params as Record<string, string | number | undefined>,
 		);
+	}
+
+	/**
+	 * Download the receipt PDF for a paid invoice. Falls back to the invoice PDF
+	 * for invoices issued before receipts existed.
+	 */
+	async getReceipt(id: string): Promise<Buffer> {
+		return this.getRaw(`${BASE_PATH}/${id}/receipt`);
+	}
+
+	/** Re-send the receipt email to the buyer on file. Paid invoices only. */
+	async sendReceipt(id: string): Promise<{ ok: true; sentTo: string }> {
+		return this.post<{ ok: true; sentTo: string }>(`${BASE_PATH}/${id}/send-receipt`);
 	}
 }

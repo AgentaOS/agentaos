@@ -67,6 +67,7 @@ const checkout = await agentaos.checkouts.create({
   webhookUrl: 'https://shop.com/webhooks',   // Server notification on payment (HTTPS)
   expiresIn: 1800,                           // Seconds until expiry (300-86400, default 1800)
   taxRateId: 'uuid',                         // Pre-created tax rate UUID
+  dueDate: '2026-09-30',                     // Invoice due date (YYYY-MM-DD), presentation only
 
   // --- Optional: pre-populate buyer info ---
   buyerEmail: 'john@example.com',
@@ -90,8 +91,11 @@ const checkout = await agentaos.checkouts.create({
 | `checkoutUrl` | `string` | URL to send your human customer to |
 | `x402Url` | `string` | x402 protocol URL for AI agent payments |
 | `status` | `'open' \| 'completed' \| 'expired' \| 'cancelled'` | Current status |
+| `sellerMode` | `'mor' \| 'crypto'` | How this session settles |
 | `amountOverride` | `number \| null` | Amount for this session |
 | `currency` | `string` | Settlement currency |
+| `invoiceId` | `string \| null` | Issued invoice UUID (null until an invoice exists) |
+| `invoiceNumber` | `string \| null` | Human-readable invoice number |
 | `expiresAt` | `string` | ISO 8601 expiration time |
 | `createdAt` | `string` | ISO 8601 creation time |
 
@@ -124,13 +128,15 @@ await agentaos.checkouts.cancel('mZrESFyR7RC9RPsJfZCVkg');
 
 Reusable payment templates. Share the `checkoutUrl` — each visitor gets a new session.
 
+> **Seller mode is derived from your account — it is not a parameter.** Once your business is verified you accept card + bank via Merchant of Record; otherwise payments settle on-chain to the wallet on file. You never pass it; the server resolves it and returns it as `sellerMode` on the response (a `checkouts.create` with `linkId` inherits the link's mode).
+
 ### `paymentLinks.create(params)`
 
 ```typescript
 const link = await agentaos.paymentLinks.create({
   amount: 29.99,
   currency: 'EUR',
-  description: 'Monthly subscription',
+  description: 'Pro plan',
   successUrl: 'https://shop.com/success',
   cancelUrl: 'https://shop.com/cancel',
   webhookUrl: 'https://shop.com/webhooks',
@@ -147,6 +153,18 @@ console.log(link.checkoutUrl);
 // → https://app.agentaos.ai/pay/7rr6S9ml4BMp829wV5WeAA
 ```
 
+**Recurring (subscription) link** — set `type: 'subscription'` and a `billingInterval` (requires a verified account, since subscriptions bill card/bank via Merchant of Record):
+
+```typescript
+const subscription = await agentaos.paymentLinks.create({
+  amount: 29.99,
+  currency: 'EUR',
+  description: 'Pro plan — monthly',
+  type: 'subscription',
+  billingInterval: 'month',     // 'month' | 'year' — REQUIRED for subscriptions
+});
+```
+
 **Response:**
 
 | Field | Type | Description |
@@ -156,6 +174,9 @@ console.log(link.checkoutUrl);
 | `amount` | `number` | Payment amount |
 | `currency` | `string` | Settlement currency |
 | `status` | `'active' \| 'cancelled'` | Link status |
+| `sellerMode` | `'mor' \| 'crypto'` | How this link settles |
+| `type` | `'one_time' \| 'subscription'` | Link type |
+| `billingInterval` | `'month' \| 'year' \| null` | Cadence for subscriptions; null for one-time |
 | `paymentCount` | `number` | Times this link has been paid |
 | `createdAt` | `string` | ISO 8601 |
 
@@ -176,6 +197,90 @@ const links = await agentaos.paymentLinks.list({ limit: 20, offset: 0 });
 ```typescript
 await agentaos.paymentLinks.cancel('uuid');
 ```
+
+---
+
+## Subscriptions
+
+Read + manage subscriptions. Subscriptions are **created by buyers** on the hosted checkout (paying a payment link with `type: 'subscription'`) — this resource is the merchant-side management surface (list, cancel), mirroring the dashboard. There is no `create` here by design.
+
+### `subscriptions.list(params?)`
+
+Paginated — returns `{ items, total, hasMore }` (`total` is the full count, `hasMore` tells you whether another page remains).
+
+```typescript
+const page = await agentaos.subscriptions.list({
+  limit: 20,   // 1-100, default 20
+  offset: 0,
+});
+console.log(page.total, page.hasMore);
+```
+
+**Each item in `page.items`:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Subscription UUID |
+| `customerEmail` | `string \| null` | Subscriber email |
+| `customerName` | `string \| null` | Subscriber name |
+| `planName` | `string \| null` | The plan (subscription payment link) name or description |
+| `billingInterval` | `'month' \| 'year' \| null` | Billing cadence |
+| `status` | `'incomplete' \| 'incomplete_expired' \| 'trialing' \| 'active' \| 'past_due' \| 'canceled' \| 'unpaid' \| 'paused'` | Current status |
+| `unitAmountMinor` | `number` | Per-cycle amount in integer minor units (e.g. `1999` = €19.99) |
+| `currency` | `string` | Settlement currency |
+| `currentPeriodEnd` | `string \| null` | ISO 8601 end of the current paid period; null before the first cycle books |
+| `stripeSubscriptionId` | `string \| null` | Underlying Stripe subscription ID |
+
+### `subscriptions.cancel(id, params?)`
+
+Defaults to cancel-at-period-end — the subscriber keeps the current paid period, no refund. Pass `{ atPeriodEnd: false }` to cancel immediately. Idempotent on an already-canceled subscription.
+
+```typescript
+// Cancel at period end (default) — subscriber keeps access until currentPeriodEnd
+await agentaos.subscriptions.cancel('uuid');
+
+// Cancel immediately — access revoked now, no refund
+await agentaos.subscriptions.cancel('uuid', { atPeriodEnd: false });
+```
+
+**Response:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | `SubscriptionStatus` | Status after the cancellation |
+| `currentPeriodEnd` | `string \| null` | ISO 8601 end of the current paid period |
+| `cancelAtPeriodEnd` | `boolean` | Whether the subscription is scheduled to cancel at period end |
+| `effectiveCancelDate` | `string \| null` | ISO 8601 date the cancellation takes effect |
+
+---
+
+## Customers
+
+Read the customers who have paid you (mirrors the dashboard Customers list).
+
+### `customers.list(params?)`
+
+Paginated — returns `{ items, total, hasMore }` (`total` is the full count, `hasMore` tells you whether another page remains).
+
+```typescript
+const page = await agentaos.customers.list({
+  limit: 20,   // 1-100, default 20
+  offset: 0,
+});
+console.log(page.total, page.hasMore);
+```
+
+**Each item in `page.items`:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Customer UUID |
+| `email` | `string` | Customer email |
+| `name` | `string \| null` | Customer name |
+| `country` | `string \| null` | ISO 3166-1 alpha-2 country code |
+| `vatNumber` | `string \| null` | VAT number on file |
+| `stripeCustomerId` | `string \| null` | Underlying Stripe customer ID |
+| `createdAt` | `string` | ISO 8601 |
 
 ---
 
@@ -283,6 +388,24 @@ const csv = await agentaos.invoices.exportCsv({
   status: 'issued',
 });
 fs.writeFileSync('invoices.csv', csv);
+```
+
+### `invoices.getReceipt(id)`
+
+Download the receipt PDF for a paid invoice. Falls back to the invoice PDF for invoices issued before receipts existed.
+
+```typescript
+const receipt = await agentaos.invoices.getReceipt('uuid');
+fs.writeFileSync('receipt.pdf', receipt);
+```
+
+### `invoices.sendReceipt(id)`
+
+Re-send the receipt email to the buyer on file. Paid invoices only.
+
+```typescript
+const result = await agentaos.invoices.sendReceipt('uuid');
+console.log(result.sentTo); // buyer email the receipt was sent to
 ```
 
 ---

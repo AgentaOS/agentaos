@@ -83,6 +83,10 @@ export interface CreatePaymentLinkParams {
 	/** UUID of pre-created tax rate */
 	taxRateId?: string;
 	checkoutFields?: CheckoutField[];
+	/** 'one_time' (default) or 'subscription' for recurring billing. */
+	type?: 'one_time' | 'subscription';
+	/** Billing cadence — REQUIRED when type is 'subscription', omit otherwise. */
+	billingInterval?: 'month' | 'year';
 }
 
 export interface PaymentLink {
@@ -92,6 +96,12 @@ export interface PaymentLink {
 	currency: string;
 	description: string | null;
 	status: 'active' | 'cancelled';
+	/** Settlement mode: 'mor' (card + bank) or 'crypto' (on-chain to your wallet). */
+	sellerMode: 'mor' | 'crypto';
+	/** 'one_time' or 'subscription'. */
+	type: 'one_time' | 'subscription';
+	/** Set only for subscription links; null for one-time links. */
+	billingInterval: 'month' | 'year' | null;
 	checkoutUrl: string;
 	metadata: Record<string, unknown>;
 	checkoutFields: CheckoutField[];
@@ -142,6 +152,8 @@ export interface CreateCheckoutParams {
 	expiresIn?: number;
 	/** CAIP-2 network IDs (e.g. ['eip155:8453']). Defaults to Base mainnet. */
 	supportedNetworks?: string[];
+	/** Invoice due date (YYYY-MM-DD). Presentation only — stamped on the issued invoice. */
+	dueDate?: string;
 }
 
 export interface ListCheckoutParams extends ListParams {
@@ -156,11 +168,16 @@ export interface Checkout {
 	checkoutUrl: string;
 	x402Url: string;
 	status: 'open' | 'completed' | 'expired' | 'cancelled';
+	/** Settlement mode: 'mor' (card + bank) or 'crypto' (on-chain to your wallet). */
+	sellerMode: 'mor' | 'crypto';
 	amountOverride: number | null;
 	currency: string;
 	metadata: Record<string, unknown>;
 	successUrl: string | null;
 	cancelUrl: string | null;
+	/** Set once an invoice has been issued for this session; null until then. */
+	invoiceId: string | null;
+	invoiceNumber: string | null;
 	expiresAt: string;
 	createdAt: string;
 	updatedAt: string;
@@ -241,6 +258,69 @@ export interface Invoice {
 	status: 'issued' | 'voided';
 	issuedAt: string;
 	voidedAt: string | null;
+	createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Subscriptions
+// ---------------------------------------------------------------------------
+
+/** Raw Stripe subscription status, mirrored onto the local record by the poll. */
+export type SubscriptionStatus =
+	| 'incomplete'
+	| 'incomplete_expired'
+	| 'trialing'
+	| 'active'
+	| 'past_due'
+	| 'canceled'
+	| 'unpaid'
+	| 'paused';
+
+export interface Subscription {
+	id: string;
+	customerEmail: string | null;
+	customerName: string | null;
+	/** The plan (subscription payment-link) name or description. */
+	planName: string | null;
+	billingInterval: 'month' | 'year' | null;
+	status: SubscriptionStatus;
+	/** Per-cycle amount in integer minor units (e.g. 1999 = €19.99). */
+	unitAmountMinor: number;
+	currency: string;
+	/** ISO 8601 end of the current paid period; null before the first cycle books. */
+	currentPeriodEnd: string | null;
+	stripeSubscriptionId: string | null;
+}
+
+export interface CancelSubscriptionParams {
+	/**
+	 * Cancel at the end of the current paid period (default true) — the
+	 * subscriber keeps what they paid for, no refund. Pass false to cancel
+	 * immediately.
+	 */
+	atPeriodEnd?: boolean;
+}
+
+export interface CancelSubscriptionResult {
+	status: SubscriptionStatus;
+	currentPeriodEnd: string | null;
+	cancelAtPeriodEnd: boolean;
+	/** ISO 8601 date the cancellation takes effect. */
+	effectiveCancelDate: string | null;
+}
+
+// ---------------------------------------------------------------------------
+// Customers
+// ---------------------------------------------------------------------------
+
+export interface Customer {
+	id: string;
+	email: string;
+	name: string | null;
+	/** ISO 3166-1 alpha-2 country code. */
+	country: string | null;
+	vatNumber: string | null;
+	stripeCustomerId: string | null;
 	createdAt: string;
 }
 

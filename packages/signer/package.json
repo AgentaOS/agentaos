@@ -1,6 +1,6 @@
 {
 	"name": "@agentaos/sdk",
-	"version": "1.2.0",
+	"version": "2.0.0",
 	"description": "SDK for threshold signing — the key never exists",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",
@@ -29,7 +29,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"build": "tsc",
+		"build": "tsc -p tsconfig.build.json",
 		"lint": "biome check src/",
 		"test": "vitest run",
 		"typecheck": "tsc --noEmit",

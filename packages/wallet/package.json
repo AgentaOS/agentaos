@@ -1,6 +1,6 @@
 {
 	"name": "agentaos",
-	"version": "1.2.0",
+	"version": "2.0.0",
 	"description": "AgentaOS — CLI + MCP server for threshold signing. The key never exists.",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",
@@ -25,7 +25,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"build": "tsc",
+		"build": "tsc -p tsconfig.build.json",
 		"dev": "tsx src/index.ts",
 		"lint": "biome check src/",
 		"test": "vitest run --passWithNoTests",

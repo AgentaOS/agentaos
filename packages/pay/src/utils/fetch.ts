@@ -9,7 +9,7 @@ import {
 	TimeoutError,
 	ValidationError,
 } from '../errors.js';
-import { camelToSnake, snakeToCamel } from './transform.js';
+import { snakeToCamel } from './transform.js';
 
 interface RequestOptions {
 	baseUrl: string;

@@ -34,9 +34,13 @@ import { registerX402Discover } from './tools/x402-discover.js';
 import { registerX402Fetch } from './tools/x402-fetch.js';
 
 // Merchant payment tools (agenta_pay_*) — uses @agentaos/pay SDK
+import { registerPayCancelSubscription } from './tools/pay-cancel-subscription.js';
 import { registerPayCreateCheckout } from './tools/pay-create-checkout.js';
 import { registerPayGetCheckout } from './tools/pay-get-checkout.js';
 import { registerPayListCheckouts } from './tools/pay-list-checkouts.js';
+import { registerPayListCustomers } from './tools/pay-list-customers.js';
+import { registerPayListSubscriptions } from './tools/pay-list-subscriptions.js';
+import { registerPaySendReceipt } from './tools/pay-send-receipt.js';
 
 /**
  * Start the AgentaOS MCP server with all tools.
@@ -84,6 +88,10 @@ export async function runMcp() {
 	registerPayCreateCheckout(server);
 	registerPayGetCheckout(server);
 	registerPayListCheckouts(server);
+	registerPayListSubscriptions(server);
+	registerPayCancelSubscription(server);
+	registerPayListCustomers(server);
+	registerPaySendReceipt(server);
 
 	// Graceful shutdown — wipe key material
 	const shutdown = () => {

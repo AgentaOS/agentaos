@@ -56,6 +56,12 @@ agenta --help
 | `agenta pay checkout -a <amount>` | Create a checkout session |
 | `agenta pay get <sessionId>` | Get checkout details |
 | `agenta pay list` | List checkouts |
+| `agenta subscriptions list` | List subscriptions |
+| `agenta subscriptions cancel <id>` | Cancel a subscription (at period end; `--now` for immediate) |
+| `agenta customers list` | List customers |
+| `agenta invoices list` | List invoices |
+| `agenta invoices receipt <id>` | Download the receipt PDF |
+| `agenta invoices send-receipt <id>` | Re-send the receipt email |
 
 ### Agent Sub-accounts
 
@@ -128,7 +134,7 @@ OS Keychain (service: agenta):
 
 When invoked with no arguments, runs as an MCP server over stdio. This lets AI agents interact with the wallet through the [Model Context Protocol](https://modelcontextprotocol.io/).
 
-### 18 Tools
+### 25 Tools
 
 | Tool | Description |
 |------|-------------|
@@ -150,6 +156,13 @@ When invoked with no arguments, runs as an MCP server over stdio. This lets AI a
 | `agenta_x402_check` | Check if a URL requires x402 payment |
 | `agenta_x402_discover` | Discover x402-protected endpoints |
 | `agenta_x402_fetch` | Fetch a 402-protected resource with auto-payment |
+| `agenta_pay_create_checkout` | Create a checkout session |
+| `agenta_pay_get_checkout` | Get checkout session details |
+| `agenta_pay_list_checkouts` | List checkout sessions |
+| `agenta_pay_list_subscriptions` | List subscriptions |
+| `agenta_pay_cancel_subscription` | Cancel a subscription (at period end or immediately) |
+| `agenta_pay_list_customers` | List customers who have paid you |
+| `agenta_pay_send_receipt` | Re-send a paid invoice's receipt email to the buyer |
 
 ### Claude Desktop
 

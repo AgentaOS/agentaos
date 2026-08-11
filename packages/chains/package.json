@@ -1,6 +1,6 @@
 {
 	"name": "@agentaos/chains",
-	"version": "1.2.0",
+	"version": "2.0.0",
 	"description": "Ethereum chain adapter for AgentaOS threshold wallet",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",
@@ -29,7 +29,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"build": "tsc",
+		"build": "tsc -p tsconfig.build.json",
 		"lint": "biome check src/",
 		"test": "vitest run",
 		"typecheck": "tsc --noEmit",
@@ -38,6 +38,5 @@
 	"dependencies": {
 		"@agentaos/core": "workspace:*",
 		"viem": "^2.21.0"
-	},
-	"devDependencies": {}
+	}
 }

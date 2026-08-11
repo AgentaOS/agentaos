@@ -1,6 +1,8 @@
 import { CheckoutsResource } from './resources/checkouts.js';
+import { CustomersResource } from './resources/customers.js';
 import { InvoicesResource } from './resources/invoices.js';
 import { PaymentLinksResource } from './resources/payment-links.js';
+import { SubscriptionsResource } from './resources/subscriptions.js';
 import { TransactionsResource } from './resources/transactions.js';
 import { WebhooksResource } from './resources/webhooks.js';
 import type { AgentaOSOptions } from './types.js';
@@ -14,6 +16,8 @@ export class AgentaOS {
 	readonly paymentLinks: PaymentLinksResource;
 	readonly transactions: TransactionsResource;
 	readonly invoices: InvoicesResource;
+	readonly subscriptions: SubscriptionsResource;
+	readonly customers: CustomersResource;
 	readonly webhooks: WebhooksResource;
 
 	constructor(apiKey: string, options?: AgentaOSOptions) {
@@ -50,6 +54,8 @@ export class AgentaOS {
 		this.paymentLinks = new PaymentLinksResource(baseUrl, apiKey, resourceOptions);
 		this.transactions = new TransactionsResource(baseUrl, apiKey, resourceOptions);
 		this.invoices = new InvoicesResource(baseUrl, apiKey, resourceOptions);
+		this.subscriptions = new SubscriptionsResource(baseUrl, apiKey, resourceOptions);
+		this.customers = new CustomersResource(baseUrl, apiKey, resourceOptions);
 		this.webhooks = new WebhooksResource();
 	}
 }
