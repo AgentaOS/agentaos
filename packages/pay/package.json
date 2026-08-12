@@ -1,6 +1,6 @@
 {
 	"name": "@agentaos/pay",
-	"version": "2.0.0",
+	"version": "2.1.0",
 	"description": "AgentaOS Payment SDK — accept regulated stablecoin payments programmatically",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",
