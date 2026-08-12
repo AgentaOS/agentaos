@@ -110,6 +110,15 @@ describe('paymentLinks', () => {
 		expect(calls[0]?.method).toBe('DELETE');
 		expect(pathOf(calls[0])).toBe('/api/v1/gateway/payment-links/pl_9');
 	});
+
+	it('camelizes the create response, including name and image_url', async () => {
+		stubRoutes({ id: 'pl_1', name: 'Pro Plan', image_url: 'https://cdn.example.com/pro-plan.png' });
+		const link = await client().paymentLinks.create({ amount: 29.99 });
+		expect(link).toMatchObject({
+			name: 'Pro Plan',
+			imageUrl: 'https://cdn.example.com/pro-plan.png',
+		});
+	});
 });
 
 describe('transactions', () => {
