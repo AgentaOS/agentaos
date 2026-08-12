@@ -70,4 +70,22 @@ describe('create forwards the new additive fields', () => {
 		await new AgentaOS('sk_test_x').checkouts.create({ amount: 10, dueDate: '2026-09-30' });
 		expect(bodies[0]?.dueDate).toBe('2026-09-30');
 	});
+
+	it('paymentLinks.create forwards name and imageUrl', async () => {
+		const bodies = captureRequestBodies();
+		await new AgentaOS('sk_test_x').paymentLinks.create({
+			amount: 29.99,
+			name: 'Pro Plan',
+			imageUrl: 'https://cdn.example.com/pro-plan.png',
+		});
+		expect(bodies[0]?.name).toBe('Pro Plan');
+		expect(bodies[0]?.imageUrl).toBe('https://cdn.example.com/pro-plan.png');
+	});
+
+	it('paymentLinks.create omits name and imageUrl when not provided', async () => {
+		const bodies = captureRequestBodies();
+		await new AgentaOS('sk_test_x').paymentLinks.create({ amount: 29.99 });
+		expect(bodies[0]).not.toHaveProperty('name');
+		expect(bodies[0]).not.toHaveProperty('imageUrl');
+	});
 });

@@ -137,6 +137,7 @@ const link = await agentaos.paymentLinks.create({
   amount: 29.99,
   currency: 'EUR',
   description: 'Pro plan',
+  name: 'Pro Plan',             // shown in the dashboard's Products grid; defaults from `description` if omitted
   successUrl: 'https://shop.com/success',
   cancelUrl: 'https://shop.com/cancel',
   webhookUrl: 'https://shop.com/webhooks',
@@ -173,6 +174,8 @@ const subscription = await agentaos.paymentLinks.create({
 | `checkoutUrl` | `string` | Shareable payment URL |
 | `amount` | `number` | Payment amount |
 | `currency` | `string` | Settlement currency |
+| `name` | `string \| null` | Product name shown in the dashboard's Products grid |
+| `imageUrl` | `string \| null` | Product thumbnail shown in the dashboard's Products grid |
 | `status` | `'active' \| 'cancelled'` | Link status |
 | `sellerMode` | `'mor' \| 'crypto'` | How this link settles |
 | `type` | `'one_time' \| 'subscription'` | Link type |

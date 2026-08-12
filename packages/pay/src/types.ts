@@ -71,6 +71,12 @@ export interface CreatePaymentLinkParams {
 	/** 'EUR' | 'USD', default from org settings */
 	currency?: string;
 	description?: string;
+	/** Product name shown in the dashboard's Products grid. Optional — if omitted,
+	 *  the server defaults it from `description`. Set it to give the link a clean
+	 *  product title. */
+	name?: string;
+	/** Product thumbnail shown in the dashboard's Products grid. */
+	imageUrl?: string;
 	/** HTTPS only */
 	webhookUrl?: string;
 	/** HTTPS only */
@@ -95,6 +101,10 @@ export interface PaymentLink {
 	amount: number;
 	currency: string;
 	description: string | null;
+	/** Product name shown in the dashboard's Products grid. Defaults from `description` when not set. */
+	name: string | null;
+	/** Product thumbnail shown in the dashboard's Products grid. */
+	imageUrl: string | null;
 	status: 'active' | 'cancelled';
 	/** Settlement mode: 'mor' (card + bank) or 'crypto' (on-chain to your wallet). */
 	sellerMode: 'mor' | 'crypto';
