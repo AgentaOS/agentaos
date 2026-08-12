@@ -1,5 +1,11 @@
 # @agentaos/pay
 
+## 2.1.0
+
+### Minor Changes
+
+- [#33](https://github.com/AgentaOS/agentaos/pull/33) [`defbc16`](https://github.com/AgentaOS/agentaos/commit/defbc16c51e8c8258c6f2f15561ae49026b9a640) Thanks [@PancheI](https://github.com/PancheI)! - Add optional `name` (and `imageUrl`) to `paymentLinks.create`, and expose `name`/`imageUrl` on the `PaymentLink` type.
+
 ## 2.0.0
 
 ### Major Changes
