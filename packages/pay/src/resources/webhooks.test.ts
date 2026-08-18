@@ -127,3 +127,36 @@ describe('webhooks.verify — format and freshness', () => {
 		);
 	});
 });
+
+describe('webhooks.verify — raw-body guidance (the #1 integration mistake)', () => {
+	it('rejects a parsed object with an actionable "pass the raw body" message', () => {
+		const signature = sign(VALID_PAYLOAD, SECRET, nowSec());
+		// A JSON body parser (e.g. express.json()) hands you an object, not the raw bytes.
+		const parsed = JSON.parse(VALID_PAYLOAD) as unknown;
+		let message = '';
+		try {
+			// @ts-expect-error — deliberately passing the parsed object a body parser produces
+			new WebhooksResource().verify(parsed, signature, SECRET);
+		} catch (err) {
+			message = (err as Error).message;
+		}
+		expect(message).toMatch(/raw request body/i);
+		expect(message).toMatch(/express\.raw/);
+	});
+
+	it('rejects null with the raw-body message', () => {
+		const signature = sign(VALID_PAYLOAD, SECRET, nowSec());
+		expect(() =>
+			// @ts-expect-error — null is not a valid payload
+			new WebhooksResource().verify(null, signature, SECRET),
+		).toThrow(/raw request body/i);
+	});
+
+	it('a genuine signature mismatch also hints at the raw body', () => {
+		const signature = sign(VALID_PAYLOAD, SECRET, nowSec());
+		const tampered = VALID_PAYLOAD.replace('s_1', 's_2');
+		expect(() => new WebhooksResource().verify(tampered, signature, SECRET)).toThrow(
+			/RAW request body/i,
+		);
+	});
+});

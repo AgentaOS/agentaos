@@ -10,6 +10,16 @@ export class WebhooksResource {
 		secret: string,
 		toleranceSec = 300,
 	): WebhookEvent {
+		// The signature is over the RAW request body. A parsed/re-serialized object never
+		// matches, so reject a non-string/Buffer payload up front with an actionable message
+		// instead of letting `[object Object]` fall through to a generic mismatch error.
+		if (typeof payload !== 'string' && !Buffer.isBuffer(payload)) {
+			const received = payload === null ? 'null' : typeof payload;
+			throw new WebhookVerificationError(
+				`Webhook payload must be the raw request body (a string or Buffer), but received ${received}. You are likely passing an already-parsed JSON body — verification signs the RAW bytes, so a parsed or re-serialized object never matches the signature. Read the raw body instead, e.g. in Express: app.post('/webhooks', express.raw({ type: 'application/json' }), handler).`,
+			);
+		}
+
 		const payloadStr = typeof payload === 'string' ? payload : payload.toString('utf-8');
 
 		// Parse signature: t=<timestamp>,v1=<hmac>
@@ -44,14 +54,18 @@ export class WebhooksResource {
 		// Timing-safe compare
 		if (expected.length !== v1.length) {
 			throw new WebhookVerificationError(
-				'Webhook signature verification failed. Signature does not match payload.',
+				'Webhook signature verification failed: no matching signature for the payload. ' +
+					'Are you passing the RAW request body you received (not a parsed or re-serialized object)? ' +
+					'A JSON body parser running before verification is the most common cause.',
 			);
 		}
 
 		const isValid = timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(v1, 'hex'));
 		if (!isValid) {
 			throw new WebhookVerificationError(
-				'Webhook signature verification failed. Signature does not match payload.',
+				'Webhook signature verification failed: no matching signature for the payload. ' +
+					'Are you passing the RAW request body you received (not a parsed or re-serialized object)? ' +
+					'A JSON body parser running before verification is the most common cause.',
 			);
 		}
 
