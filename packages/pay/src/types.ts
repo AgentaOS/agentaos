@@ -293,8 +293,8 @@ export interface Subscription {
 	customerName: string | null;
 	/** The plan (subscription payment-link) name or description. */
 	planName: string | null;
-	/** Plan id. Same as `paymentLinks.id` / product page Copy link ID. Your metadata stays on the checkout. */
-	paymentLinkId: string;
+	/** Same UUID as `checkouts.create({ linkId })` / product page Copy link ID. */
+	linkId: string;
 	billingInterval: 'month' | 'year' | null;
 	status: SubscriptionStatus;
 	/** Per-cycle amount in integer minor units (e.g. 1999 = €19.99). */
