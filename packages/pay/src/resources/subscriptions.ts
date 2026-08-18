@@ -4,6 +4,7 @@ import type {
 	ListParams,
 	PaginatedList,
 	Subscription,
+	SubscriptionInvoice,
 } from '../types.js';
 import { BaseResource } from './base.js';
 
@@ -33,5 +34,10 @@ export class SubscriptionsResource extends BaseResource {
 		return this.post<CancelSubscriptionResult>(`${BASE_PATH}/${id}/cancel`, {
 			atPeriodEnd: params?.atPeriodEnd ?? true,
 		});
+	}
+
+	/** Per-cycle invoices for one subscription, newest first. */
+	async invoices(id: string): Promise<SubscriptionInvoice[]> {
+		return this.get<SubscriptionInvoice[]>(`${BASE_PATH}/${id}/invoices`);
 	}
 }

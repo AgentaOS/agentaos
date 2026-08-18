@@ -267,6 +267,19 @@ describe('subscriptions', () => {
 		await client().subscriptions.cancel('sub_1', { atPeriodEnd: false });
 		expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual({ atPeriodEnd: false });
 	});
+
+	it('invoices → GET /api/v1/gateway/subscriptions/:id/invoices', async () => {
+		const calls = stubRoutes([
+			{ id: 'inv_1', invoice_number: 'INV-2026-0001', issued_at: '2026-08-18T00:00:00Z' },
+		]);
+		const rows = await client().subscriptions.invoices('sub_1');
+		expect(calls[0]?.method).toBe('GET');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/subscriptions/sub_1/invoices');
+		expect(rows[0]).toMatchObject({
+			invoiceNumber: 'INV-2026-0001',
+			issuedAt: '2026-08-18T00:00:00Z',
+		});
+	});
 });
 
 describe('customers', () => {

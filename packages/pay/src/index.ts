@@ -14,6 +14,7 @@ export type {
 	Invoice,
 	ListInvoiceParams,
 	Subscription,
+	SubscriptionInvoice,
 	SubscriptionStatus,
 	CancelSubscriptionParams,
 	CancelSubscriptionResult,
