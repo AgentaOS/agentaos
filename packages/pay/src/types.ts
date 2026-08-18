@@ -96,6 +96,7 @@ export interface CreatePaymentLinkParams {
 }
 
 export interface PaymentLink {
+	/** Same value as `checkouts.create({ linkId })`. On the product page: Copy link ID. */
 	id: string;
 	orgId: string;
 	amount: number;
@@ -130,7 +131,7 @@ export interface PaymentLink {
 // ---------------------------------------------------------------------------
 
 export interface CreateCheckoutParams {
-	/** Link ID to create checkout from. Optional — omit to create a standalone checkout. */
+	/** `paymentLinks.id`. On the product page this is Copy link ID. Omit for a standalone checkout. */
 	linkId?: string;
 	/** Amount in currency units (e.g. 10.00). Required if no linkId. */
 	amount?: number;
@@ -292,6 +293,8 @@ export interface Subscription {
 	customerName: string | null;
 	/** The plan (subscription payment-link) name or description. */
 	planName: string | null;
+	/** Same UUID as `checkouts.create({ linkId })` / product page Copy link ID. */
+	linkId: string;
 	billingInterval: 'month' | 'year' | null;
 	status: SubscriptionStatus;
 	/** Per-cycle amount in integer minor units (e.g. 1999 = €19.99). */
@@ -300,6 +303,21 @@ export interface Subscription {
 	/** ISO 8601 end of the current paid period; null before the first cycle books. */
 	currentPeriodEnd: string | null;
 	stripeSubscriptionId: string | null;
+	cancelAtPeriodEnd: boolean;
+	canceledAt: string | null;
+	effectiveCancelDate: string | null;
+}
+
+/** One cycle invoice from GET /gateway/subscriptions/:id/invoices. */
+export interface SubscriptionInvoice {
+	id: string;
+	invoiceNumber: string;
+	status: string;
+	issuedAt: string;
+	amount: number;
+	currency: string;
+	disputed: boolean;
+	chargedBack: boolean;
 }
 
 export interface CancelSubscriptionParams {
