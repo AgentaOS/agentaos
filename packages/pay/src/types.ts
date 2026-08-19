@@ -365,6 +365,8 @@ export interface CheckoutCompletedData {
 	payer: string;
 	payerType: 'human' | 'agent';
 	network: string;
+	/** `true` = live mode, `false` = test mode. Account mode, not the chain — see `network` for the chain/rail. */
+	livemode: boolean;
 	metadata: Record<string, unknown>;
 }
 
@@ -377,6 +379,8 @@ export interface SendCompletedData {
 	token: string;
 	chainId: number;
 	network: string;
+	/** `true` = live mode, `false` = test mode. */
+	livemode: boolean;
 	description: string | null;
 }
 
@@ -389,10 +393,34 @@ export interface SendFailedData {
 	token: string;
 	chainId: number;
 	network: string;
+	/** `true` = live mode, `false` = test mode. */
+	livemode: boolean;
 	description: string | null;
+}
+
+export interface SubscriptionData {
+	id: string;
+	/** Stripe subscription status, mirrored verbatim (e.g. `incomplete`, `active`, `trialing`, `past_due`, `unpaid`, `canceled`). */
+	status: string;
+	planName: string | null;
+	currency: string;
+	/** Price snapshot in integer minor units (e.g. cents). */
+	amountMinor: number;
+	/** ISO 8601 timestamp, or `null` before the first billing cycle is set. */
+	currentPeriodEnd: string | null;
+	cancelAtPeriodEnd: boolean;
+	customerEmail: string | null;
+	customerName: string | null;
+	/** `true` = live mode, `false` = test mode. */
+	livemode: boolean;
 }
 
 export type WebhookEvent =
 	| { type: 'checkout.session.completed'; data: CheckoutCompletedData }
 	| { type: 'send.completed'; data: SendCompletedData }
-	| { type: 'send.failed'; data: SendFailedData };
+	| { type: 'send.failed'; data: SendFailedData }
+	| { type: 'subscription.created'; data: SubscriptionData }
+	| { type: 'subscription.renewed'; data: SubscriptionData }
+	| { type: 'subscription.payment_failed'; data: SubscriptionData }
+	| { type: 'subscription.updated'; data: SubscriptionData }
+	| { type: 'subscription.canceled'; data: SubscriptionData };
