@@ -23,6 +23,7 @@ export type {
 	CheckoutCompletedData,
 	SendCompletedData,
 	SendFailedData,
+	SubscriptionData,
 	PaginatedList,
 	ListParams,
 } from './types.js';
