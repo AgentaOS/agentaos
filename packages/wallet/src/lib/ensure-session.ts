@@ -1,4 +1,4 @@
-import { getRefreshToken, getSession, getSessionServerUrl, storeSession } from './keychain.js';
+import { getRefreshToken, getSession, getSessionServerUrl, storeSession } from './session-store.js';
 
 /** Decode JWT payload without verification (display + expiry check only). */
 export function decodeJwt(token: string): Record<string, unknown> | null {
@@ -27,21 +27,30 @@ export async function ensureSession(): Promise<SessionResult> {
 		(await getSessionServerUrl()) || process.env.AGENTA_SERVER || 'https://api.agentaos.ai';
 	const jwt = decodeJwt(token);
 	const exp = typeof jwt?.exp === 'number' ? jwt.exp : undefined;
-	const needsUpgrade = jwt?.scope === 'setup'; // passkey was set up after token was issued
 
-	// Still valid and full scope (with 30s buffer)
-	if (exp && exp * 1000 > Date.now() + 30_000 && !needsUpgrade) {
+	// Still valid (with 30s buffer). Deliberately NOT keyed on `scope`: a token's
+	// scope reflects what the ACCOUNT can do (crypto signing needs a passkey), not
+	// whether the session is fresh, and a merchant who never sets a passkey stays
+	// `setup` forever. Refreshing on it rotated the refresh token on EVERY command,
+	// and two commands racing that rotation trip the server's reuse detection,
+	// which revokes the whole family and logs the user out for good.
+	if (exp && exp * 1000 > Date.now() + 30_000) {
 		return { ok: true, token, serverUrl };
 	}
 
-	// Expired or needs scope upgrade — try refresh
+	// Expired (or unreadable) — try refresh
 	const refreshToken = await getRefreshToken();
 	if (!refreshToken) return { ok: false, reason: 'session-expired' };
 
 	try {
 		const res = await fetch(`${serverUrl}/api/v1/auth/refresh`, {
 			method: 'POST',
-			headers: { 'content-type': 'application/json' },
+			// `x-client: cli` is REQUIRED, not decoration. Without it the server
+			// treats us as a browser and returns the rotated tokens ONLY as httpOnly
+			// cookies, which we cannot read — while still having spent the refresh
+			// token server-side. That combination burns the session on every refresh
+			// and then reports it expired.
+			headers: { 'content-type': 'application/json', 'x-client': 'cli' },
 			body: JSON.stringify({ refreshToken }),
 			signal: AbortSignal.timeout(10_000),
 		});

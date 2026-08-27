@@ -63,3 +63,21 @@ packages/wallet/src/__tests__/find-txs.mts
 # Claude
 CLAUDE.md
 .claude/
+
+# Supabase CLI scratch state — NEVER commit, this repo is PUBLIC.
+# `.temp/project-ref` and `.temp/pooler-url` identify the production database
+# project and its connection host. Not credentials (no password is stored), but
+# they tell anyone reading the repo exactly where the database lives.
+supabase/.temp/
+
+# Internal engineering notes — NEVER commit, this repo is PUBLIC.
+# These describe the PRIVATE agentaos-platform repo: branch names, guard and
+# endpoint internals, dashboard source line numbers, and internal deliberation
+# about breaking integrators. No credentials, but none of it is ours to publish.
+# Their home is the private platform repo's implementation/ directory.
+/implementation/
+/API-V2-COMPAT-AND-SDK-PLAN.md
+
+# Stray copies of the build output. `bin` in package.json points at
+# ./dist/index.js and `files` publishes only dist/ — nothing references bin/.
+packages/wallet/bin/

@@ -1,39 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
-import { SignerManager } from '../lib/signer-manager.js';
-
-import { registerListNetworks } from './tools/list-networks.js';
-import { registerListSigners } from './tools/list-signers.js';
-import { registerResolveAddress } from './tools/resolve-address.js';
-// Discovery
-import { registerWalletOverview } from './tools/wallet-overview.js';
-
-import { registerGetBalances } from './tools/get-balances.js';
-// Common operations
-import { registerSendEth } from './tools/send-eth.js';
-import { registerSendToken } from './tools/send-token.js';
-
-// Advanced — contract interaction
-import { registerCallContract } from './tools/call-contract.js';
-import { registerExecute } from './tools/execute.js';
-import { registerReadContract } from './tools/read-contract.js';
-import { registerSimulate } from './tools/simulate.js';
-
-// Signing
-import { registerSignMessage } from './tools/sign-message.js';
-import { registerSignTypedData } from './tools/sign-typed-data.js';
-
-import { registerGetAuditLog } from './tools/get-audit-log.js';
-// Management & Audit
-import { registerGetStatus } from './tools/get-status.js';
-
-// x402 payment tools
-import { registerX402Check } from './tools/x402-check.js';
-import { registerX402Discover } from './tools/x402-discover.js';
-import { registerX402Fetch } from './tools/x402-fetch.js';
-
-// Merchant payment tools (agenta_pay_*) — uses @agentaos/pay SDK
 import { registerPayCancelSubscription } from './tools/pay-cancel-subscription.js';
 import { registerPayCreateCheckout } from './tools/pay-create-checkout.js';
 import { registerPayGetCheckout } from './tools/pay-get-checkout.js';
@@ -43,8 +10,12 @@ import { registerPayListSubscriptions } from './tools/pay-list-subscriptions.js'
 import { registerPaySendReceipt } from './tools/pay-send-receipt.js';
 
 /**
- * Start the AgentaOS MCP server with all tools.
- * Connects via stdio transport.
+ * The AgentaOS MCP server, over stdio.
+ *
+ * Merchant tools only. The agent sub-account surface (MPC signers, on-chain
+ * sends, contract calls, message signing, the signing audit log and x402) was
+ * removed: it is the wallet-era product, not the merchant-of-record one, and
+ * every one of those tools needed key material this server no longer holds.
  */
 export async function runMcp() {
 	const server = new McpServer({
@@ -52,39 +23,6 @@ export async function runMcp() {
 		version: '0.1.0',
 	});
 
-	const signerManager = new SignerManager();
-
-	// Discovery — the LLM should call these first
-	registerWalletOverview(server, signerManager);
-	registerListNetworks(server, signerManager);
-	registerListSigners(server, signerManager);
-	registerResolveAddress(server, signerManager);
-
-	// Common operations — web2-style
-	registerSendEth(server, signerManager);
-	registerSendToken(server, signerManager);
-	registerGetBalances(server, signerManager);
-
-	// Advanced — arbitrary contract interaction
-	registerCallContract(server, signerManager);
-	registerReadContract(server, signerManager);
-	registerExecute(server, signerManager);
-	registerSimulate(server, signerManager);
-
-	// Signing
-	registerSignMessage(server, signerManager);
-	registerSignTypedData(server, signerManager);
-
-	// Management & Audit
-	registerGetStatus(server, signerManager);
-	registerGetAuditLog(server, signerManager);
-
-	// x402 payment tools
-	registerX402Check(server);
-	registerX402Discover(server);
-	registerX402Fetch(server, signerManager);
-
-	// Merchant payment tools — no signerManager needed, uses @agentaos/pay SDK
 	registerPayCreateCheckout(server);
 	registerPayGetCheckout(server);
 	registerPayListCheckouts(server);
@@ -93,15 +31,6 @@ export async function runMcp() {
 	registerPayListCustomers(server);
 	registerPaySendReceipt(server);
 
-	// Graceful shutdown — wipe key material
-	const shutdown = () => {
-		signerManager.destroy();
-		process.exit(0);
-	};
-	process.on('SIGINT', shutdown);
-	process.on('SIGTERM', shutdown);
-
-	// Connect via stdio
 	const transport = new StdioServerTransport();
 	await server.connect(transport);
 }

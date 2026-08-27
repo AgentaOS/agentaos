@@ -94,22 +94,5 @@ export function hint(text: string): void {
 	console.log(`     ${dim(text)}`);
 }
 
-// ---------------------------------------------------------------------------
-// @inquirer/prompts theme — monochrome brand
-//
-// Pass as `theme` option to select(), input(), confirm(), password()
-// e.g. select({ message: '...', choices: [...], theme: promptTheme })
-// ---------------------------------------------------------------------------
-
-export const promptTheme = {
-	prefix: {
-		idle: bold('?'),
-		done: success('✓'),
-	},
-	style: {
-		answer: (text: string) => bold(text),
-		highlight: (text: string) => bold(text),
-		key: (text: string) => bold(`<${text}>`),
-		description: (text: string) => dim(text),
-	},
-};
+// The `@inquirer/prompts` theme lived here. It went with the prompts: this CLI
+// is driven by AI tools, so nothing waits on stdin any more.

@@ -2,32 +2,11 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+/** Merchant tools only. The agent sub-account surface (MPC signers, on-chain
+ *  sends, contract calls, message signing, the signing audit log and x402) was
+ *  removed as wallet-era legacy — this list is the assertion that it stays
+ *  removed, so a stray re-registration fails here rather than shipping. */
 const EXPECTED_TOOLS = [
-	// Discovery
-	'agenta_wallet_overview',
-	'agenta_list_networks',
-	'agenta_list_signers',
-	'agenta_resolve_address',
-	// Common operations
-	'agenta_send_eth',
-	'agenta_send_token',
-	'agenta_get_balances',
-	// Advanced
-	'agenta_call_contract',
-	'agenta_read_contract',
-	'agenta_execute',
-	'agenta_simulate',
-	// Signing
-	'agenta_sign_message',
-	'agenta_sign_typed_data',
-	// Management
-	'agenta_get_status',
-	'agenta_get_audit_log',
-	// x402
-	'agenta_x402_check',
-	'agenta_x402_discover',
-	'agenta_x402_fetch',
-	// Merchant payments
 	'agenta_pay_create_checkout',
 	'agenta_pay_get_checkout',
 	'agenta_pay_list_checkouts',
@@ -82,23 +61,34 @@ describe('AgentaOS Terminal MCP Server', () => {
 		}
 	});
 
-	it('x402 tools have correct input schema', async () => {
+	// The removal is the point, so assert it directly: anything needing key
+	// material must not come back, because this server no longer holds any.
+	it('exposes no wallet, signing or x402 tools', async () => {
 		const { tools } = await client.listTools();
+		const names = tools.map((t) => t.name);
 
-		const check = tools.find((t) => t.name === 'agenta_x402_check');
-		expect(check).toBeDefined();
-		const checkProps = check!.inputSchema.properties as Record<string, unknown>;
-		expect(checkProps).toHaveProperty('url');
+		for (const gone of [
+			'agenta_wallet_overview',
+			'agenta_list_signers',
+			'agenta_send_eth',
+			'agenta_send_token',
+			'agenta_call_contract',
+			'agenta_execute',
+			'agenta_sign_message',
+			'agenta_sign_typed_data',
+			'agenta_get_audit_log',
+			'agenta_x402_check',
+			'agenta_x402_discover',
+			'agenta_x402_fetch',
+		]) {
+			expect(names).not.toContain(gone);
+		}
+	});
 
-		const discover = tools.find((t) => t.name === 'agenta_x402_discover');
-		expect(discover).toBeDefined();
-		const discoverProps = discover!.inputSchema.properties as Record<string, unknown>;
-		expect(discoverProps).toHaveProperty('domain');
-
-		const fetchTool = tools.find((t) => t.name === 'agenta_x402_fetch');
-		expect(fetchTool).toBeDefined();
-		const fetchProps = fetchTool!.inputSchema.properties as Record<string, unknown>;
-		expect(fetchProps).toHaveProperty('url');
-		expect(fetchProps).toHaveProperty('maxAmount');
+	it('every tool is a merchant payment tool', async () => {
+		const { tools } = await client.listTools();
+		for (const tool of tools) {
+			expect(tool.name).toMatch(/^agenta_pay_/);
+		}
 	});
 });
