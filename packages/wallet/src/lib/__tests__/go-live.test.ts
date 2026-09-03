@@ -123,9 +123,14 @@ describe('nextStep', () => {
 		expect(nextStep(fresh({ audit: requestedAudit() }))?.command).toBe('agenta verify submit');
 	});
 
-	it('asks for a payout account once verified', () => {
+	// Payout accounts are added in the dashboard; there is no CLI command, so the
+	// step carries no command — only the reason. Naming a command that does not
+	// exist would send an agent into a wall.
+	it('asks for a payout account once verified, as a dashboard step', () => {
 		const r = fresh({ verifyState: 'verified', hasPayoutAccount: false, audit: requestedAudit() });
-		expect(nextStep(r)?.command).toBe('agenta payouts add');
+		const step = nextStep(r);
+		expect(step?.command).toBeNull();
+		expect(step?.why).toMatch(/payout account in the dashboard/);
 	});
 
 	// The audit is a gift, never a gate. A verified merchant who skipped it needs
@@ -133,7 +138,9 @@ describe('nextStep', () => {
 	// present in front of getting paid.
 	it('does not send a verified merchant back for an audit they never asked for', () => {
 		const r = fresh({ verifyState: 'verified', hasPayoutAccount: false, audit: null });
-		expect(nextStep(r)?.command).toBe('agenta payouts add');
+		const step = nextStep(r);
+		expect(step?.command).toBeNull();
+		expect(step?.why).toMatch(/payout account/);
 	});
 
 	it('has nothing to chase once the merchant can go live', () => {
@@ -155,7 +162,7 @@ describe('nextStep', () => {
 			audit: null,
 			hasPayoutAccount: false,
 		});
-		expect(nextStep(r)?.command).toBe('agenta verify changes');
+		expect(nextStep(r)?.command).toBe('agenta verify resubmit');
 	});
 
 	// Nothing a terminal can do about these, and inventing a step would be worse

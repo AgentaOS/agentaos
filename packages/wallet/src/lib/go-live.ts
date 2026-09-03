@@ -166,10 +166,14 @@ export function auditLabel(r: GoLiveReadiness): string {
  * merchant's move and outranks everything, then verification, then payouts.
  * States we cannot act on from a terminal (in review, on hold, rejected)
  * deliberately return null rather than inventing busywork.
+ *
+ * `command` is null when the step happens in the dashboard (there is no CLI
+ * command for it); `why` still says what to do. Every non-null command here
+ * MUST be a real `agenta` command — agents run these verbatim.
  */
-export function nextStep(r: GoLiveReadiness): { command: string; why: string } | null {
+export function nextStep(r: GoLiveReadiness): { command: string | null; why: string } | null {
 	if (r.rfi) {
-		return { command: 'agenta verify changes', why: 'we asked you to change something' };
+		return { command: 'agenta verify resubmit', why: 'we asked you to change something' };
 	}
 	if (r.verifyState === 'unverified') {
 		// The audit is offered FIRST only to someone who has not started verifying:
@@ -180,7 +184,10 @@ export function nextStep(r: GoLiveReadiness): { command: string; why: string } |
 			: { command: 'agenta audit request', why: 'start with the free audit' };
 	}
 	if (r.verifyState === 'verified' && !r.hasPayoutAccount) {
-		return { command: 'agenta payouts add', why: 'add a payout account to get paid' };
+		return {
+			command: null,
+			why: 'add a payout account in the dashboard (Payments → Payout account) to get paid',
+		};
 	}
 	return null;
 }
