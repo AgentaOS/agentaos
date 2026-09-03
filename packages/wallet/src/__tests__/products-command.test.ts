@@ -41,6 +41,25 @@ describe('agenta products create — flags to API params', () => {
 		expect(buildCreateParams({ ...oneTime, trialDays: '7' }).ok).toBe(false);
 	});
 
+	it('passes the success URL through so buyers return to the app', () => {
+		const built = buildCreateParams({ ...oneTime, successUrl: 'https://myapp.com/thanks' });
+		expect(built.ok).toBe(true);
+		if (!built.ok) return;
+		expect(built.params.successUrl).toBe('https://myapp.com/thanks');
+	});
+
+	// The API rejects anything but https; a plain-http localhost URL is the
+	// mistake every first integration makes, so name it.
+	it.each(['http://localhost:3000/thanks', 'myapp.com/thanks', 'https://'])(
+		'refuses success URL %s',
+		(successUrl) => {
+			expect(buildCreateParams({ ...oneTime, successUrl })).toEqual({
+				ok: false,
+				error: '--success-url must be an https:// URL.',
+			});
+		},
+	);
+
 	it.each(['0', '-5', 'abc'])('refuses amount %s', (amount) => {
 		expect(buildCreateParams({ ...oneTime, amount }).ok).toBe(false);
 	});

@@ -27,6 +27,7 @@ interface CreateOptions {
 	subscription?: boolean;
 	interval?: string;
 	trialDays?: string;
+	successUrl?: string;
 }
 
 /** Flags → API params, or the one sentence that explains why they cannot be. */
@@ -37,12 +38,17 @@ export function buildCreateParams(
 	if (Number.isNaN(amount) || amount <= 0) {
 		return { ok: false, error: 'Amount must be a positive number.' };
 	}
+	// The API only accepts https here; say so before the round-trip.
+	if (opts.successUrl !== undefined && !/^https:\/\/\S+$/i.test(opts.successUrl)) {
+		return { ok: false, error: '--success-url must be an https:// URL.' };
+	}
 
 	const params: CreatePaymentLinkParams = {
 		name: opts.name,
 		amount,
 		currency: opts.currency,
 		description: opts.description,
+		successUrl: opts.successUrl,
 	};
 
 	if (!opts.subscription) {
@@ -78,6 +84,7 @@ function productView(link: PaymentLink): Record<string, unknown> {
 		currency: link.currency,
 		status: link.status,
 		checkoutUrl: link.checkoutUrl,
+		successUrl: link.successUrl,
 	};
 }
 
@@ -95,6 +102,7 @@ productsCommand
 	.option('--subscription', 'Recurring plan instead of a one-time product')
 	.option('--interval <interval>', 'Billing cadence for a plan: month or year')
 	.option('--trial-days <days>', 'Free trial length for a plan, in days')
+	.option('--success-url <url>', 'https URL buyers return to after paying (we append ?sessionId=…)')
 	.action(async (opts: CreateOptions) => {
 		const built = buildCreateParams(opts);
 		if (!built.ok) {
