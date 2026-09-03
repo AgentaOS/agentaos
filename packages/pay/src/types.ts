@@ -310,6 +310,23 @@ export interface Subscription {
 	cancelAtPeriodEnd: boolean;
 	canceledAt: string | null;
 	effectiveCancelDate: string | null;
+	/**
+	 * Null unless a downgrade is scheduled; then the plan, amount and date the
+	 * subscription switches to. `planName` / `unitAmountMinor` / `linkId` above
+	 * stay what the buyer paid for until `effectiveAt`.
+	 */
+	pendingPlanChange: PendingPlanChange | null;
+}
+
+/** A scheduled downgrade, applied at the next renewal. */
+export interface PendingPlanChange {
+	/** The target product's `paymentLinks.id`. */
+	linkId: string;
+	planName: string | null;
+	/** Per-cycle amount from `effectiveAt` on, integer minor units. */
+	unitAmountMinor: number;
+	/** ISO 8601: the current period end at the time the downgrade was scheduled. */
+	effectiveAt: string;
 }
 
 /** One cycle invoice from GET /gateway/subscriptions/:id/invoices. */
@@ -341,8 +358,13 @@ export interface CancelSubscriptionResult {
 	effectiveCancelDate: string | null;
 }
 
-/** `upgrade` = the new plan costs more per cycle; `downgrade` = the same or less. */
-export type PlanChangeDirection = 'upgrade' | 'downgrade';
+/**
+ * `upgrade` = the new plan costs more per cycle (charged now); `downgrade` =
+ * the same or less (scheduled for the period end); `revert` = the target is
+ * the current plan while a downgrade is pending — cancels that downgrade,
+ * nothing charged, nothing scheduled.
+ */
+export type PlanChangeDirection = 'upgrade' | 'downgrade' | 'revert';
 
 /**
  * Quote for moving a subscription to another plan (GET …/plan-change/preview).
@@ -386,6 +408,13 @@ export type ChangePlanResult =
 			applied: true;
 			/** ISO 8601: when the new plan starts (the current period end). */
 			effectiveAt: string;
+			unitAmountMinor: number;
+			currency: string;
+	  }
+	| {
+			/** The pending downgrade was cancelled; the current plan stays. */
+			direction: 'revert';
+			applied: true;
 			unitAmountMinor: number;
 			currency: string;
 	  };
@@ -456,12 +485,26 @@ export interface SubscriptionData {
 	/** Stripe subscription status, mirrored verbatim (e.g. `incomplete`, `active`, `trialing`, `past_due`, `unpaid`, `canceled`). */
 	status: string;
 	planName: string | null;
+	/** The current plan's `paymentLinks.id`. */
+	linkId: string;
 	currency: string;
 	/** Price snapshot in integer minor units (e.g. cents). */
 	amountMinor: number;
 	/** ISO 8601 timestamp, or `null` before the first billing cycle is set. */
 	currentPeriodEnd: string | null;
 	cancelAtPeriodEnd: boolean;
+	/**
+	 * Null unless a downgrade is scheduled. `subscription.updated` fires when a
+	 * downgrade is scheduled (this is set), reverted (null again), an upgrade is
+	 * applied, and when the scheduled plan takes over at the period end.
+	 */
+	pendingPlan: {
+		linkId: string;
+		planName: string | null;
+		amountMinor: number;
+		/** ISO 8601. */
+		effectiveAt: string;
+	} | null;
 	customerEmail: string | null;
 	customerName: string | null;
 	/** `true` = live mode, `false` = test mode. */
