@@ -18,7 +18,6 @@ invoicesCommand
 	.command('list')
 	.description('List invoices')
 	.option('--limit <n>', 'Results per page (default 10)', '10')
-	.option('--json', 'Output as JSON')
 	.action(async (opts: { limit: string }) => {
 		const client = await requirePayClient();
 		if (!client) return;
@@ -65,7 +64,6 @@ invoicesCommand
 	.command('receipt <id>')
 	.description('Download the receipt PDF for a paid invoice')
 	.option('-o, --output <path>', 'File path to save the PDF to')
-	.option('--json', 'Output as JSON')
 	.action(async (id: string, opts: { output?: string }) => {
 		const client = await requirePayClient();
 		if (!client) return;
@@ -98,7 +96,6 @@ invoicesCommand
 invoicesCommand
 	.command('send-receipt <id>')
 	.description('Re-send the receipt email to the buyer on file')
-	.option('--json', 'Output as JSON')
 	.action(async (id: string) => {
 		const client = await requirePayClient();
 		if (!client) return;

@@ -26,7 +26,6 @@ subscriptionsCommand
 	.command('list')
 	.description('List subscriptions')
 	.option('--limit <n>', 'Results per page (default 10)', '10')
-	.option('--json', 'Output as JSON')
 	.action(async (opts: { limit: string }) => {
 		const client = await requirePayClient();
 		if (!client) return;
@@ -73,7 +72,6 @@ subscriptionsCommand
 	.command('cancel <id>')
 	.description('Cancel a subscription (at period end by default)')
 	.option('--now', 'Cancel immediately instead of at the end of the current period')
-	.option('--json', 'Output as JSON')
 	.action(async (id: string, opts: { now?: boolean }) => {
 		const client = await requirePayClient();
 		if (!client) return;

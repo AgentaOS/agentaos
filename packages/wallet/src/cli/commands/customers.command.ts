@@ -15,7 +15,6 @@ customersCommand
 	.command('list')
 	.description('List customers')
 	.option('--limit <n>', 'Results per page (default 10)', '10')
-	.option('--json', 'Output as JSON')
 	.action(async (opts: { limit: string }) => {
 		const client = await requirePayClient();
 		if (!client) return;

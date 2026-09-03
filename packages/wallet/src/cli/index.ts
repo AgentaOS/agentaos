@@ -10,6 +10,7 @@ import { revenueAuditCommand, verifyCommand } from './commands/onboarding.comman
 import { payCommand } from './commands/pay.command.js';
 import { statusCommand } from './commands/status.command.js';
 import { subscriptionsCommand } from './commands/subscriptions.command.js';
+import { addJsonOption } from './output.js';
 import { BRAND_BANNER, dim } from './theme.js';
 
 // ---------------------------------------------------------------------------
@@ -24,6 +25,10 @@ import { BRAND_BANNER, dim } from './theme.js';
 // ---------------------------------------------------------------------------
 
 export async function runCli(): Promise<void> {
+	await buildProgram().parseAsync();
+}
+
+export function buildProgram(): Command {
 	const program = new Command();
 
 	program
@@ -75,5 +80,6 @@ ${dim('Docs: https://github.com/AgentaOS/agentaos')}
 	program.addCommand(customersCommand);
 	program.addCommand(invoicesCommand);
 
-	await program.parseAsync();
+	for (const command of program.commands) addJsonOption(command);
+	return program;
 }
