@@ -93,6 +93,8 @@ export interface CreatePaymentLinkParams {
 	type?: 'one_time' | 'subscription';
 	/** Billing cadence — REQUIRED when type is 'subscription', omit otherwise. */
 	billingInterval?: 'month' | 'year';
+	/** Free-trial length in days (1–730). Subscription links only. */
+	trialPeriodDays?: number;
 }
 
 export interface PaymentLink {

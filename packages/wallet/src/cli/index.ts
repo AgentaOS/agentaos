@@ -8,6 +8,7 @@ import { invoicesCommand } from './commands/invoices.command.js';
 import { loginCommand, logoutCommand } from './commands/login.command.js';
 import { revenueAuditCommand, verifyCommand } from './commands/onboarding.command.js';
 import { payCommand } from './commands/pay.command.js';
+import { productsCommand } from './commands/products.command.js';
 import { statusCommand } from './commands/status.command.js';
 import { subscriptionsCommand } from './commands/subscriptions.command.js';
 import { addJsonOption } from './output.js';
@@ -75,6 +76,7 @@ ${dim('Docs: https://github.com/AgentaOS/agentaos')}
 	program.addCommand(statusCommand);
 	program.addCommand(revenueAuditCommand);
 	program.addCommand(verifyCommand);
+	program.addCommand(productsCommand);
 	program.addCommand(payCommand);
 	program.addCommand(subscriptionsCommand);
 	program.addCommand(customersCommand);
