@@ -41,11 +41,23 @@ describe('agenta products create — flags to API params', () => {
 		expect(buildCreateParams({ ...oneTime, trialDays: '7' }).ok).toBe(false);
 	});
 
-	it('passes the success URL through so buyers return to the app', () => {
-		const built = buildCreateParams({ ...oneTime, successUrl: 'https://myapp.com/thanks' });
+	it('passes the return URLs through so buyers land back in the app', () => {
+		const built = buildCreateParams({
+			...oneTime,
+			successUrl: 'https://myapp.com/thanks',
+			cancelUrl: 'https://myapp.com/pricing',
+		});
 		expect(built.ok).toBe(true);
 		if (!built.ok) return;
 		expect(built.params.successUrl).toBe('https://myapp.com/thanks');
+		expect(built.params.cancelUrl).toBe('https://myapp.com/pricing');
+	});
+
+	it('refuses a plain-http cancel URL', () => {
+		expect(buildCreateParams({ ...oneTime, cancelUrl: 'http://myapp.com/pricing' })).toEqual({
+			ok: false,
+			error: '--cancel-url must be an https:// URL.',
+		});
 	});
 
 	// The API rejects anything but https; a plain-http localhost URL is the

@@ -28,7 +28,10 @@ interface CreateOptions {
 	interval?: string;
 	trialDays?: string;
 	successUrl?: string;
+	cancelUrl?: string;
 }
+
+const HTTPS_URL = /^https:\/\/\S+$/i;
 
 /** Flags → API params, or the one sentence that explains why they cannot be. */
 export function buildCreateParams(
@@ -38,9 +41,12 @@ export function buildCreateParams(
 	if (Number.isNaN(amount) || amount <= 0) {
 		return { ok: false, error: 'Amount must be a positive number.' };
 	}
-	// The API only accepts https here; say so before the round-trip.
-	if (opts.successUrl !== undefined && !/^https:\/\/\S+$/i.test(opts.successUrl)) {
+	// The API only accepts https for return URLs; say so before the round-trip.
+	if (opts.successUrl !== undefined && !HTTPS_URL.test(opts.successUrl)) {
 		return { ok: false, error: '--success-url must be an https:// URL.' };
+	}
+	if (opts.cancelUrl !== undefined && !HTTPS_URL.test(opts.cancelUrl)) {
+		return { ok: false, error: '--cancel-url must be an https:// URL.' };
 	}
 
 	const params: CreatePaymentLinkParams = {
@@ -49,6 +55,7 @@ export function buildCreateParams(
 		currency: opts.currency,
 		description: opts.description,
 		successUrl: opts.successUrl,
+		cancelUrl: opts.cancelUrl,
 	};
 
 	if (!opts.subscription) {
@@ -85,6 +92,7 @@ function productView(link: PaymentLink): Record<string, unknown> {
 		status: link.status,
 		checkoutUrl: link.checkoutUrl,
 		successUrl: link.successUrl,
+		cancelUrl: link.cancelUrl,
 	};
 }
 
@@ -103,6 +111,7 @@ productsCommand
 	.option('--interval <interval>', 'Billing cadence for a plan: month or year')
 	.option('--trial-days <days>', 'Free trial length for a plan, in days')
 	.option('--success-url <url>', 'https URL buyers return to after paying (we append ?sessionId=…)')
+	.option('--cancel-url <url>', 'https URL buyers return to if they back out')
 	.action(async (opts: CreateOptions) => {
 		const built = buildCreateParams(opts);
 		if (!built.ok) {
