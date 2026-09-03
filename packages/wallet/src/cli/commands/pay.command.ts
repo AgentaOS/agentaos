@@ -41,7 +41,6 @@ payCommand
 	.option('-c, --currency <currency>', 'Currency code (e.g. EUR, USD)')
 	.option('-d, --description <desc>', 'Description shown on checkout page')
 	.option('--email <email>', 'Pre-populate buyer email')
-	.option('--json', 'Output as JSON')
 	.action(
 		async (opts: { amount: string; currency?: string; description?: string; email?: string }) => {
 			const amount = Number.parseFloat(opts.amount);
@@ -96,7 +95,6 @@ payCommand
 payCommand
 	.command('get <sessionId>')
 	.description('Get checkout session status')
-	.option('--json', 'Output as JSON')
 	.action(async (sessionId: string) => {
 		const client = await requirePayClient();
 		if (!client) return;
@@ -139,7 +137,6 @@ payCommand
 	.description('List checkout sessions')
 	.option('--status <status>', 'Filter: open, completed, expired, cancelled')
 	.option('--limit <n>', 'Results per page (default 10)', '10')
-	.option('--json', 'Output as JSON')
 	.action(async (opts: { status?: string; limit: string }) => {
 		const client = await requirePayClient();
 		if (!client) return;

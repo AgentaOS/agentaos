@@ -3,6 +3,29 @@
 version = 4
 
 [[package]]
+name = "agentaos-mpc-wasm"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "cggmp24",
+ "cggmp24-keygen",
+ "critical-section",
+ "generic-ec",
+ "getrandom",
+ "js-sys",
+ "key-share",
+ "num-bigint-dig",
+ "rand",
+ "rand_core",
+ "round-based",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "sha2",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -547,29 +570,6 @@ dependencies = [
  "ff",
  "rand_core",
  "subtle",
-]
-
-[[package]]
-name = "agentaos-mpc-wasm"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "cggmp24",
- "cggmp24-keygen",
- "critical-section",
- "generic-ec",
- "getrandom",
- "js-sys",
- "key-share",
- "num-bigint-dig",
- "rand",
- "rand_core",
- "round-based",
- "serde",
- "serde-wasm-bindgen",
- "serde_json",
- "sha2",
- "wasm-bindgen",
 ]
 
 [[package]]

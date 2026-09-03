@@ -3,13 +3,14 @@ import chalk from 'chalk';
 import { Command } from 'commander';
 import ora from 'ora';
 import { getConfigDir } from '../../lib/config.js';
+import { ensureSession } from '../../lib/ensure-session.js';
 import {
 	deleteSession,
 	getRefreshToken,
 	getSession,
 	getSessionServerUrl,
 	storeSession,
-} from '../../lib/keychain.js';
+} from '../../lib/session-store.js';
 import { dim, failMark, section, successMark } from '../theme.js';
 
 // ---------------------------------------------------------------------------
@@ -19,7 +20,9 @@ import { dim, failMark, section, successMark } from '../theme.js';
 async function postJson<T>(url: string, body: unknown): Promise<T> {
 	const response = await fetch(url, {
 		method: 'POST',
-		headers: { 'content-type': 'application/json' },
+		// See ensure-session.ts: without `x-client: cli` the auth endpoints hand
+		// tokens back as httpOnly cookies only, which a CLI cannot read.
+		headers: { 'content-type': 'application/json', 'x-client': 'cli' },
 		body: JSON.stringify(body),
 		signal: AbortSignal.timeout(15_000),
 	});
@@ -54,12 +57,22 @@ export const loginCommand = new Command('login')
 	.option('--server <url>', 'Server URL', process.env.AGENTA_SERVER ?? 'https://api.agentaos.ai')
 	.action(async (opts: { server: string }) => {
 		try {
-			const existing = await getSession();
-			if (existing) {
+			// A session FILE is not a session. Every other command tells an expired
+			// user to run `agenta login`, so refusing them here on the strength of a
+			// dead token left them with no way back in at all. Only a session that
+			// still works is grounds for turning them away.
+			const existing = await ensureSession();
+			if (existing.ok) {
 				console.log(
 					`\n  ${dim('Already logged in. Run')} ${chalk.bold('agenta logout')} ${dim('to switch accounts.')}\n`,
 				);
 				return;
+			}
+			if (existing.reason === 'session-expired') {
+				// Clear it before re-authenticating: the stale refresh token is spent,
+				// and leaving it on disk would strand the next command the same way.
+				await deleteSession();
+				console.log(`\n  ${dim('Your previous session expired. Signing you in again.')}`);
 			}
 
 			const baseUrl = opts.server.replace(/\/+$/, '');
@@ -98,21 +111,11 @@ export const loginCommand = new Command('login')
 				}>(`${baseUrl}/api/v1/auth/device-code/poll`, { deviceCode });
 
 				if (result.status === 'completed' && result.token) {
+					// The poll already returned a fresh token pair. Immediately spending
+					// the refresh token to "upgrade" it burned the new one milliseconds
+					// after issue and left the session one race away from the server's
+					// reuse detection, which revokes the entire family.
 					await storeSession(result.token, baseUrl, result.refreshToken);
-
-					if (result.refreshToken) {
-						try {
-							const refreshRes = await postJson<{ token?: string; refreshToken?: string }>(
-								`${baseUrl}/api/v1/auth/refresh`,
-								{ refreshToken: result.refreshToken },
-							);
-							if (refreshRes.token) {
-								await storeSession(refreshRes.token, baseUrl, refreshRes.refreshToken);
-							}
-						} catch {
-							/* best-effort */
-						}
-					}
 
 					spinner.succeed('Logged in');
 					console.log('');
