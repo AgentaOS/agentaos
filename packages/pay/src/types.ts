@@ -115,6 +115,8 @@ export interface PaymentLink {
 	type: 'one_time' | 'subscription';
 	/** Set only for subscription links; null for one-time links. */
 	billingInterval: 'month' | 'year' | null;
+	/** Free-trial length in days on a subscription link; null when there is no trial. */
+	trialPeriodDays: number | null;
 	checkoutUrl: string;
 	metadata: Record<string, unknown>;
 	checkoutFields: CheckoutField[];
@@ -338,6 +340,55 @@ export interface CancelSubscriptionResult {
 	/** ISO 8601 date the cancellation takes effect. */
 	effectiveCancelDate: string | null;
 }
+
+/** `upgrade` = the new plan costs more per cycle; `downgrade` = the same or less. */
+export type PlanChangeDirection = 'upgrade' | 'downgrade';
+
+/**
+ * Quote for moving a subscription to another plan (GET …/plan-change/preview).
+ * Read-only: nothing is charged or scheduled until `changePlan` is called with
+ * the `prorationDate` echoed from here.
+ */
+export interface PlanChangePreview {
+	direction: PlanChangeDirection;
+	currency: string;
+	/** Charged now, integer minor units. Always 0 for a downgrade. */
+	dueTodayMinor: number;
+	dueTodayVatMinor: number;
+	/** ISO 8601. Upgrade: now. Downgrade: the current period end. */
+	effectiveAt: string;
+	/** The next regular cycle invoice on the new plan, integer minor units. */
+	nextInvoiceMinor: number;
+	nextInvoiceVatMinor: number;
+	nextInvoiceAt: string;
+	/** Unix seconds. Pass back to `changePlan` so the charge matches this quote. */
+	prorationDate: number;
+}
+
+export interface ChangePlanParams {
+	/** The target product's `paymentLinks.id` (same currency and billing interval as the current plan). */
+	targetLinkId: string;
+	/** From `previewPlanChange().prorationDate`. */
+	prorationDate: number;
+}
+
+export type ChangePlanResult =
+	| {
+			direction: 'upgrade';
+			applied: true;
+			status: SubscriptionStatus;
+			/** New per-cycle amount, integer minor units. */
+			unitAmountMinor: number;
+			currency: string;
+	  }
+	| {
+			direction: 'downgrade';
+			applied: true;
+			/** ISO 8601: when the new plan starts (the current period end). */
+			effectiveAt: string;
+			unitAmountMinor: number;
+			currency: string;
+	  };
 
 // ---------------------------------------------------------------------------
 // Customers

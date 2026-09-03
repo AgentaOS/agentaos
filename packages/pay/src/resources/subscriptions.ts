@@ -1,8 +1,11 @@
 import type {
 	CancelSubscriptionParams,
 	CancelSubscriptionResult,
+	ChangePlanParams,
+	ChangePlanResult,
 	ListParams,
 	PaginatedList,
+	PlanChangePreview,
 	Subscription,
 	SubscriptionInvoice,
 } from '../types.js';
@@ -39,5 +42,26 @@ export class SubscriptionsResource extends BaseResource {
 	/** Per-cycle invoices for one subscription, newest first. */
 	async invoices(id: string): Promise<SubscriptionInvoice[]> {
 		return this.get<SubscriptionInvoice[]>(`${BASE_PATH}/${id}/invoices`);
+	}
+
+	/**
+	 * Quote a move to another plan without applying it. The target must be a
+	 * different subscription product in the same currency and billing interval;
+	 * the subscription must be active or trialing.
+	 */
+	async previewPlanChange(id: string, targetLinkId: string): Promise<PlanChangePreview> {
+		return this.get<PlanChangePreview>(`${BASE_PATH}/${id}/plan-change/preview`, {
+			targetLinkId,
+		});
+	}
+
+	/**
+	 * Apply a plan change quoted by `previewPlanChange`. An upgrade charges the
+	 * prorated difference on the saved card now; a downgrade switches at the
+	 * current period end and charges nothing today. Idempotent on
+	 * (subscription, target plan, prorationDate).
+	 */
+	async changePlan(id: string, params: ChangePlanParams): Promise<ChangePlanResult> {
+		return this.post<ChangePlanResult>(`${BASE_PATH}/${id}/plan-change`, params);
 	}
 }

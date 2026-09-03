@@ -268,6 +268,51 @@ describe('subscriptions', () => {
 		expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual({ atPeriodEnd: false });
 	});
 
+	it('previewPlanChange → GET …/plan-change/preview?targetLinkId=… and returns the quote', async () => {
+		const calls = stubRoutes({
+			direction: 'upgrade',
+			currency: 'eur',
+			due_today_minor: 1234,
+			due_today_vat_minor: 239,
+			effective_at: '2026-09-03T10:00:00.000Z',
+			next_invoice_minor: 4900,
+			next_invoice_vat_minor: 1176,
+			next_invoice_at: '2026-10-03T10:45:13.000Z',
+			proration_date: 1788434542,
+		});
+		const quote = await client().subscriptions.previewPlanChange('sub_1', 'link_2');
+		const url = new URL(calls[0]?.url ?? '');
+		expect(calls[0]?.method ?? 'GET').toBe('GET');
+		expect(url.pathname).toBe('/api/v1/gateway/subscriptions/sub_1/plan-change/preview');
+		expect(url.searchParams.get('targetLinkId')).toBe('link_2');
+		expect(quote).toMatchObject({
+			direction: 'upgrade',
+			dueTodayMinor: 1234,
+			prorationDate: 1788434542,
+		});
+	});
+
+	it('changePlan → POST …/plan-change echoing the quoted prorationDate', async () => {
+		const calls = stubRoutes({
+			direction: 'upgrade',
+			applied: true,
+			status: 'active',
+			unit_amount_minor: 4900,
+			currency: 'eur',
+		});
+		const res = await client().subscriptions.changePlan('sub_1', {
+			targetLinkId: 'link_2',
+			prorationDate: 1788434542,
+		});
+		expect(calls[0]?.method).toBe('POST');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/subscriptions/sub_1/plan-change');
+		expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual({
+			targetLinkId: 'link_2',
+			prorationDate: 1788434542,
+		});
+		expect(res).toMatchObject({ direction: 'upgrade', applied: true, unitAmountMinor: 4900 });
+	});
+
 	it('invoices → GET /api/v1/gateway/subscriptions/:id/invoices', async () => {
 		const calls = stubRoutes([
 			{ id: 'inv_1', invoice_number: 'INV-2026-0001', issued_at: '2026-08-18T00:00:00Z' },
