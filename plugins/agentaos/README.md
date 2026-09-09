@@ -55,6 +55,15 @@ agenta login
 claude mcp list   # expect an "agentaos" server, connected
 ```
 
+## ChatGPT, Claude.ai and other hosted assistants
+
+Hosted assistants cannot run `npx`; they connect over HTTPS instead. Add
+`https://mcp.agentaos.ai/mcp` as a custom connector (ChatGPT: Settings →
+Connectors; Claude.ai: Customize → Connectors → Add custom connector). An
+AgentaOS page opens: pick Test or Live and press **Approve**. The assistant then
+has the same `agenta_pay_*` tools as this plugin. To disconnect, revoke the key
+on app.agentaos.ai → Developers.
+
 ## Docs
 
 - Skill reference: `skills/agentaos/SKILL.md` (source of truth:
