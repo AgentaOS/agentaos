@@ -1,8 +1,9 @@
+import type { AgentaOS } from '@agentaos/pay';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { createPayClient, formatPayError } from './pay-utils.js';
+import { formatPayError } from './pay-utils.js';
 
-export function registerPayGetCheckout(server: McpServer) {
+export function registerPayGetCheckout(server: McpServer, getClient: () => AgentaOS) {
 	server.registerTool(
 		'agenta_pay_get_checkout',
 		{
@@ -14,7 +15,7 @@ export function registerPayGetCheckout(server: McpServer) {
 		},
 		async ({ sessionId }) => {
 			try {
-				const client = createPayClient();
+				const client = getClient();
 				const checkout = await client.checkouts.retrieve(sessionId);
 
 				// amountOverride is for link-based checkouts; standalone checkouts use the session amount

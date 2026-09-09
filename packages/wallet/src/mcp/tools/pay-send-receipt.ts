@@ -1,8 +1,9 @@
+import type { AgentaOS } from '@agentaos/pay';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { createPayClient, formatPayError } from './pay-utils.js';
+import { formatPayError } from './pay-utils.js';
 
-export function registerPaySendReceipt(server: McpServer) {
+export function registerPaySendReceipt(server: McpServer, getClient: () => AgentaOS) {
 	server.registerTool(
 		'agenta_pay_send_receipt',
 		{
@@ -14,7 +15,7 @@ export function registerPaySendReceipt(server: McpServer) {
 		},
 		async ({ invoiceId }) => {
 			try {
-				const client = createPayClient();
+				const client = getClient();
 				const result = await client.invoices.sendReceipt(invoiceId);
 
 				return { content: [{ type: 'text' as const, text: `Receipt sent to ${result.sentTo}` }] };

@@ -1,13 +1,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
-import { registerPayCancelSubscription } from './tools/pay-cancel-subscription.js';
-import { registerPayCreateCheckout } from './tools/pay-create-checkout.js';
-import { registerPayGetCheckout } from './tools/pay-get-checkout.js';
-import { registerPayListCheckouts } from './tools/pay-list-checkouts.js';
-import { registerPayListCustomers } from './tools/pay-list-customers.js';
-import { registerPayListSubscriptions } from './tools/pay-list-subscriptions.js';
-import { registerPaySendReceipt } from './tools/pay-send-receipt.js';
+import { registerPayTools } from './tools/index.js';
+import { createPayClient } from './tools/pay-utils.js';
 
 /**
  * The AgentaOS MCP server, over stdio.
@@ -23,13 +18,7 @@ export async function runMcp() {
 		version: '0.1.0',
 	});
 
-	registerPayCreateCheckout(server);
-	registerPayGetCheckout(server);
-	registerPayListCheckouts(server);
-	registerPayListSubscriptions(server);
-	registerPayCancelSubscription(server);
-	registerPayListCustomers(server);
-	registerPaySendReceipt(server);
+	registerPayTools(server, createPayClient);
 
 	const transport = new StdioServerTransport();
 	await server.connect(transport);
