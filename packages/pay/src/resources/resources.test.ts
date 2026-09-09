@@ -491,9 +491,11 @@ describe('orgId option', () => {
 	it('appends orgId to every request, reads and writes alike, when set', async () => {
 		const calls = stubRoutes({ items: [], total: 0, has_more: false });
 		const client = sessionClient('org_7');
-		await client.customers.list({ limit: 5 });
+		await client.goLive.get();
+		await client.paymentLinks.list({ limit: 5 });
 		await client.subscriptions.cancel('sub_1');
 		expect(calls.map((call) => new URL(call.url).searchParams.get('orgId'))).toEqual([
+			'org_7',
 			'org_7',
 			'org_7',
 		]);
