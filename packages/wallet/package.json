@@ -1,6 +1,6 @@
 {
 	"name": "agentaos",
-	"version": "3.0.0",
+	"version": "3.1.0",
 	"description": "AgentaOS — CLI + MCP server for threshold signing. The key never exists.",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",
