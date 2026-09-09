@@ -157,6 +157,7 @@ describe('remote MCP authorization', () => {
 		const keyCall = calls.find((c) => c.url.endsWith('/gateway/secret-keys'));
 		expect(JSON.parse(String(keyCall?.init?.body))).toEqual({
 			supportedNetworks: ['base-sepolia'],
+			label: 'ChatGPT',
 		});
 		expect(new Headers(keyCall?.init?.headers).get('authorization')).toBe('Bearer session-jwt');
 
@@ -177,6 +178,7 @@ describe('remote MCP authorization', () => {
 		const keyCall = calls.find((c) => c.url.endsWith('/gateway/secret-keys'));
 		expect(JSON.parse(String(keyCall?.init?.body))).toEqual({
 			supportedNetworks: ['base', 'arbitrum'],
+			label: 'ChatGPT',
 		});
 		expect(completed[0]?.props).toMatchObject({ mode: 'live' });
 	});

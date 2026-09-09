@@ -50,11 +50,16 @@ export class AgentaosApi {
 		return this.request<Network[]>('GET', '/networks');
 	}
 
-	createSecretKey(sessionToken: string, supportedNetworks: string[]): Promise<SecretKey> {
+	/** `label` is what the Developers tab shows as the key's name (max 40 chars). */
+	createSecretKey(
+		sessionToken: string,
+		supportedNetworks: string[],
+		label: string,
+	): Promise<SecretKey> {
 		return this.request<SecretKey>(
 			'POST',
 			'/gateway/secret-keys',
-			{ supportedNetworks },
+			{ supportedNetworks, label: label.slice(0, 40) },
 			{ authorization: `Bearer ${sessionToken}` },
 		);
 	}
