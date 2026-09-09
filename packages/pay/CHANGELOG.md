@@ -1,5 +1,20 @@
 # @agentaos/pay
 
+## 2.2.0
+
+### Minor Changes
+
+- [#35](https://github.com/AgentaOS/agentaos/pull/35) [`5f52799`](https://github.com/AgentaOS/agentaos/commit/5f52799cbb3dea15de80aaf720c5fccb8a08e15b) Thanks [@PancheI](https://github.com/PancheI)! - Add `subscriptions.invoices(id)` and expose `linkId` / cancel fields on `Subscription` so a logged-in SaaS can match a product, list billing history, and cancel.
+
+- [#37](https://github.com/AgentaOS/agentaos/pull/37) [`0b3489a`](https://github.com/AgentaOS/agentaos/commit/0b3489af518ea41a5453949707dc5ddb72a80288) Thanks [@PancheI](https://github.com/PancheI)! - Add `livemode` to webhook payloads and type the subscription webhook events.
+
+  - Every `WebhookEvent` `data` now carries `livemode: boolean` (`true` = live mode, `false` = test mode) — the account-mode signal. This replaces the previous chain-specific `testnet` field, which was meaningless for card/bank rails; use `network` for the chain/rail.
+  - New `SubscriptionData` type and five `subscription.*` events on the `WebhookEvent` union: `subscription.created`, `subscription.renewed`, `subscription.payment_failed`, `subscription.updated`, `subscription.canceled`.
+
+### Patch Changes
+
+- [#36](https://github.com/AgentaOS/agentaos/pull/36) [`0d4ab68`](https://github.com/AgentaOS/agentaos/commit/0d4ab68fb7c28fa6002ee96729cef8951ffb78e2) Thanks [@PancheI](https://github.com/PancheI)! - Make `webhooks.verify()` errors self-explaining for the most common integration mistake — passing a parsed body instead of the raw request bytes. A non-string/Buffer payload (e.g. `req.body` after `express.json()`) now throws an actionable message pointing at `express.raw()`, and a genuine signature mismatch asks whether the raw body was used, mirroring Stripe's hint. No change to the verification algorithm.
+
 ## 2.1.0
 
 ### Minor Changes

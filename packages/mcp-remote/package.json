@@ -1,6 +1,6 @@
 {
 	"name": "@agentaos/mcp-remote",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"private": true,
 	"description": "AgentaOS remote MCP server for ChatGPT, Claude.ai and other hosted assistants (Cloudflare Worker)",
 	"license": "Apache-2.0",
