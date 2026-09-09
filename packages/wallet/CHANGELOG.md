@@ -1,5 +1,16 @@
 # agentaos
 
+## 3.1.0
+
+### Minor Changes
+
+- [#45](https://github.com/AgentaOS/agentaos/pull/45) [`967b34f`](https://github.com/AgentaOS/agentaos/commit/967b34f2a90e20e096ececf2379c980aa562eb8f) Thanks [@PancheI](https://github.com/PancheI)! - The CLI and the MCP server are one operations catalogue: every command is a tool (19), with merchant-readable output on both. New tools: status, audit, verify, products, invoices; `registerAgentaTools` (alias `registerPayTools`).
+
+### Patch Changes
+
+- Updated dependencies [[`967b34f`](https://github.com/AgentaOS/agentaos/commit/967b34f2a90e20e096ececf2379c980aa562eb8f)]:
+  - @agentaos/pay@2.3.0
+
 ## 3.0.0
 
 ### Major Changes
