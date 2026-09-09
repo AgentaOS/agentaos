@@ -32,7 +32,10 @@ export interface SecretKey {
 export class AgentaosApi {
 	constructor(
 		private readonly baseUrl: string,
-		private readonly fetchFn: typeof fetch = fetch,
+		// Wrapped, not passed bare: a bare `fetch` stored on the instance is
+		// invoked with the instance as `this`, which Workers reject as an
+		// illegal invocation. Node tolerates it, so a test would not catch it.
+		private readonly fetchFn: typeof fetch = (input, init) => fetch(input, init),
 	) {}
 
 	createDeviceCode(): Promise<DeviceCode> {

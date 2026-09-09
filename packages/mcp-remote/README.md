@@ -25,15 +25,21 @@ than a dedicated "reconnect" sentence.
 
 ## Local development
 
+The OAuth provider only accepts an `https` issuer, so the local Worker serves TLS on a
+self-signed certificate and is reached as `https://localhost:8788` (the `dev` script
+passes `--local-protocol https --host localhost:8788`; without `--host`, wrangler
+rewrites local requests to the production route and the issuer comes out wrong).
+
 ```bash
-cp .dev.vars.example .dev.vars      # points at the local API on :8080
+cp .dev.vars.example .dev.vars      # local API on :8080, public URL https://localhost:8788
 pnpm --filter agentaos build         # the Worker imports the tools from agentaos/mcp
 pnpm --filter @agentaos/mcp-remote dev
-npx @modelcontextprotocol/inspector@latest   # connect to http://localhost:8788/mcp
+npx @modelcontextprotocol/inspector@latest   # connect to https://localhost:8788/mcp
 ```
 
-The approve page honours `return` for `http://localhost:*` in dev, so the whole flow
-runs against the local API and app.
+The approve page honours `return` for `http(s)://localhost:*` in dev, so the whole flow
+runs against the local API and app. Open `https://localhost:8788/` in the browser once
+and accept the certificate, or the redirect back to `/callback` stops at the warning.
 
 ## Deploy
 
