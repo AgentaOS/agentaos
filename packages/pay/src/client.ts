@@ -52,7 +52,9 @@ export class AgentaOS {
 			debug: options?.debug ?? false,
 			logger: options?.logger as ((level: string, message: string) => void) | undefined,
 			authMode: isApiKey ? ('api-key' as const) : ('jwt' as const),
-			orgId: options?.orgId,
+			// A key is bound to one org server-side; only a session user can be in
+			// several, so only a session ever carries the choice.
+			orgId: isApiKey ? undefined : options?.orgId,
 		};
 
 		this.checkouts = new CheckoutsResource(baseUrl, apiKey, resourceOptions);

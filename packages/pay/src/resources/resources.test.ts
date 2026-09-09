@@ -478,6 +478,16 @@ describe('orgId option', () => {
 		return new AgentaOS(jwt, { baseUrl: 'https://api.example.com', orgId });
 	}
 
+	it('never sends orgId for an API key, even when the option is set', async () => {
+		const calls = stubRoutes({ 'GET /api/v1/gateway/customers': { items: [], total: 0 } });
+		const client = new AgentaOS('sk_test_abc123', {
+			baseUrl: 'https://api.example.com',
+			orgId: 'org_1',
+		});
+		await client.customers.list({ limit: 1 });
+		expect(calls[0]?.url).not.toContain('orgId');
+	});
+
 	it('appends orgId to every request, reads and writes alike, when set', async () => {
 		const calls = stubRoutes({ items: [], total: 0, has_more: false });
 		const client = sessionClient('org_7');
