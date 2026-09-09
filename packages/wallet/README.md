@@ -46,22 +46,33 @@ agenta --help
 | Command | Description |
 |---------|-------------|
 | `agenta login` | Sign in via browser (device-code flow) |
-| `agenta status` | Account, wallet, and readiness overview |
+| `agenta status` | Account and go-live overview |
 | `agenta logout` | Clear session |
 
 ### Payments
 
+Every row is also an MCP tool (`agenta products create` = `agenta_products_create`), same inputs, same output.
+
 | Command | Description |
 |---------|-------------|
+| `agenta audit request --url <url>` | Ask for the free Revenue & Pricing Audit |
+| `agenta audit show` | The audit state, and the report PDF once it exists (`--no-download` for the link only) |
+| `agenta verify declaration` | The five statements `--accept-declaration` attests to |
+| `agenta verify submit --legal-name ... --accept-declaration` | Submit business verification so the merchant can accept live payments |
+| `agenta verify status` | Where the verification has got to |
+| `agenta verify resubmit` | Send back for review after making the changes we asked for |
+| `agenta products create --name <name> -a <amount>` | Create a product (one-time) or a subscription plan (`--subscription --interval month\|year`, `--trial-days <n>`) |
+| `agenta products list` | List products and plans |
 | `agenta pay checkout -a <amount>` | Create a checkout session |
-| `agenta pay get <sessionId>` | Get checkout details |
-| `agenta pay list` | List checkouts |
+| `agenta pay get <sessionId>` | Get checkout session status |
+| `agenta pay list` | List checkout sessions |
 | `agenta subscriptions list` | List subscriptions |
 | `agenta subscriptions cancel <id>` | Cancel a subscription (at period end; `--now` for immediate) |
+| `agenta subscriptions change-plan <id> --to <linkId>` | Move a subscription to another plan (`--dry-run` quotes only) |
 | `agenta customers list` | List customers |
 | `agenta invoices list` | List invoices |
 | `agenta invoices receipt <id>` | Download the receipt PDF |
-| `agenta invoices send-receipt <id>` | Re-send the receipt email |
+| `agenta invoices send-receipt <id>` | Re-send the receipt email to the buyer on file |
 
 ### Agent Sub-accounts
 
