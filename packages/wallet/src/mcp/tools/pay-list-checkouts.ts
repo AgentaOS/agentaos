@@ -1,8 +1,9 @@
+import type { AgentaOS } from '@agentaos/pay';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { createPayClient, formatPayError } from './pay-utils.js';
+import { formatPayError } from './pay-utils.js';
 
-export function registerPayListCheckouts(server: McpServer) {
+export function registerPayListCheckouts(server: McpServer, getClient: () => AgentaOS) {
 	server.registerTool(
 		'agenta_pay_list_checkouts',
 		{
@@ -25,7 +26,7 @@ export function registerPayListCheckouts(server: McpServer) {
 		},
 		async ({ status, limit, offset }) => {
 			try {
-				const client = createPayClient();
+				const client = getClient();
 				const data = await client.checkouts.list({
 					status,
 					limit: limit ?? 10,

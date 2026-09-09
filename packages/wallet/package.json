@@ -17,6 +17,12 @@
 		"agentaos": "./dist/index.js",
 		"agenta": "./dist/index.js"
 	},
+	"exports": {
+		"./mcp": {
+			"types": "./dist/mcp/tools/index.d.ts",
+			"default": "./dist/mcp/tools/index.js"
+		}
+	},
 	"files": ["dist", "!dist/__tests__"],
 	"engines": {
 		"node": ">=20.0.0"

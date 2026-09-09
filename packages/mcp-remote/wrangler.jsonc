@@ -1,0 +1,14 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "agentaos-mcp",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-08-01",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"kv_namespaces": [{ "binding": "OAUTH_KV", "id": "REPLACE_WITH_KV_ID" }],
+	"vars": {
+		"AGENTAOS_API_URL": "https://api.agentaos.ai",
+		"MCP_PUBLIC_URL": "https://mcp.agentaos.ai"
+	},
+	"routes": [{ "pattern": "mcp.agentaos.ai", "custom_domain": true }],
+	"observability": { "enabled": true }
+}
