@@ -38,13 +38,10 @@ export interface ReceiptView {
  *  bytes themselves are the result; the CLI writes them to a file. */
 export const invoicesReceipt = operation({
 	name: 'invoices.receipt',
-	description: 'The receipt PDF for a paid invoice',
+	description: 'Download the receipt PDF for a paid invoice',
 	input: z.object({
 		id: z.string().min(1).describe('The invoice id'),
-		output: z
-			.string()
-			.optional()
-			.describe('Where to save the PDF (default ./receipt-<id>.pdf; terminal only)'),
+		output: z.string().optional().describe('File path to save the PDF to'),
 	}),
 	positional: 'id',
 	async run(sdk, input): Promise<ReceiptView> {

@@ -21,7 +21,7 @@ const createInput = z.object({
 	subscription: z.boolean().optional().describe('Recurring plan instead of a one-time product'),
 	interval: oneOf(['month', 'year'], '--interval')
 		.optional()
-		.describe('Billing cadence for a plan'),
+		.describe('Billing cadence for a plan: month or year'),
 	trialDays: z.coerce
 		.number({ invalid_type_error: TRIAL_MESSAGE })
 		.int(TRIAL_MESSAGE)

@@ -133,5 +133,5 @@ function appliedLine(result: ChangePlanResult): string {
 export const SUBSCRIPTIONS: OperationGroup = {
 	name: 'subscriptions',
 	description: 'Subscription management (list, cancel, change-plan)',
-	operations: [subscriptionsList, subscriptionsCancel, subscriptionsChangePlan],
+	operations: [subscriptionsChangePlan, subscriptionsList, subscriptionsCancel],
 };

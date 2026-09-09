@@ -1,7 +1,6 @@
 import { AgentaOS } from '@agentaos/pay';
 import { getConfigDir } from '../lib/config.js';
-import { decodeJwt, ensureSession } from '../lib/ensure-session.js';
-import { fetchOrg } from '../lib/org.js';
+import { type SessionResult, decodeJwt, ensureSession } from '../lib/ensure-session.js';
 
 /** Who the session belongs to. Only the CLI knows this: a key is org-bound and nameless. */
 export interface CliAccount {
@@ -26,9 +25,9 @@ export interface CliContext {
 }
 
 /**
- * The stored session, refreshed if needed, as an SDK client. A session names
- * a person, who may belong to several orgs; the first one is the one every
- * request acts for, the same way the dashboard picks it.
+ * The stored session, refreshed if needed, as an SDK client. The org it acts
+ * for was resolved once at first use and lives with the session; the SDK
+ * stamps it on every request.
  */
 export async function connect(): Promise<Connection> {
 	const session = await ensureSession();
@@ -39,18 +38,12 @@ export async function connect(): Promise<Connection> {
 				: 'Not logged in. Run agenta login.',
 		);
 	}
-
-	const { token, serverUrl } = session;
-	const org = await fetchOrg(serverUrl, token);
-	const sdk = new AgentaOS(token, { baseUrl: serverUrl, orgId: org?.id });
-	return { sdk, account: accountOf(token, serverUrl, org) };
+	const sdk = new AgentaOS(session.token, { baseUrl: session.serverUrl, orgId: session.orgId });
+	return { sdk, account: accountOf(session) };
 }
 
-function accountOf(
-	token: string,
-	serverUrl: string,
-	org: { id: string; name: string | null } | null,
-): CliAccount {
+function accountOf(session: Extract<SessionResult, { ok: true }>): CliAccount {
+	const { token, serverUrl } = session;
 	const payload = decodeJwt(token);
 	const exp = typeof payload?.exp === 'number' ? payload.exp : null;
 	return {
@@ -58,8 +51,8 @@ function accountOf(
 		email: typeof payload?.email === 'string' ? payload.email : null,
 		server: serverUrl,
 		configDir: getConfigDir(),
-		orgId: org?.id ?? null,
-		organization: org?.name ?? null,
+		orgId: session.orgId ?? null,
+		organization: session.orgName ?? null,
 		...(exp
 			? {
 					jwtExpiresAt: new Date(exp * 1000).toISOString(),

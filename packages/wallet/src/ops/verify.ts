@@ -85,7 +85,7 @@ export const verifyDeclaration = operation({
 const submitInput = z.object({
 	entity: oneOf(['business', 'individual'], '--entity')
 		.default('business')
-		.describe('Who is being verified'),
+		.describe('business | individual (default business)'),
 	legalName: z.string().trim().optional().describe('Registered company name, or full legal name'),
 	registrationNumber: z
 		.string()
@@ -106,9 +106,9 @@ const submitInput = z.object({
 		.describe('2-letter code (defaults to --country)'),
 	url: liveUrl('--url').optional().describe('The merchant project page'),
 	description: z.string().trim().optional().describe('One sentence on what it does'),
-	category: oneOf(CATEGORIES, '--category').optional().describe('What kind of product it is'),
-	delivery: oneOf(DELIVERY, '--delivery').optional().describe('How the buyer receives it'),
-	volume: oneOf(VOLUME_BANDS, '--volume').optional().describe('Expected monthly volume'),
+	category: oneOf(CATEGORIES, '--category').optional().describe(CATEGORIES.join(' | ')),
+	delivery: oneOf(DELIVERY, '--delivery').optional().describe(DELIVERY.join(' | ')),
+	volume: oneOf(VOLUME_BANDS, '--volume').optional().describe(VOLUME_BANDS.join(' | ')),
 	customers: z.boolean().optional().describe('The merchant already has paying customers'),
 	restricted: z
 		.boolean()
@@ -118,7 +118,7 @@ const submitInput = z.object({
 	acceptDeclaration: z
 		.boolean()
 		.optional()
-		.describe('Attest to the five statements (verify declaration)'),
+		.describe('Attest to the five statements (agenta verify declaration)'),
 });
 
 type SubmitInput = z.infer<typeof submitInput>;
@@ -308,5 +308,5 @@ export const verifyResubmit = operation({
 export const VERIFY: OperationGroup = {
 	name: 'verify',
 	description: 'Business verification, so the merchant can accept live payments',
-	operations: [verifyDeclaration, verifySubmit, verifyStatus, verifyResubmit],
+	operations: [verifySubmit, verifyStatus, verifyResubmit, verifyDeclaration],
 };

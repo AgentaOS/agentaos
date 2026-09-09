@@ -18,7 +18,7 @@ export const pageLimit = z.coerce
 	.min(1)
 	.max(100)
 	.default(10)
-	.describe('Results per page');
+	.describe('Results per page (default 10)');
 
 export function oneOf<const T extends readonly [string, ...string[]]>(values: T, flag: string) {
 	return z.enum(values, {

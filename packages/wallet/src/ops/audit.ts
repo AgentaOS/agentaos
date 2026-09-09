@@ -33,8 +33,8 @@ export const auditRequest = operation({
 	input: z.object({
 		url: liveUrl('--url').describe('The page on the merchant website where they sell it'),
 		description: z.string().trim().optional().describe('One sentence on what it does'),
-		category: oneOf(CATEGORIES, '--category').optional().describe('What kind of product it is'),
-		delivery: oneOf(AUDIT_DELIVERY, '--delivery').optional().describe('How the buyer receives it'),
+		category: oneOf(CATEGORIES, '--category').optional().describe(CATEGORIES.join(' | ')),
+		delivery: oneOf(AUDIT_DELIVERY, '--delivery').optional().describe(AUDIT_DELIVERY.join(' | ')),
 	}),
 	async run(sdk, input) {
 		await sdk.accountReview.requestAudit({
@@ -76,16 +76,18 @@ export interface AuditShowView {
 
 export const auditShow = operation({
 	name: 'audit.show',
-	description: 'The audit state, and the report PDF once it exists',
+	description: 'The audit state, and download the report PDF once it exists',
 	input: z.object({
-		download: z
-			.boolean()
-			.default(true)
-			.describe('Save the report PDF once it exists (terminal only)'),
 		output: z
 			.string()
 			.optional()
-			.describe('Where to save the report PDF (default ./revenue-audit.pdf; terminal only)'),
+			.describe('Save the report PDF here (default ./revenue-audit.pdf)'),
+		download: z
+			.boolean()
+			.default(true)
+			.describe(
+				'Save the report PDF once it exists (a terminal does; a tool call returns the link)',
+			),
 	}),
 	async run(sdk): Promise<AuditShowView> {
 		const readiness = await sdk.goLive.get();

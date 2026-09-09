@@ -16,9 +16,11 @@ import { isJsonMode } from '../output.js';
 export function statusCommand(ctx: CliContext): Command {
 	const status = new Command('status')
 		.alias('whoami')
+		.usage('[options]')
 		.description(statusGet.description)
 		.action(() => showStatus(ctx));
-	// `agenta status get` is the catalogue's name for the same thing.
+	// `agenta status get` is the catalogue's name for the same thing; hidden,
+	// and the usage line above keeps `[command]` out of the help it had in 3.0.0.
 	status.addCommand(
 		new Command('get').description(statusGet.description).action(() => showStatus(ctx)),
 		{ hidden: true },

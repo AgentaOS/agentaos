@@ -33,10 +33,6 @@ vi.mock('../lib/ensure-session.js', async (importOriginal) => ({
 	ensureSession: async () => ({ ok: true, token: 't', serverUrl: 'https://api.example.com' }),
 }));
 
-vi.mock('../lib/org.js', () => ({
-	fetchOrg: async () => ({ id: 'org_1', name: 'Acme' }),
-}));
-
 function exitOverrideAll(command: Command): Command {
 	command.exitOverride();
 	for (const subcommand of command.commands) exitOverrideAll(subcommand);

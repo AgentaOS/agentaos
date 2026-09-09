@@ -4,22 +4,16 @@ import { kebab, opOf } from '../ops/naming.js';
 import { issuesText } from '../ops/schema.js';
 import type { Operation, OperationGroup } from '../ops/types.js';
 import type { CliContext } from './connect.js';
+import { flagSpec } from './flags.js';
 import { isJsonMode, outputError } from './output.js';
 import { applySideEffect } from './side-effects.js';
 
 /**
  * The CLI rendered from the operations catalogue: one commander subcommand
- * per operation, its flags read off the zod input. Today's short flags are
- * kept by name; everything else is `--kebab-case` of the input key.
+ * per operation, its flags read off the zod input. Flags a published CLI
+ * already promised keep their spelling (`flags.ts`); anything new is
+ * `--kebab-case` of the input key.
  */
-
-const SHORT_FLAGS: Record<string, string> = {
-	name: '-n',
-	amount: '-a',
-	currency: '-c',
-	description: '-d',
-	output: '-o',
-};
 
 interface Field {
 	key: string;
@@ -60,35 +54,21 @@ function fieldsOf(op: Operation): Field[] {
 	return Object.entries(op.input.shape).map(([key, schema]) => fieldOf(key, schema));
 }
 
-function optionFor(field: Field): Option {
-	const long = `--${kebab(field.key)}`;
-	if (field.inner instanceof z.ZodBoolean) {
-		// A boolean that defaults to true is switched OFF: `--no-download`.
-		return field.defaultValue === true
-			? new Option(`--no-${kebab(field.key)}`, negated(field.description))
-			: new Option(long, field.description);
-	}
-
-	const short = SHORT_FLAGS[field.key];
-	const placeholder = field.inner instanceof z.ZodNumber ? '<n>' : '<value>';
-	const option = new Option(`${short ? `${short}, ` : ''}${long} ${placeholder}`, helpOf(field));
+function optionFor(op: Operation, field: Field): Option {
+	const spec = flagSpec(op.name, field.key);
+	const option = new Option(spec?.flags ?? generatedFlags(field), spec?.help ?? field.description);
 	if (field.required) option.makeOptionMandatory();
-	if (field.defaultValue !== undefined) option.default(field.defaultValue);
+	if (spec?.default !== undefined) option.default(spec.default);
 	return option;
 }
 
-/** `Save the report PDF` → `Don't save the report PDF`, for a `--no-` flag. */
-function negated(description: string): string {
-	return description ? `Don't ${description.charAt(0).toLowerCase()}${description.slice(1)}` : '';
-}
-
-/** The help line: the description, then the accepted values for an enum. */
-function helpOf(field: Field): string {
-	if (field.inner instanceof z.ZodEnum) {
-		const values = (field.inner.options as string[]).join(' | ');
-		return field.description ? `${field.description} (${values})` : values;
+/** `--kebab-case <value>`; a boolean is a bare flag, switched OFF when it defaults to true. */
+function generatedFlags(field: Field): string {
+	const name = kebab(field.key);
+	if (field.inner instanceof z.ZodBoolean) {
+		return field.defaultValue === true ? `--no-${name}` : `--${name}`;
 	}
-	return field.description;
+	return `--${name} <value>`;
 }
 
 export function commandFromOperation(op: Operation, ctx: CliContext): Command {
@@ -96,9 +76,9 @@ export function commandFromOperation(op: Operation, ctx: CliContext): Command {
 	const fields = fieldsOf(op);
 
 	const positional = fields.find((field) => field.key === op.positional);
-	if (positional) command.argument(`<${positional.key}>`, positional.description);
+	if (positional) command.argument(`<${positional.key}>`);
 	for (const field of fields) {
-		if (field !== positional) command.addOption(optionFor(field));
+		if (field !== positional) command.addOption(optionFor(op, field));
 	}
 
 	command.action(async (...args: unknown[]) => {

@@ -117,7 +117,9 @@ export const payList = operation({
 	name: 'pay.list',
 	description: 'List checkout sessions',
 	input: z.object({
-		status: oneOf(STATUSES, '--status').optional().describe('Only checkouts in this state'),
+		status: oneOf(STATUSES, '--status')
+			.optional()
+			.describe(`Filter: ${STATUSES.join(', ')}`),
 		limit: pageLimit,
 	}),
 	async run(sdk, input) {
