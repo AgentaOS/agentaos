@@ -1,3 +1,7 @@
 packages:
   - "packages/*"
   - "examples/*"
+
+# Supply-chain hygiene — see .npmrc `minimum-release-age` for rationale.
+# Refuses any package version younger than 7 days. pnpm 10+ honors this key.
+minimumReleaseAge: 10080
