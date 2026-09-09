@@ -471,3 +471,27 @@ describe('accountReview', () => {
 		});
 	});
 });
+
+describe('orgId option', () => {
+	function sessionClient(orgId?: string): AgentaOS {
+		const jwt = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1XzEifQ.c2ln';
+		return new AgentaOS(jwt, { baseUrl: 'https://api.example.com', orgId });
+	}
+
+	it('appends orgId to every request, reads and writes alike, when set', async () => {
+		const calls = stubRoutes({ items: [], total: 0, has_more: false });
+		const client = sessionClient('org_7');
+		await client.customers.list({ limit: 5 });
+		await client.subscriptions.cancel('sub_1');
+		expect(calls.map((call) => new URL(call.url).searchParams.get('orgId'))).toEqual([
+			'org_7',
+			'org_7',
+		]);
+	});
+
+	it('sends no orgId when the option is absent', async () => {
+		const calls = stubRoutes({ items: [], total: 0, has_more: false });
+		await sessionClient().customers.list({ limit: 5 });
+		expect(new URL(calls[0]?.url ?? '').searchParams.has('orgId')).toBe(false);
+	});
+});

@@ -33,6 +33,13 @@ export interface AgentaOSOptions {
 
 	/** Custom logger. Receives sanitized log entries. */
 	logger?: (level: 'debug' | 'info' | 'warn' | 'error', message: string) => void;
+
+	/**
+	 * The organization to act for when authenticating with a session token
+	 * (a JWT from `agenta login`), whose owner may belong to several. Sent as
+	 * `?orgId=` on every request. API keys are bound to one org and need it not.
+	 */
+	orgId?: string;
 }
 
 // ---------------------------------------------------------------------------

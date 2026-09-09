@@ -52,6 +52,7 @@ export class AgentaOS {
 			debug: options?.debug ?? false,
 			logger: options?.logger as ((level: string, message: string) => void) | undefined,
 			authMode: isApiKey ? ('api-key' as const) : ('jwt' as const),
+			orgId: options?.orgId,
 		};
 
 		this.checkouts = new CheckoutsResource(baseUrl, apiKey, resourceOptions);
