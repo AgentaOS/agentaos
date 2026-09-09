@@ -4,7 +4,7 @@
 	"main": "src/index.ts",
 	"compatibility_date": "2026-08-01",
 	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
-	"kv_namespaces": [{ "binding": "OAUTH_KV", "id": "REPLACE_WITH_KV_ID" }],
+	"kv_namespaces": [{ "binding": "OAUTH_KV", "id": "b25cbe4c5ef04a8e8b1ac02b594260cf" }],
 	"vars": {
 		"AGENTAOS_API_URL": "https://api.agentaos.ai",
 		"MCP_PUBLIC_URL": "https://mcp.agentaos.ai"
