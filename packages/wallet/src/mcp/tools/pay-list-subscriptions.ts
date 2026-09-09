@@ -1,6 +1,7 @@
+import type { AgentaOS } from '@agentaos/pay';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { createPayClient, formatPayError } from './pay-utils.js';
+import { formatPayError } from './pay-utils.js';
 
 /** Format integer minor units for display. Platform currencies (EUR/USD) are 2-decimal. */
 function formatAmount(minor: number, currency: string): string {
@@ -11,7 +12,7 @@ function formatAmount(minor: number, currency: string): string {
 	}
 }
 
-export function registerPayListSubscriptions(server: McpServer) {
+export function registerPayListSubscriptions(server: McpServer, getClient: () => AgentaOS) {
 	server.registerTool(
 		'agenta_pay_list_subscriptions',
 		{
@@ -29,7 +30,7 @@ export function registerPayListSubscriptions(server: McpServer) {
 		},
 		async ({ limit, offset }) => {
 			try {
-				const client = createPayClient();
+				const client = getClient();
 				const data = await client.subscriptions.list({
 					limit: limit ?? 10,
 					offset: offset ?? 0,

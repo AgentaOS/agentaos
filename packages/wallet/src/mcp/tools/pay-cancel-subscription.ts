@@ -1,8 +1,9 @@
+import type { AgentaOS } from '@agentaos/pay';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { createPayClient, formatPayError } from './pay-utils.js';
+import { formatPayError } from './pay-utils.js';
 
-export function registerPayCancelSubscription(server: McpServer) {
+export function registerPayCancelSubscription(server: McpServer, getClient: () => AgentaOS) {
 	server.registerTool(
 		'agenta_pay_cancel_subscription',
 		{
@@ -18,7 +19,7 @@ export function registerPayCancelSubscription(server: McpServer) {
 		},
 		async ({ subscriptionId, atPeriodEnd }) => {
 			try {
-				const client = createPayClient();
+				const client = getClient();
 				const result = await client.subscriptions.cancel(subscriptionId, {
 					atPeriodEnd: atPeriodEnd ?? true,
 				});
