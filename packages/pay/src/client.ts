@@ -1,5 +1,7 @@
+import { AccountReviewResource } from './resources/account-review.js';
 import { CheckoutsResource } from './resources/checkouts.js';
 import { CustomersResource } from './resources/customers.js';
+import { GoLiveResource } from './resources/go-live.js';
 import { InvoicesResource } from './resources/invoices.js';
 import { PaymentLinksResource } from './resources/payment-links.js';
 import { SubscriptionsResource } from './resources/subscriptions.js';
@@ -18,6 +20,8 @@ export class AgentaOS {
 	readonly invoices: InvoicesResource;
 	readonly subscriptions: SubscriptionsResource;
 	readonly customers: CustomersResource;
+	readonly goLive: GoLiveResource;
+	readonly accountReview: AccountReviewResource;
 	readonly webhooks: WebhooksResource;
 
 	constructor(apiKey: string, options?: AgentaOSOptions) {
@@ -56,6 +60,8 @@ export class AgentaOS {
 		this.invoices = new InvoicesResource(baseUrl, apiKey, resourceOptions);
 		this.subscriptions = new SubscriptionsResource(baseUrl, apiKey, resourceOptions);
 		this.customers = new CustomersResource(baseUrl, apiKey, resourceOptions);
+		this.goLive = new GoLiveResource(baseUrl, apiKey, resourceOptions);
+		this.accountReview = new AccountReviewResource(baseUrl, apiKey, resourceOptions);
 		this.webhooks = new WebhooksResource();
 	}
 }

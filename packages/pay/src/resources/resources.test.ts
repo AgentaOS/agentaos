@@ -9,7 +9,7 @@ interface FetchCall {
 }
 
 /** Capture method + url + body of each call and return a scripted response body. */
-function stubRoutes(responseBody: unknown = { ok: true }): FetchCall[] {
+function stubRoutes(responseBody: unknown = { ok: true }, status = 200): FetchCall[] {
 	const calls: FetchCall[] = [];
 	vi.stubGlobal(
 		'fetch',
@@ -21,7 +21,7 @@ function stubRoutes(responseBody: unknown = { ok: true }): FetchCall[] {
 			});
 			const isText = typeof responseBody === 'string';
 			return new Response(isText ? (responseBody as string) : JSON.stringify(responseBody), {
-				status: 200,
+				status,
 				headers: isText ? {} : { 'content-type': 'application/json' },
 			});
 		}),
@@ -346,6 +346,128 @@ describe('customers', () => {
 			email: 'a@b.com',
 			vatNumber: 'DE123',
 			stripeCustomerId: 'cus_x',
+		});
+	});
+});
+
+describe('goLive', () => {
+	it('get → GET /api/v1/gateway/go-live returning the readiness object as-is', async () => {
+		const calls = stubRoutes({
+			triedIt: true,
+			verifyState: 'unverified',
+			hasPayoutAccount: false,
+			canGoLive: false,
+			progress: { done: 1, total: 3 },
+			rfi: null,
+			audit: null,
+		});
+		const readiness = await client().goLive.get();
+		expect(calls[0]?.method).toBe('GET');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/go-live');
+		expect(readiness).toMatchObject({ verifyState: 'unverified', progress: { done: 1, total: 3 } });
+	});
+});
+
+describe('accountReview', () => {
+	const review = {
+		status: 'in_review',
+		entity_type: 'business',
+		legal_name: 'Acme OÜ',
+		registration_number: '16961316',
+		tax_country: 'EE',
+		address: { street: 'Sepapaja 6', city: 'Tallinn', country: 'EE' },
+		product_url: 'https://acme.example',
+		product_description: null,
+		checklist: { prohibited_ok: true, product_category: 'saas' },
+		reject_reason: null,
+		cooldown_until: null,
+		submitted_at: '2026-09-09T10:00:00Z',
+		heldReason: null,
+		rfi: null,
+	};
+
+	it('get → GET /api/v1/gateway/account-review, unwrapping and camelizing the review', async () => {
+		const calls = stubRoutes({ review, prefill: { legal_name_default: null } });
+		const res = await client().accountReview.get();
+		expect(calls[0]?.method).toBe('GET');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/account-review');
+		expect(res).toMatchObject({
+			status: 'in_review',
+			entityType: 'business',
+			legalName: 'Acme OÜ',
+			submittedAt: '2026-09-09T10:00:00Z',
+			checklist: { prohibitedOk: true, productCategory: 'saas' },
+		});
+	});
+
+	it('get → null when nothing is on file yet', async () => {
+		stubRoutes({ review: null, prefill: { legal_name_default: null } });
+		expect(await client().accountReview.get()).toBeNull();
+	});
+
+	it('get → null on 404', async () => {
+		stubRoutes({ message: 'Not found' }, 404);
+		expect(await client().accountReview.get()).toBeNull();
+	});
+
+	it('submit → POST /api/v1/gateway/account-review with the body untouched', async () => {
+		const calls = stubRoutes({ review });
+		const body = {
+			entityType: 'business' as const,
+			legalName: 'Acme OÜ',
+			registrationNumber: '16961316',
+			taxCountry: 'EE',
+			address: { street: 'Sepapaja 6', city: 'Tallinn', country: 'EE' },
+			productUrl: 'https://acme.example',
+			displayName: 'Acme',
+			checklist: {
+				prohibited_ok: true,
+				checklist_ack: true,
+				cooldown_ack: true,
+				privacy_ok: true,
+				tos_ok: true,
+				product_category: 'saas' as const,
+				volume_band: '1k_10k' as const,
+			},
+		};
+		const res = await client().accountReview.submit(body);
+		expect(calls[0]?.method).toBe('POST');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/account-review');
+		expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual(body);
+		expect(res).toMatchObject({ status: 'in_review', legalName: 'Acme OÜ' });
+	});
+
+	it('resubmit → POST /api/v1/gateway/account-review/resubmit with an empty body', async () => {
+		const calls = stubRoutes({ review });
+		const res = await client().accountReview.resubmit();
+		expect(calls[0]?.method).toBe('POST');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/account-review/resubmit');
+		expect(JSON.parse(calls[0]?.body ?? 'null')).toEqual({});
+		expect(res).toMatchObject({ status: 'in_review' });
+	});
+
+	it('requestAudit → POST /api/v1/gateway/account-review/audit with the product facts', async () => {
+		const calls = stubRoutes({
+			review: {
+				...review,
+				status: 'pending',
+				submitted_at: null,
+				checklist: { audit: { requestedAt: '2026-09-09T10:00:00Z' } },
+			},
+		});
+		const body = {
+			productUrl: 'https://acme.example',
+			productDescription: 'Invoices for freelancers',
+			productCategory: 'saas' as const,
+			deliveryMethod: 'instant_digital' as const,
+		};
+		const res = await client().accountReview.requestAudit(body);
+		expect(calls[0]?.method).toBe('POST');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/account-review/audit');
+		expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual(body);
+		expect(res).toMatchObject({
+			submittedAt: null,
+			checklist: { audit: { requestedAt: '2026-09-09T10:00:00Z' } },
 		});
 	});
 });

@@ -13,21 +13,21 @@ export class CheckoutsResource extends BaseResource {
 		// Seller mode is NOT a parameter — a link-based session inherits its link's
 		// mode and a link-less session uses the mode the server derives from the
 		// merchant's account. The response carries the resolved `sellerMode`.
-		return this.post<Checkout>(BASE_PATH, params);
+		return this.postJson<Checkout>(BASE_PATH, params);
 	}
 
 	async list(params?: ListCheckoutParams): Promise<PaginatedList<Checkout>> {
-		return this.get<PaginatedList<Checkout>>(
+		return this.getJson<PaginatedList<Checkout>>(
 			BASE_PATH,
 			params as Record<string, string | number | undefined>,
 		);
 	}
 
 	async retrieve(sessionId: string): Promise<Checkout> {
-		return this.get<Checkout>(`${BASE_PATH}/${sessionId}`);
+		return this.getJson<Checkout>(`${BASE_PATH}/${sessionId}`);
 	}
 
 	async cancel(sessionId: string): Promise<{ success: boolean }> {
-		return this.post<{ success: boolean }>(`${BASE_PATH}/${sessionId}/cancel`);
+		return this.postJson<{ success: boolean }>(`${BASE_PATH}/${sessionId}/cancel`);
 	}
 }

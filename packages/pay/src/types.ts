@@ -435,6 +435,210 @@ export interface Customer {
 }
 
 // ---------------------------------------------------------------------------
+// Go live (merchant onboarding readiness)
+// ---------------------------------------------------------------------------
+
+/** Mirrors `GoLiveVerifyState` (server: gateway/domain/mor-verification-readiness.ts). */
+export type VerifyState = 'unverified' | 'in_review' | 'on_hold' | 'verified' | 'rejected';
+
+/** One thing ops asked the merchant to change. Mirrors `RfiItem`. */
+export interface RfiItem {
+	id: string;
+	text: string;
+	at: string;
+}
+
+/** Mirrors `GoLiveReadiness` (server: gateway/go-live/go-live.service.ts). Only
+ *  the fields the CLI actually prints are declared. */
+export interface GoLiveReadiness {
+	triedIt: boolean;
+	verifyState: VerifyState;
+	hasPayoutAccount: boolean;
+	canGoLive: boolean;
+	progress: { done: number; total: number };
+	rejectReason: string | null;
+	cooldownUntil: string | null;
+	heldReason: string | null;
+	/** Open change requests only. Non-null means the merchant owes us something. */
+	rfi: { question: string; askedAt: string; items: RfiItem[] } | null;
+	/** Null until they ask for one. `reportUrl` is null while it is being written. */
+	audit: {
+		requestedAt: string;
+		publishedAt: string | null;
+		reportUrl: string | null;
+		grade: string | null;
+	} | null;
+	milestones: {
+		firstProductAt: string | null;
+		firstTestPaymentAt: string | null;
+		firstLivePaymentAt: string | null;
+		livePaymentCount: number;
+	};
+}
+
+// ---------------------------------------------------------------------------
+// Account review (business verification + the free audit)
+// ---------------------------------------------------------------------------
+
+/** Same values the merchant dashboard writes. */
+export type ProductCategory =
+	| 'saas'
+	| 'digital'
+	| 'services'
+	| 'marketplace'
+	| 'physical'
+	| 'other';
+
+export type DeliveryMethod =
+	| 'instant_digital'
+	| 'email_delivery'
+	| 'subscription_access'
+	| 'manual'
+	| 'scheduled_service'
+	| 'physical_shipped'
+	| 'other';
+
+/** The subset of {@link DeliveryMethod} the audit request accepts
+ *  (server: `RequestAuditDto.deliveryMethod`). */
+export type AuditDeliveryMethod =
+	| 'instant_digital'
+	| 'scheduled_service'
+	| 'physical_shipped'
+	| 'other';
+
+export type VolumeBand = 'under_1k' | '1k_10k' | '10k_50k' | 'over_50k';
+
+export type AccountReviewStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
+
+export type AccountReviewEntityType = 'individual' | 'business';
+
+export interface AccountReviewAddress {
+	street: string;
+	city: string;
+	region?: string;
+	/** Postal code. */
+	postal?: string;
+	/** ISO 3166-1 alpha-2 country code. */
+	country: string;
+}
+
+/** The merchant's own acknowledgements as stored (read side, camelized). Every
+ *  key is optional because a row created by the free audit alone carries only
+ *  `audit` until the merchant submits verification. */
+export interface AccountReviewChecklist {
+	prohibitedOk?: boolean;
+	checklistAck?: boolean;
+	cooldownAck?: boolean;
+	privacyOk?: boolean;
+	tosOk?: boolean;
+	hasUsageClaims?: boolean;
+	noFalseClaimsOk?: boolean;
+	hasCustomers?: boolean;
+	trademarkOk?: boolean;
+	pricingClearOk?: boolean;
+	ethicalOk?: boolean;
+	productCategory?: string;
+	deliveryMethod?: string;
+	volumeBand?: string;
+	/** The free Revenue & Pricing Audit. Merchant writes `requestedAt`; ops
+	 *  fills the rest when the report is done. Gates nothing. */
+	audit?: {
+		requestedAt?: string;
+		publishedAt?: string | null;
+		reportUrl?: string | null;
+		score?: number | null;
+		grade?: string | null;
+	};
+}
+
+/** The verification on file (server: `AccountReviewResponse`). Live
+ *  environment always — a review is about one real business. */
+export interface AccountReview {
+	status: AccountReviewStatus;
+	entityType: AccountReviewEntityType;
+	legalName: string | null;
+	registrationNumber: string | null;
+	/** ISO 3166-1 alpha-2 country code. */
+	taxCountry: string | null;
+	address: AccountReviewAddress | null;
+	productUrl: string | null;
+	productDescription: string | null;
+	checklist: AccountReviewChecklist | null;
+	rejectReason: string | null;
+	cooldownUntil: string | null;
+	/** Null until verification was actually submitted — the free audit alone
+	 *  never sets it. */
+	submittedAt: string | null;
+	/** Null unless the merchant is on hold. */
+	heldReason: string | null;
+	/** Open change requests only. Non-null means the merchant owes us something. */
+	rfi: { question: string; askedAt: string; items: RfiItem[] } | null;
+}
+
+/** The five things we check on the merchant's own live site before approving. */
+export interface SiteChecklist {
+	price_visible: boolean;
+	terms: boolean;
+	privacy: boolean;
+	refunds: boolean;
+	contact: boolean;
+}
+
+/** Write side of the checklist. Keys are snake_case because the server stores
+ *  this object literally (request bodies are never transformed). The five
+ *  required acknowledgements must all be true or the server rejects the submit. */
+export interface SubmitAccountReviewChecklist {
+	prohibited_ok: boolean;
+	checklist_ack: boolean;
+	cooldown_ack: boolean;
+	privacy_ok: boolean;
+	tos_ok: boolean;
+	has_usage_claims?: boolean;
+	no_false_claims_ok?: boolean;
+	has_customers?: boolean;
+	trademark_ok?: boolean;
+	pricing_clear_ok?: boolean;
+	ethical_ok?: boolean;
+	product_category?: ProductCategory;
+	delivery_method?: DeliveryMethod;
+	volume_band?: VolumeBand;
+	/** When present every item must be true. */
+	site_checklist?: SiteChecklist;
+}
+
+/** Body for `accountReview.submit()` (server: `SubmitAccountReviewDto`). */
+export interface SubmitAccountReview {
+	entityType: AccountReviewEntityType;
+	/** Registered company name, or the individual's full legal name. */
+	legalName: string;
+	/** Required when `entityType` is `'business'`. */
+	registrationNumber?: string;
+	/** Country of registration, ISO 3166-1 alpha-2. */
+	taxCountry: string;
+	address: AccountReviewAddress;
+	/** The merchant project page. http(s) only. */
+	productUrl: string;
+	productDescription?: string;
+	/** Name buyers see on their statement. */
+	displayName?: string;
+	checklist: SubmitAccountReviewChecklist;
+}
+
+/** Body for `accountReview.requestAudit()` (server: `RequestAuditDto`). */
+export interface RequestAudit {
+	/** The page the audit reads. The only required field. http(s) only. */
+	productUrl: string;
+	productDescription?: string;
+	productCategory?: ProductCategory;
+	deliveryMethod?: AuditDeliveryMethod;
+}
+
+/** What `accountReview.requestAudit()` returns: the review row the audit was
+ *  recorded on. `checklist.audit.requestedAt` is when we started owing the
+ *  report; it does not move when the merchant asks again. */
+export type AuditRequested = AccountReview;
+
+// ---------------------------------------------------------------------------
 // Webhook Events
 // ---------------------------------------------------------------------------
 

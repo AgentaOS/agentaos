@@ -13,7 +13,7 @@ export class BaseResource {
 		},
 	) {}
 
-	protected async get<T>(
+	protected async getJson<T>(
 		path: string,
 		query?: Record<string, string | number | undefined>,
 	): Promise<T> {
@@ -31,7 +31,7 @@ export class BaseResource {
 		});
 	}
 
-	protected async post<T>(path: string, body?: unknown, idempotencyKey?: string): Promise<T> {
+	protected async postJson<T>(path: string, body?: unknown, idempotencyKey?: string): Promise<T> {
 		return request<T>({
 			baseUrl: this.baseUrl,
 			apiKey: this.apiKey,

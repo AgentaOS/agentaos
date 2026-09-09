@@ -7,7 +7,7 @@ const BASE_PATH = '/api/v1/gateway/customers';
 export class CustomersResource extends BaseResource {
 	/** List customers in the current environment (test/live from the API key), paginated. */
 	async list(params?: ListParams): Promise<PaginatedList<Customer>> {
-		return this.get<PaginatedList<Customer>>(
+		return this.getJson<PaginatedList<Customer>>(
 			BASE_PATH,
 			params as Record<string, string | number | undefined>,
 		);
