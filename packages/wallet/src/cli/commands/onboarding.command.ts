@@ -116,7 +116,9 @@ const auditRequestCommand = new Command('request')
 						requested: true,
 						productUrl,
 						label: 'Being written',
-						writtenBy: 'a person, usually within 24 to 48 hours',
+						// No turnaround promise: a date we miss costs more than a date we
+						// never gave (same rule as the app, 2026-09-09).
+						writtenBy: 'a person',
 					},
 				});
 			} catch (error: unknown) {
