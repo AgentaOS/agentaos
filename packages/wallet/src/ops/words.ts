@@ -6,8 +6,13 @@
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /** `money(29, 'eur')` → `€29.00`. Amounts in major units, as the API's decimal fields carry them. */
+/** The API names a product's currency by the token it settles in (EURC, USDC);
+ *  a founder reads euros and dollars. */
+const SETTLEMENT_TOKENS: Record<string, string> = { EURC: 'EUR', USDC: 'USD', EURE: 'EUR' };
+
 export function money(amount: number, currency: string): string {
-	const code = currency.toUpperCase();
+	const upper = currency.toUpperCase();
+	const code = SETTLEMENT_TOKENS[upper] ?? upper;
 	try {
 		return new Intl.NumberFormat('en-US', { style: 'currency', currency: code }).format(amount);
 	} catch {
