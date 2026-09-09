@@ -22,7 +22,7 @@ const BASE_PATH = '/api/v1/gateway/subscriptions';
 export class SubscriptionsResource extends BaseResource {
 	/** List subscriptions in the current environment (test/live from the API key), paginated. */
 	async list(params?: ListParams): Promise<PaginatedList<Subscription>> {
-		return this.get<PaginatedList<Subscription>>(
+		return this.getJson<PaginatedList<Subscription>>(
 			BASE_PATH,
 			params as Record<string, string | number | undefined>,
 		);
@@ -34,14 +34,14 @@ export class SubscriptionsResource extends BaseResource {
 	 * to cancel immediately. Idempotent on an already-canceled subscription.
 	 */
 	async cancel(id: string, params?: CancelSubscriptionParams): Promise<CancelSubscriptionResult> {
-		return this.post<CancelSubscriptionResult>(`${BASE_PATH}/${id}/cancel`, {
+		return this.postJson<CancelSubscriptionResult>(`${BASE_PATH}/${id}/cancel`, {
 			atPeriodEnd: params?.atPeriodEnd ?? true,
 		});
 	}
 
 	/** Per-cycle invoices for one subscription, newest first. */
 	async invoices(id: string): Promise<SubscriptionInvoice[]> {
-		return this.get<SubscriptionInvoice[]>(`${BASE_PATH}/${id}/invoices`);
+		return this.getJson<SubscriptionInvoice[]>(`${BASE_PATH}/${id}/invoices`);
 	}
 
 	/**
@@ -50,7 +50,7 @@ export class SubscriptionsResource extends BaseResource {
 	 * the subscription must be active or trialing.
 	 */
 	async previewPlanChange(id: string, targetLinkId: string): Promise<PlanChangePreview> {
-		return this.get<PlanChangePreview>(`${BASE_PATH}/${id}/plan-change/preview`, {
+		return this.getJson<PlanChangePreview>(`${BASE_PATH}/${id}/plan-change/preview`, {
 			targetLinkId,
 		});
 	}
@@ -62,6 +62,6 @@ export class SubscriptionsResource extends BaseResource {
 	 * (subscription, target plan, prorationDate).
 	 */
 	async changePlan(id: string, params: ChangePlanParams): Promise<ChangePlanResult> {
-		return this.post<ChangePlanResult>(`${BASE_PATH}/${id}/plan-change`, params);
+		return this.postJson<ChangePlanResult>(`${BASE_PATH}/${id}/plan-change`, params);
 	}
 }

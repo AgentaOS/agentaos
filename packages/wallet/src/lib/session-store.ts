@@ -27,6 +27,14 @@ interface StoredSession {
 	refreshToken?: string;
 	serverUrl?: string;
 	createdAt?: string;
+	/** The org every request acts for; a session names a person, not an org. */
+	orgId?: string;
+	orgName?: string;
+}
+
+export interface StoredOrg {
+	orgId: string;
+	orgName: string | null;
 }
 
 function sessionFilePath(): string {
@@ -54,11 +62,29 @@ export async function storeSession(
 	const payload: StoredSession = { token, createdAt: new Date().toISOString() };
 	if (serverUrl) payload.serverUrl = serverUrl;
 	if (refreshToken) payload.refreshToken = refreshToken;
+	// A refresh rotates tokens, not the person: the org stays.
+	const existing = read();
+	if (existing?.orgId) payload.orgId = existing.orgId;
+	if (existing?.orgName) payload.orgName = existing.orgName;
+	write(payload);
+}
 
+function write(payload: StoredSession): void {
 	const p = sessionFilePath();
 	const tmp = `${p}.tmp`;
 	writeFileSync(tmp, JSON.stringify(payload), { mode: 0o600 });
 	renameSync(tmp, p);
+}
+
+export async function storeSessionOrg(org: StoredOrg): Promise<void> {
+	const existing = read();
+	if (!existing) return;
+	write({ ...existing, orgId: org.orgId, orgName: org.orgName ?? undefined });
+}
+
+export async function getSessionOrg(): Promise<StoredOrg | null> {
+	const stored = read();
+	return stored?.orgId ? { orgId: stored.orgId, orgName: stored.orgName ?? null } : null;
 }
 
 export async function getSession(): Promise<string | null> {

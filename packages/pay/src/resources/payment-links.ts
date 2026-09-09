@@ -8,18 +8,18 @@ export class PaymentLinksResource extends BaseResource {
 		// Seller mode (Merchant of Record vs on-chain crypto) is NOT a parameter —
 		// the server derives it from the merchant's account. The response carries
 		// the resolved `sellerMode` for rendering.
-		return this.post<PaymentLink>(BASE_PATH, params);
+		return this.postJson<PaymentLink>(BASE_PATH, params);
 	}
 
 	async list(params?: ListParams): Promise<PaginatedList<PaymentLink>> {
-		return this.get<PaginatedList<PaymentLink>>(
+		return this.getJson<PaginatedList<PaymentLink>>(
 			BASE_PATH,
 			params as Record<string, string | number | undefined>,
 		);
 	}
 
 	async retrieve(id: string): Promise<PaymentLink> {
-		return this.get<PaymentLink>(`${BASE_PATH}/${id}`);
+		return this.getJson<PaymentLink>(`${BASE_PATH}/${id}`);
 	}
 
 	async cancel(id: string): Promise<{ success: boolean }> {

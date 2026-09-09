@@ -1,4 +1,13 @@
-import { getRefreshToken, getSession, getSessionServerUrl, storeSession } from './session-store.js';
+import { fetchOrg } from './org.js';
+import {
+	type StoredOrg,
+	getRefreshToken,
+	getSession,
+	getSessionOrg,
+	getSessionServerUrl,
+	storeSession,
+	storeSessionOrg,
+} from './session-store.js';
 
 /** Decode JWT payload without verification (display + expiry check only). */
 export function decodeJwt(token: string): Record<string, unknown> | null {
@@ -12,14 +21,37 @@ export function decodeJwt(token: string): Record<string, unknown> | null {
 }
 
 export type SessionResult =
-	| { ok: true; token: string; serverUrl: string }
+	| { ok: true; token: string; serverUrl: string; orgId?: string; orgName?: string | null }
 	| { ok: false; reason: 'not-logged-in' | 'session-expired' };
 
 /**
- * Get a valid session token, auto-refreshing if expired.
- * Returns the session or a reason why it failed.
+ * Get a valid session token, auto-refreshing if expired, and the org the
+ * session acts for. Returns the session or a reason why it failed.
  */
 export async function ensureSession(): Promise<SessionResult> {
+	const session = await validSession();
+	if (!session.ok) return session;
+	const org = await sessionOrg(session.serverUrl, session.token);
+	return org ? { ...session, orgId: org.orgId, orgName: org.orgName } : session;
+}
+
+/**
+ * A session token names a person, who may belong to several orgs; the server
+ * takes the one to act for from `?orgId=`. Looked up once (`GET /orgs`, the
+ * first membership, as the dashboard picks it) and kept with the session, so
+ * no command pays for it twice.
+ */
+async function sessionOrg(serverUrl: string, token: string): Promise<StoredOrg | null> {
+	const stored = await getSessionOrg();
+	if (stored) return stored;
+	const org = await fetchOrg(serverUrl, token);
+	if (!org) return null;
+	const resolved = { orgId: org.id, orgName: org.name };
+	await storeSessionOrg(resolved);
+	return resolved;
+}
+
+async function validSession(): Promise<SessionResult> {
 	const token = await getSession();
 	if (!token) return { ok: false, reason: 'not-logged-in' };
 

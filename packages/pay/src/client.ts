@@ -1,5 +1,7 @@
+import { AccountReviewResource } from './resources/account-review.js';
 import { CheckoutsResource } from './resources/checkouts.js';
 import { CustomersResource } from './resources/customers.js';
+import { GoLiveResource } from './resources/go-live.js';
 import { InvoicesResource } from './resources/invoices.js';
 import { PaymentLinksResource } from './resources/payment-links.js';
 import { SubscriptionsResource } from './resources/subscriptions.js';
@@ -18,6 +20,8 @@ export class AgentaOS {
 	readonly invoices: InvoicesResource;
 	readonly subscriptions: SubscriptionsResource;
 	readonly customers: CustomersResource;
+	readonly goLive: GoLiveResource;
+	readonly accountReview: AccountReviewResource;
 	readonly webhooks: WebhooksResource;
 
 	constructor(apiKey: string, options?: AgentaOSOptions) {
@@ -48,6 +52,9 @@ export class AgentaOS {
 			debug: options?.debug ?? false,
 			logger: options?.logger as ((level: string, message: string) => void) | undefined,
 			authMode: isApiKey ? ('api-key' as const) : ('jwt' as const),
+			// A key is bound to one org server-side; only a session user can be in
+			// several, so only a session ever carries the choice.
+			orgId: isApiKey ? undefined : options?.orgId,
 		};
 
 		this.checkouts = new CheckoutsResource(baseUrl, apiKey, resourceOptions);
@@ -56,6 +63,8 @@ export class AgentaOS {
 		this.invoices = new InvoicesResource(baseUrl, apiKey, resourceOptions);
 		this.subscriptions = new SubscriptionsResource(baseUrl, apiKey, resourceOptions);
 		this.customers = new CustomersResource(baseUrl, apiKey, resourceOptions);
+		this.goLive = new GoLiveResource(baseUrl, apiKey, resourceOptions);
+		this.accountReview = new AccountReviewResource(baseUrl, apiKey, resourceOptions);
 		this.webhooks = new WebhooksResource();
 	}
 }

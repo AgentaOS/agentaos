@@ -5,18 +5,18 @@ const BASE_PATH = '/api/v1/gateway/invoices';
 
 export class InvoicesResource extends BaseResource {
 	async list(params?: ListInvoiceParams): Promise<PaginatedList<Invoice>> {
-		return this.get<PaginatedList<Invoice>>(
+		return this.getJson<PaginatedList<Invoice>>(
 			BASE_PATH,
 			params as Record<string, string | number | undefined>,
 		);
 	}
 
 	async retrieve(id: string): Promise<Invoice> {
-		return this.get<Invoice>(`${BASE_PATH}/${id}`);
+		return this.getJson<Invoice>(`${BASE_PATH}/${id}`);
 	}
 
 	async void(id: string): Promise<{ success: boolean }> {
-		return this.post<{ success: boolean }>(`${BASE_PATH}/${id}/void`);
+		return this.postJson<{ success: boolean }>(`${BASE_PATH}/${id}/void`);
 	}
 
 	async downloadPdf(id: string): Promise<Buffer> {
@@ -48,6 +48,6 @@ export class InvoicesResource extends BaseResource {
 
 	/** Re-send the receipt email to the buyer on file. Paid invoices only. */
 	async sendReceipt(id: string): Promise<{ ok: true; sentTo: string }> {
-		return this.post<{ ok: true; sentTo: string }>(`${BASE_PATH}/${id}/send-receipt`);
+		return this.postJson<{ ok: true; sentTo: string }>(`${BASE_PATH}/${id}/send-receipt`);
 	}
 }

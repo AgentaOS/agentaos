@@ -1,5 +1,7 @@
 import { request, requestRaw, requestText } from '../utils/fetch.js';
 
+type Query = Record<string, string | number | undefined>;
+
 export class BaseResource {
 	constructor(
 		protected readonly baseUrl: string,
@@ -10,90 +12,73 @@ export class BaseResource {
 			debug?: boolean;
 			logger?: (level: string, message: string) => void;
 			authMode?: 'api-key' | 'jwt';
+			/** Session users may belong to several orgs; this one goes on every request. */
+			orgId?: string;
 		},
 	) {}
 
-	protected async get<T>(
-		path: string,
-		query?: Record<string, string | number | undefined>,
-	): Promise<T> {
+	protected async getJson<T>(path: string, query?: Query): Promise<T> {
 		return request<T>({
-			baseUrl: this.baseUrl,
-			apiKey: this.apiKey,
+			...this.transport(),
 			method: 'GET',
 			path,
-			query,
-			timeout: this.options.timeout,
-			maxRetries: this.options.maxRetries,
-			debug: this.options.debug,
-			logger: this.options.logger,
-			authMode: this.options.authMode,
+			query: this.scoped(query),
 		});
 	}
 
-	protected async post<T>(path: string, body?: unknown, idempotencyKey?: string): Promise<T> {
+	protected async postJson<T>(path: string, body?: unknown, idempotencyKey?: string): Promise<T> {
 		return request<T>({
-			baseUrl: this.baseUrl,
-			apiKey: this.apiKey,
+			...this.transport(),
 			method: 'POST',
 			path,
+			query: this.scoped(),
 			body,
-			timeout: this.options.timeout,
-			maxRetries: this.options.maxRetries,
 			idempotencyKey,
-			debug: this.options.debug,
-			logger: this.options.logger,
-			authMode: this.options.authMode,
 		});
 	}
 
 	protected async del<T>(path: string): Promise<T> {
 		return request<T>({
-			baseUrl: this.baseUrl,
-			apiKey: this.apiKey,
+			...this.transport(),
 			method: 'DELETE',
 			path,
-			timeout: this.options.timeout,
-			maxRetries: this.options.maxRetries,
-			debug: this.options.debug,
-			logger: this.options.logger,
-			authMode: this.options.authMode,
+			query: this.scoped(),
 		});
 	}
 
-	protected async getRaw(
-		path: string,
-		query?: Record<string, string | number | undefined>,
-	): Promise<Buffer> {
+	protected async getRaw(path: string, query?: Query): Promise<Buffer> {
 		return requestRaw({
-			baseUrl: this.baseUrl,
-			apiKey: this.apiKey,
+			...this.transport(),
 			method: 'GET',
 			path,
-			query,
-			timeout: this.options.timeout,
-			maxRetries: this.options.maxRetries,
-			debug: this.options.debug,
-			logger: this.options.logger,
-			authMode: this.options.authMode,
+			query: this.scoped(query),
 		});
 	}
 
-	protected async getText(
-		path: string,
-		query?: Record<string, string | number | undefined>,
-	): Promise<string> {
+	protected async getText(path: string, query?: Query): Promise<string> {
 		return requestText({
-			baseUrl: this.baseUrl,
-			apiKey: this.apiKey,
+			...this.transport(),
 			method: 'GET',
 			path,
-			query,
+			query: this.scoped(query),
+		});
+	}
+
+	private transport() {
+		return {
+			baseUrl: this.baseUrl,
+			apiKey: this.apiKey,
 			timeout: this.options.timeout,
 			maxRetries: this.options.maxRetries,
 			debug: this.options.debug,
 			logger: this.options.logger,
 			authMode: this.options.authMode,
-		});
+		};
+	}
+
+	/** The query with `orgId` added when the client was given one. */
+	private scoped(query?: Query): Query | undefined {
+		if (!this.options.orgId) return query;
+		return { ...query, orgId: this.options.orgId };
 	}
 }

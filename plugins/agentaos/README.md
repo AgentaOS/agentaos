@@ -3,12 +3,41 @@
 Merchant-of-record billing for AI agents and SaaS. This plugin gives a coding
 agent:
 
-- The AgentaOS MCP server (`agentaos`, hosted at mcp.agentaos.ai) with tools for
-  checkouts, subscriptions, customers and receipts, connected with one browser
-  approval and no key to paste.
-- A skill (`agenta`) that teaches the agent the `agenta` CLI and the
-  AgentaOS integration patterns (frontend-only buy links, server-side paywalls,
-  webhooks, subscriptions).
+- The AgentaOS MCP server (`agentaos`, hosted at mcp.agentaos.ai) with 19 tools
+  covering status, audit, verification, products, checkouts, subscriptions,
+  customers and invoices, connected with one browser approval and no key to
+  paste.
+- A skill (`agenta`) that teaches the agent those tools and the AgentaOS
+  integration patterns (frontend-only buy links, server-side paywalls,
+  webhooks, trials, plan changes), with the `agenta` CLI as the same
+  operations for terminals and CI.
+
+## Tools
+
+| Tool | What it does |
+|------|--------------|
+| `agenta_status_get` | Account and go-live overview |
+| `agenta_audit_request` | Ask for the free Revenue & Pricing Audit |
+| `agenta_audit_show` | The audit state, and the report PDF once it exists |
+| `agenta_verify_declaration` | The five statements verification attests to |
+| `agenta_verify_submit` | Submit business verification so the merchant can accept live payments |
+| `agenta_verify_status` | Where the verification has got to |
+| `agenta_verify_resubmit` | Send back for review after making the changes we asked for |
+| `agenta_products_create` | Create a product (one-time) or a subscription plan |
+| `agenta_products_list` | List products and plans |
+| `agenta_pay_checkout` | Create a checkout session |
+| `agenta_pay_get` | Get checkout session status |
+| `agenta_pay_list` | List checkout sessions |
+| `agenta_subscriptions_list` | List subscriptions |
+| `agenta_subscriptions_cancel` | Cancel a subscription (at period end by default) |
+| `agenta_subscriptions_change_plan` | Move a subscription to another plan (upgrade charges now, downgrade at period end) |
+| `agenta_customers_list` | List customers |
+| `agenta_invoices_list` | List invoices |
+| `agenta_invoices_receipt` | The receipt PDF for a paid invoice |
+| `agenta_invoices_send_receipt` | Re-send the receipt email to the buyer on file |
+
+Every tool is also a CLI command (`agenta_products_create` = `agenta products
+create`) with the same inputs and the same merchant-readable output.
 
 ## Install
 
@@ -30,8 +59,8 @@ press **Approve**. The tools are live in that session and every later one.
 The connection is a normal API key on your account, named "Claude Code" under
 app.agentaos.ai → Settings → Developers. Revoke it there to disconnect.
 
-Then sign in the CLI itself (separate from the MCP connection, needed for the
-`agenta` skill's terminal commands):
+The CLI is optional: it is the same 19 operations for a terminal, a headless
+agent or CI, signed in separately from the MCP connection:
 
 ```bash
 agenta login
@@ -59,12 +88,11 @@ Hosted assistants cannot run `npx`; they connect over HTTPS instead. Add
 `https://mcp.agentaos.ai/mcp` as a custom connector (ChatGPT: Settings →
 Connectors; Claude.ai: Customize → Connectors → Add custom connector). An
 AgentaOS page opens: pick Test or Live and press **Approve**. The assistant then
-has the same `agenta_pay_*` tools as this plugin. To disconnect, revoke the key
+has the same 19 `agenta_*` tools as this plugin. To disconnect, revoke the key
 on app.agentaos.ai → Developers.
 
 ## Docs
 
-- Skill reference: `skills/agentaos/SKILL.md` (source of truth:
-  https://agentaos.ai/SKILL.md)
+- Skill reference: `skills/agentaos/SKILL.md`
 - Full API reference: https://docs.agentaos.ai/llms-full.txt
 - Dashboard: https://app.agentaos.ai

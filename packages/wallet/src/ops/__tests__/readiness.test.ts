@@ -1,5 +1,6 @@
+import type { GoLiveReadiness } from '@agentaos/pay';
 import { describe, expect, it } from 'vitest';
-import { type GoLiveReadiness, auditLabel, nextStep, verifyLabel } from '../go-live.js';
+import { auditLabel, nextStep, verifyLabel } from '../readiness.js';
 
 /** A brand-new account: logged in, nothing done. Every test starts here and
  *  changes only the field under test, so a passing assertion can only be
