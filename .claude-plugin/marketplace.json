@@ -1,0 +1,16 @@
+{
+	"name": "agentaos",
+	"owner": { "name": "AgentaOS", "url": "https://agentaos.ai" },
+	"metadata": {
+		"description": "Merchant-of-record billing for AI agents and SaaS: products, checkout, subscriptions, invoices, VAT handled."
+	},
+	"plugins": [
+		{
+			"name": "agentaos",
+			"source": "./plugins/agentaos",
+			"description": "AgentaOS tools (MCP) and the integration guide for coding agents.",
+			"version": "1.0.0",
+			"keywords": ["payments", "merchant of record", "billing", "subscriptions", "checkout"]
+		}
+	]
+}
