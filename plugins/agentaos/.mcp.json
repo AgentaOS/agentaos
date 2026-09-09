@@ -1,9 +1,8 @@
 {
 	"mcpServers": {
 		"agentaos": {
-			"command": "npx",
-			"args": ["-y", "agentaos"],
-			"env": { "AGENTAOS_GATEWAY_KEY": "${AGENTAOS_GATEWAY_KEY}" }
+			"type": "http",
+			"url": "https://mcp.agentaos.ai/mcp"
 		}
 	}
 }

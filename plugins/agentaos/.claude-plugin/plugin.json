@@ -1,6 +1,6 @@
 {
 	"name": "agentaos",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "AgentaOS tools (MCP) and the integration guide for coding agents.",
 	"author": { "name": "AgentaOS", "email": "hello@agentaos.ai" },
 	"homepage": "https://agentaos.ai",
