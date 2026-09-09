@@ -6,7 +6,7 @@
 	"license": "Apache-2.0",
 	"type": "module",
 	"scripts": {
-		"dev": "wrangler dev",
+		"dev": "wrangler dev --local-protocol https --host localhost:8788",
 		"deploy": "wrangler deploy",
 		"build": "tsc --noEmit",
 		"test": "vitest run",

@@ -5,8 +5,6 @@ import { handleAuthorize, handleCallback } from './authorize.js';
 import type { ConnectionProps, Env } from './env.js';
 import { handleMcp } from './mcp.js';
 
-const PUBLIC_URL = 'https://mcp.agentaos.ai';
-
 /** Everything that is not the protected /mcp route: the OAuth approval leg and a landing line. */
 const defaultHandler: ExportedHandler<Env> = {
 	async fetch(request, env) {
@@ -15,7 +13,7 @@ const defaultHandler: ExportedHandler<Env> = {
 		if (url.pathname === '/authorize') return handleAuthorize({ request, env, api });
 		if (url.pathname === '/callback') return handleCallback({ request, env, api });
 		if (url.pathname === '/') {
-			return new Response(`AgentaOS MCP. Add ${PUBLIC_URL}/mcp as a connector.`, {
+			return new Response(`AgentaOS MCP. Add ${env.MCP_PUBLIC_URL}/mcp as a connector.`, {
 				headers: { 'content-type': 'text/plain; charset=utf-8' },
 			});
 		}
@@ -33,19 +31,38 @@ const apiHandler: ExportedHandler<Env> & Required<Pick<ExportedHandler<Env>, 'fe
 	},
 };
 
-export default new OAuthProvider<Env>({
-	apiRoute: '/mcp',
-	apiHandler,
-	defaultHandler,
-	authorizeEndpoint: '/authorize',
-	tokenEndpoint: '/token',
-	clientRegistrationEndpoint: '/register',
-	clientIdMetadataDocumentEnabled: true,
-	scopesSupported: ['agentaos'],
-	resourceMetadata: {
-		resource: `${PUBLIC_URL}/mcp`,
-		authorization_servers: [PUBLIC_URL],
-		scopes_supported: ['agentaos'],
-		resource_name: 'AgentaOS',
+/**
+ * Built from the request's env rather than at module load: the issuer and the
+ * resource URL must match where the Worker is actually reached (local
+ * `wrangler dev` runs on localhost:8788, production on mcp.agentaos.ai), and
+ * the MCP client refuses tokens whose audience does not match.
+ */
+function buildProvider(publicUrl: string): OAuthProvider<Env> {
+	return new OAuthProvider<Env>({
+		apiRoute: '/mcp',
+		apiHandler,
+		defaultHandler,
+		authorizeEndpoint: '/authorize',
+		tokenEndpoint: '/token',
+		clientRegistrationEndpoint: '/register',
+		clientIdMetadataDocumentEnabled: true,
+		scopesSupported: ['agentaos'],
+		resourceMetadata: {
+			resource: `${publicUrl}/mcp`,
+			authorization_servers: [publicUrl],
+			scopes_supported: ['agentaos'],
+			resource_name: 'AgentaOS',
+		},
+	});
+}
+
+let cached: { publicUrl: string; provider: OAuthProvider<Env> } | undefined;
+
+export default {
+	fetch(request, env, ctx) {
+		if (!cached || cached.publicUrl !== env.MCP_PUBLIC_URL) {
+			cached = { publicUrl: env.MCP_PUBLIC_URL, provider: buildProvider(env.MCP_PUBLIC_URL) };
+		}
+		return cached.provider.fetch(request, env, ctx);
 	},
-});
+} satisfies ExportedHandler<Env>;
