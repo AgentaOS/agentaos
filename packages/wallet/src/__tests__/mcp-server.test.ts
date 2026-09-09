@@ -2,18 +2,31 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-/** Merchant tools only. The agent sub-account surface (MPC signers, on-chain
- *  sends, contract calls, message signing, the signing audit log and x402) was
- *  removed as wallet-era legacy — this list is the assertion that it stays
- *  removed, so a stray re-registration fails here rather than shipping. */
+/** Merchant tools only: one per operation in the catalogue, `agenta_<group>_<op>`.
+ *  The agent sub-account surface (MPC signers, on-chain sends, contract calls,
+ *  message signing, the signing audit log and x402) was removed as wallet-era
+ *  legacy — this list is the assertion that it stays removed, so a stray
+ *  re-registration fails here rather than shipping. */
 const EXPECTED_TOOLS = [
-	'agenta_pay_create_checkout',
-	'agenta_pay_get_checkout',
-	'agenta_pay_list_checkouts',
-	'agenta_pay_list_subscriptions',
-	'agenta_pay_cancel_subscription',
-	'agenta_pay_list_customers',
-	'agenta_pay_send_receipt',
+	'agenta_status_get',
+	'agenta_audit_request',
+	'agenta_audit_show',
+	'agenta_verify_declaration',
+	'agenta_verify_submit',
+	'agenta_verify_status',
+	'agenta_verify_resubmit',
+	'agenta_products_create',
+	'agenta_products_list',
+	'agenta_pay_checkout',
+	'agenta_pay_get',
+	'agenta_pay_list',
+	'agenta_subscriptions_list',
+	'agenta_subscriptions_cancel',
+	'agenta_subscriptions_change_plan',
+	'agenta_customers_list',
+	'agenta_invoices_list',
+	'agenta_invoices_receipt',
+	'agenta_invoices_send_receipt',
 ];
 
 describe('AgentaOS Terminal MCP Server', () => {
@@ -85,10 +98,10 @@ describe('AgentaOS Terminal MCP Server', () => {
 		}
 	});
 
-	it('every tool is a merchant payment tool', async () => {
+	it('every tool is named agenta_<group>_<op>', async () => {
 		const { tools } = await client.listTools();
 		for (const tool of tools) {
-			expect(tool.name).toMatch(/^agenta_pay_/);
+			expect(tool.name).toMatch(/^agenta_[a-z]+_[a-z_]+$/);
 		}
 	});
 });

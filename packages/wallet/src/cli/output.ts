@@ -3,11 +3,7 @@ import type { Command } from 'commander';
 
 const JSON_FLAG = '--json';
 
-/**
- * Output helper — respects --json flag or non-TTY for AI-parseable output.
- * Human mode: chalk-formatted key-value pairs.
- * JSON mode: single JSON line on stdout.
- */
+/** `--json`, or no TTY, means a machine is reading: one JSON line on stdout. */
 export function isJsonMode(): boolean {
 	return process.argv.includes(JSON_FLAG) || !process.stdout.isTTY;
 }
@@ -27,22 +23,6 @@ export function addJsonOption(command: Command): Command {
 	}
 	for (const subcommand of command.commands) addJsonOption(subcommand);
 	return command;
-}
-
-export function output(data: Record<string, unknown>): void {
-	if (isJsonMode()) {
-		console.log(JSON.stringify(data));
-		return;
-	}
-	// Human-friendly
-	console.log('');
-	for (const [key, value] of Object.entries(data)) {
-		if (value === null || value === undefined) continue;
-		if (typeof value === 'object' && !Array.isArray(value)) continue; // skip nested
-		const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase());
-		console.log(`  ${chalk.bold(`${label}:`)} ${value}`);
-	}
-	console.log('');
 }
 
 export function outputError(message: string): void {

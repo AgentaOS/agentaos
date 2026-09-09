@@ -3,33 +3,29 @@ import { Command } from 'commander';
 
 const require = createRequire(import.meta.url);
 const { version } = require('../../package.json') as { version: string };
-import { customersCommand } from './commands/customers.command.js';
-import { invoicesCommand } from './commands/invoices.command.js';
+import { groups } from '../ops/index.js';
 import { loginCommand, logoutCommand } from './commands/login.command.js';
-import { revenueAuditCommand, verifyCommand } from './commands/onboarding.command.js';
-import { payCommand } from './commands/pay.command.js';
-import { productsCommand } from './commands/products.command.js';
 import { statusCommand } from './commands/status.command.js';
-import { subscriptionsCommand } from './commands/subscriptions.command.js';
+import { type CliContext, connect } from './connect.js';
+import { groupCommand } from './from-operation.js';
 import { addJsonOption } from './output.js';
 import { BRAND_BANNER, dim } from './theme.js';
 
 // ---------------------------------------------------------------------------
 // Main CLI
 //
-// Merchant commands only. The `agenta sub` tree (MPC sub-accounts: create,
-// import, switch, info, balance, send, sign-message, policies, pause, resume,
-// audit, deploy, proxy, network, link, receive, x402) was removed as wallet-era
-// legacy. That also retired the `agenta sub audit` signing log, which used to
-// collide with `agenta audit` — the merchant's Revenue & Pricing Audit — and
-// made "audit" ambiguous for the AI tools this CLI is built for.
+// Merchant commands only, rendered from the operations catalogue in
+// `ops/` — the same catalogue the MCP server renders its tools from, so the
+// two cannot drift. `login` and `logout` are the human step that mints the
+// credential, and `status` adds who you are to the catalogue's go-live
+// overview; those three are the only hand-written commands.
 // ---------------------------------------------------------------------------
 
 export async function runCli(): Promise<void> {
 	await buildProgram().parseAsync();
 }
 
-export function buildProgram(): Command {
+export function buildProgram(ctx: CliContext = { connect }): Command {
 	const program = new Command();
 
 	program
@@ -52,6 +48,10 @@ ${dim('Going live (start here):')}
   $ agenta verify status                 Where the review has got to
   $ agenta verify resubmit               Reapply after making changes we asked for
 
+${dim('Products (what you sell):')}
+  $ agenta products create -n Pro -a 29  Create a product or a subscription plan
+  $ agenta products list                 List products and plans
+
 ${dim('Payments (accept & track):')}
   $ agenta pay checkout -a 50            Create a checkout session
   $ agenta pay get <sessionId>           Get checkout details
@@ -60,6 +60,7 @@ ${dim('Payments (accept & track):')}
 ${dim('Subscriptions & customers (manage):')}
   $ agenta subscriptions list            List subscriptions
   $ agenta subscriptions cancel <id>     Cancel (at period end; --now for immediate)
+  $ agenta subscriptions change-plan <id> --to <linkId>   Upgrade or downgrade a plan
   $ agenta customers list                List customers
 
 ${dim('Invoices & receipts:')}
@@ -73,14 +74,9 @@ ${dim('Docs: https://github.com/AgentaOS/agentaos')}
 
 	program.addCommand(loginCommand);
 	program.addCommand(logoutCommand);
-	program.addCommand(statusCommand);
-	program.addCommand(revenueAuditCommand);
-	program.addCommand(verifyCommand);
-	program.addCommand(productsCommand);
-	program.addCommand(payCommand);
-	program.addCommand(subscriptionsCommand);
-	program.addCommand(customersCommand);
-	program.addCommand(invoicesCommand);
+	for (const group of groups()) {
+		program.addCommand(group.name === 'status' ? statusCommand(ctx) : groupCommand(group, ctx));
+	}
 
 	for (const command of program.commands) addJsonOption(command);
 	return program;

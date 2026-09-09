@@ -4,13 +4,25 @@ import type { Env } from '../env.js';
 import { handleMcp } from '../mcp.js';
 
 const EXPECTED_TOOLS = [
-	'agenta_pay_create_checkout',
-	'agenta_pay_get_checkout',
-	'agenta_pay_list_checkouts',
-	'agenta_pay_list_subscriptions',
-	'agenta_pay_cancel_subscription',
-	'agenta_pay_list_customers',
-	'agenta_pay_send_receipt',
+	'agenta_status_get',
+	'agenta_audit_request',
+	'agenta_audit_show',
+	'agenta_verify_declaration',
+	'agenta_verify_submit',
+	'agenta_verify_status',
+	'agenta_verify_resubmit',
+	'agenta_products_create',
+	'agenta_products_list',
+	'agenta_pay_checkout',
+	'agenta_pay_get',
+	'agenta_pay_list',
+	'agenta_subscriptions_list',
+	'agenta_subscriptions_cancel',
+	'agenta_subscriptions_change_plan',
+	'agenta_customers_list',
+	'agenta_invoices_list',
+	'agenta_invoices_receipt',
+	'agenta_invoices_send_receipt',
 ];
 
 const env = {
@@ -33,7 +45,7 @@ async function readJsonRpcResult(response: Response): Promise<{ tools: { name: s
 }
 
 describe('remote MCP endpoint', () => {
-	it('lists the seven merchant tools for a connection', async () => {
+	it('lists every merchant operation as a tool for a connection', async () => {
 		const request = new Request('http://mcp.test/mcp', {
 			method: 'POST',
 			headers: {

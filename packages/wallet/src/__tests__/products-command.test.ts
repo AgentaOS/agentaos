@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildCreateParams } from '../cli/commands/products.command.js';
+import { buildCreateParams } from '../ops/products.js';
 
 const oneTime = { name: 'Launch Kit', amount: '49', currency: 'EUR' };
 
