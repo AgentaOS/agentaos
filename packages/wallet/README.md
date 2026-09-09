@@ -134,7 +134,7 @@ OS Keychain (service: agenta):
 
 When invoked with no arguments, runs as an MCP server over stdio. This lets AI agents interact with the wallet through the [Model Context Protocol](https://modelcontextprotocol.io/).
 
-### 25 Tools
+### 37 Tools
 
 | Tool | Description |
 |------|-------------|
@@ -156,13 +156,27 @@ When invoked with no arguments, runs as an MCP server over stdio. This lets AI a
 | `agenta_x402_check` | Check if a URL requires x402 payment |
 | `agenta_x402_discover` | Discover x402-protected endpoints |
 | `agenta_x402_fetch` | Fetch a 402-protected resource with auto-payment |
-| `agenta_pay_create_checkout` | Create a checkout session |
-| `agenta_pay_get_checkout` | Get checkout session details |
-| `agenta_pay_list_checkouts` | List checkout sessions |
-| `agenta_pay_list_subscriptions` | List subscriptions |
-| `agenta_pay_cancel_subscription` | Cancel a subscription (at period end or immediately) |
-| `agenta_pay_list_customers` | List customers who have paid you |
-| `agenta_pay_send_receipt` | Re-send a paid invoice's receipt email to the buyer |
+| `agenta_status_get` | Account and go-live overview |
+| `agenta_audit_request` | Ask for the free Revenue & Pricing Audit |
+| `agenta_audit_show` | The audit state, and the report PDF once it exists |
+| `agenta_verify_declaration` | The five statements verification attests to |
+| `agenta_verify_submit` | Submit business verification so the merchant can accept live payments |
+| `agenta_verify_status` | Where the verification has got to |
+| `agenta_verify_resubmit` | Send back for review after making the changes we asked for |
+| `agenta_products_create` | Create a product (one-time) or a subscription plan |
+| `agenta_products_list` | List products and plans |
+| `agenta_pay_checkout` | Create a checkout session |
+| `agenta_pay_get` | Get checkout session status |
+| `agenta_pay_list` | List checkout sessions |
+| `agenta_subscriptions_list` | List subscriptions |
+| `agenta_subscriptions_cancel` | Cancel a subscription (at period end by default) |
+| `agenta_subscriptions_change_plan` | Move a subscription to another plan (upgrade charges now, downgrade at period end) |
+| `agenta_customers_list` | List customers |
+| `agenta_invoices_list` | List invoices |
+| `agenta_invoices_receipt` | The receipt PDF for a paid invoice |
+| `agenta_invoices_send_receipt` | Re-send the receipt email to the buyer on file |
+
+The 19 payment tools and the `agenta` CLI are one operations catalogue: `agenta_products_create` is `agenta products create`, with the same inputs and the same merchant-readable output.
 
 ### Claude Desktop
 

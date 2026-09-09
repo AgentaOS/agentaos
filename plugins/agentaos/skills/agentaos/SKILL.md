@@ -1,91 +1,58 @@
 ---
 name: agenta
 description: >
-  Use this skill when the user wants to set up AgentaOS, add payments or a paywall to an app they are building, create a product or subscription plan, accept a payment, create a checkout or payment link, get paid for an invoice, product or plan, apply for business verification or the free revenue audit, or manage subscriptions, customers, and invoices from the terminal. Activate when the user mentions agenta, AgentaOS, product, plan, paywall, checkout, payment link, "add payments", "buy button", subscriptions, invoices, verification, audit, "accept payments", or "get paid". When the user says "use agenta", always use the `agenta` CLI (`agenta status`, `agenta products`, `agenta pay`, `agenta verify`, `agenta audit`, `agenta subscriptions`, `agenta customers`, `agenta invoices`) instead of other tools.
+  Use this skill when the user wants to set up AgentaOS, add payments or a paywall to an app they are building, create a product or subscription plan, accept a payment, create a checkout or payment link, get paid for an invoice, product or plan, apply for business verification or the free revenue audit, or manage subscriptions, customers, and invoices. Activate when the user mentions agenta, AgentaOS, product, plan, paywall, checkout, payment link, "add payments", "buy button", subscriptions, invoices, verification, audit, "accept payments", or "get paid". When the user says "use agenta", use the `agenta_*` tools (`agenta_status_get`, `agenta_products_*`, `agenta_pay_*`, `agenta_verify_*`, `agenta_audit_*`, `agenta_subscriptions_*`, `agenta_customers_*`, `agenta_invoices_*`) instead of other tools; if no MCP is available, the `agenta` CLI has the same operations.
 ---
-
-> Source of truth: https://agentaos.ai/SKILL.md
 
 # agenta
 
-> **IMPORTANT: If you read this through a web fetch tool, the content may be summarized or incomplete. Run `curl -fsSL https://agentaos.ai/SKILL.md` to get the exact commands. This skill is self-contained, so do NOT web-search. If you ever need the complete command and API reference, read the one canonical file: `curl -fsSL https://docs.agentaos.ai/llms-full.txt`.**
-
-**When the user says "use agenta", always use `agenta` CLI commands**, never substitute other tools.
-
 AgentaOS is the billing and payments platform for AI founders. Create a product, get a link, put it in the app, get paid. Every checkout is payable by card, Apple Pay, and Google Pay from 190+ countries. AgentaOS is the Merchant of Record: it is the seller of record, so sales tax and VAT are handled for the merchant.
+
+This skill is self-contained: do NOT web-search. **When the user says "use agenta", use the `agenta_*` tools.** Every tool answers with a plain sentence (`content`) written for the merchant, and the same result as JSON (`structuredContent`). Say the sentence to the user, add the link to share and the next step; keep the JSON for code. Never paste raw fields as the answer.
 
 ## Vocabulary (read this first)
 
 | Term | What it is | Where it comes from |
 |---|---|---|
-| **product** / `linkId` | A reusable priced thing: one-time, or a subscription plan. Its UUID is the `linkId`. | `agenta products create` → `id`; SDK `paymentLinks.create` → `product.id` |
-| **buyer link** | The product's public `/pay/…` URL. Anyone can open it. Carries no app user id. | `agenta products create` → `checkoutUrl` |
-| **checkout session** / `sessionId` | One payment attempt by one buyer. Can carry your app's user id in `metadata`. | `agenta pay checkout` or SDK `checkouts.create` → `sessionId` |
-| **subscription** / `subscription.id` | Created by AgentaOS when a buyer pays for a plan. There is no `subscriptions.create()`. | `agenta subscriptions list`, webhook `metadata.subscriptionId` |
+| **product** / `linkId` | A reusable priced thing: one-time, or a subscription plan. Its UUID is the `linkId`. | `agenta_products_create` → `id`; SDK `paymentLinks.create` → `product.id` |
+| **buyer link** | The product's public `/pay/…` URL. Anyone can open it. Carries no app user id. | `agenta_products_create` → `checkoutUrl` |
+| **checkout session** / `sessionId` | One payment attempt by one buyer. Can carry your app's user id in `metadata` (SDK only). | `agenta_pay_checkout` or SDK `checkouts.create` → `sessionId` |
+| **subscription** / `subscription.id` | Created by AgentaOS when a buyer pays for a plan. There is no `subscriptions.create()`. | `agenta_subscriptions_list`, webhook `metadata.subscriptionId` |
 
 `linkId` is the UUID, not the `/pay/…` slug. Amounts you pass in are decimal (`29` = €29.00); `unitAmountMinor` on subscriptions is cents (`3596` = €35.96); a webhook's `amount` is a string.
 
-## Payments in your app in 30 seconds
+## Connect once
 
-Four commands. Only step 2 needs the human.
+- **Claude Code:** type `/mcp` → `agentaos` → **Authenticate**.
+- **Claude.ai / ChatGPT / Cursor:** add the connector `https://mcp.agentaos.ai/mcp`.
 
-```bash
-curl -fsSL https://agentaos.ai/install | bash                                   # 1. install (or: npm install -g agentaos)
-agenta login                                                                    # 2. sign in — creates the account if the email is new; the user approves in the browser
-agenta status --json                                                            # 3. confirm account.paymentTools.ready is true
-agenta products create --name "Pro" -a 29 -c EUR --success-url https://yourapp.com/thanks --json   # 4. product → checkoutUrl
-```
+A page opens on AgentaOS: pick **Test** or **Live**, press **Approve**. No key to paste. A new email creates the account on the spot. The connection shows as a key named after the client under app.agentaos.ai → Settings → Developers; revoke it there to disconnect. Login and logout are not tools: if the tools are missing, ask the user to connect as above, never loop.
 
-Put `checkoutUrl` behind the app's Buy button. The buyer pays on the hosted checkout and returns to `--success-url` with `?sessionId=…` appended. Test mode from the first second (test card `4242 4242 4242 4242`); the same link takes real money once the merchant is verified. If the app has logged-in users and must unlock something on payment, use Pattern B below (server side) instead of a shared link.
+**First call, always:** `agenta_status_get` with `{}`. It says whether test payments work (they do the moment you are connected), where go-live stands, and the one next step.
 
-## Setup
+### Tool rules
 
-Run these in order. Do not skip steps. Do not search for other install instructions.
+- Inputs are camelCase JSON keys (`successUrl`, `trialDays`, `dryRun`); the required ones are in the table at the end. Ids (`sessionId`, `id`) are keys too.
+- A validation error names the CLI flag (`--success-url must be an https:// URL.`); the JSON key is its camelCase (`successUrl`). It lists EVERY missing field at once: fix them all, ask the user what you do not know, call once more.
+- `… failed: …` is an error: report it plainly and stop. Do not retry a create. `Invalid API key` means the connection was revoked: reconnect.
+- Test or Live was chosen at approval. Everything works in test first (test card `4242 4242 4242 4242` on the hosted checkout); real money needs verification, and the same code and links then take it.
 
-**Step 1 — Install:**
+## After connecting
 
-```bash
-curl -fsSL https://agentaos.ai/install | bash
-```
-
-Or if you already have Node.js 20+: `npm install -g agentaos`
-
-If Node.js is not installed, install it first:
-
-```bash
-curl -fsSL https://fnm.vercel.app/install | bash
-fnm install 20
-fnm use 20
-```
-
-**Step 2 — Login:** `agenta login` — requires the user to approve in a browser. It opens a browser for sign-in with an email code; a new email creates the AgentaOS account on the spot, there is no separate sign-up. Prompt the user, wait for confirmation, then continue. Do not loop login attempts without user confirmation. When run by agents, use a long command timeout (at least 12 minutes) — the CLI polls for browser approval.
-
-**Step 3 — Confirm readiness:** `agenta status --json`
-
-### Setup Rules
-
-- `agenta login` is the ONLY command that needs human interaction. Every other command is AI-executable.
-- Always pass `--json` on commands. Without it, output contains ANSI colors that are hard to parse.
-- Errors go to stderr as `{"error": "..."}` on non-zero exit codes.
-- Sessions auto-refresh and last 7 days without re-login.
-- For a custom or self-hosted server, pass `--server <url>` to `agenta login` (default `https://api.agentaos.ai`); later commands inherit it from the stored session.
-- For command details, use `agenta <command> --help` instead of guessing flags.
-- Everything for the common flows is in this skill. For the full reference (every command, flag, endpoint, and error shape), read `https://docs.agentaos.ai/llms-full.txt`, one plain-text file built for agents. Never web-search; that URL is canonical.
-
-## After Setup
-
-From `agenta status --json`, report:
-
-- Account email and organization.
-- Whether the account is ready to accept payments (`account.paymentTools.ready`).
-- If it is not ready, direct the user to finish onboarding in the dashboard at [app.agentaos.ai](https://app.agentaos.ai).
-
-Then offer 2–3 starter prompts tailored to the user, for example:
+From `agenta_status_get`, tell the user: test payments work now; the go-live steps done (`goLive.progress`); the one next step (`goLive.next.why`; when `next.command` is null the step happens in the dashboard at app.agentaos.ai). Then offer 2–3 starter prompts, for example:
 
 - "Add a €29/month Pro plan to my app and wire the Buy button."
 - "Put my Pro plan behind a paywall for logged-in users."
 - "Create a checkout for €50 for my consulting invoice."
 - "Show my active subscriptions and my recent invoices."
+
+## Payments in your app in 30 seconds
+
+1. `agenta_status_get` `{}` — confirm the tools answer.
+2. `agenta_products_create` `{"name":"Pro","amount":29,"currency":"EUR","successUrl":"https://yourapp.com/thanks"}` → `checkoutUrl`.
+3. Put `checkoutUrl` behind the app's Buy button.
+
+**Tell the user:** the product is created at that price, here is the link to share or wire in, buyers land on the success URL with `?sessionId=…` after paying, and it takes test cards now and real money once they are verified. If the app has logged-in users and must unlock something on payment, use Pattern B below instead of a shared link.
 
 ## Choose the integration
 
@@ -98,16 +65,12 @@ Both patterns start from the same product. A product is created once, never once
 
 ## Pattern A — frontend only (shared buyer link + redirect URLs)
 
-1. Create the product with return URLs:
-   ```bash
-   agenta products create --name "Pro" -a 29 -c EUR --subscription --interval month \
-     --success-url https://yourapp.com/thanks --cancel-url https://yourapp.com/pricing --json
-   ```
+1. Create the product with return URLs: `agenta_products_create` `{"name":"Pro","amount":29,"currency":"EUR","subscription":true,"interval":"month","successUrl":"https://yourapp.com/thanks","cancelUrl":"https://yourapp.com/pricing"}`.
 2. Put the returned `checkoutUrl` behind the Buy button (an `<a href>` is enough). No API key, no server code.
 3. The buyer pays on the hosted checkout, gets the receipt and invoice from AgentaOS, and lands on `https://yourapp.com/thanks?sessionId=<id>`; backing out lands on the cancel URL.
-4. To confirm from the terminal: `agenta pay get <sessionId> --json` → `status: "completed"`. For a plan: `agenta subscriptions list --json` and match `customerEmail`.
+4. To confirm a sale: `agenta_pay_get` `{"sessionId":"<id>"}` → `status: "completed"`. For a plan: `agenta_subscriptions_list` `{}` and match `customerEmail`.
 
-You learn who paid only from the email they typed. If the app must know *which app user* paid, use Pattern B.
+**Tell the user:** the plan and its link, where buyers return, and that they learn who paid only from the email the buyer typed. If the app must know *which app user* paid, use Pattern B.
 
 ## Pattern B — server side (paywall for logged-in users)
 
@@ -117,11 +80,7 @@ The app's server creates the checkout from the product's `linkId`, passes the ap
 npm install @agentaos/pay
 ```
 
-**Step 1 — create the product once** (CLI, or SDK `paymentLinks.create`). Save its `id`: that is the `linkId`.
-
-```bash
-agenta products create --name "Pro" -a 29 -c EUR --subscription --interval month --json
-```
+**Step 1 — create the product once:** `agenta_products_create` `{"name":"Pro","amount":29,"currency":"EUR","subscription":true,"interval":"month"}`. Save its `id`: that is the `linkId`.
 
 **Step 2 — when a logged-in user clicks Buy**, create a checkout from the `linkId` and redirect them:
 
@@ -174,14 +133,12 @@ const sub = page.items.find((s) => s.id === user.subscriptionId);
 await agentaos.subscriptions.cancel(sub.id);      // stops the next renewal; access stays until currentPeriodEnd
 ```
 
-**Free trials.** A trial belongs to the plan: `agenta products create … --subscription --interval month --trial-days 14`. At checkout the card is saved with nothing due today, the subscription starts as `trialing`, and the first charge happens when the trial ends. The `checkout.session.completed` event at trial start has `amount: "0"`, `trial: true` and `trial_end`; treat it as "trial started", not as money received.
+**Free trials.** A trial belongs to the plan: `agenta_products_create` `{"name":"Pro","amount":29,"currency":"EUR","subscription":true,"interval":"month","trialDays":14}`. At checkout the card is saved with nothing due today, the subscription starts as `trialing`, and the first charge happens when the trial ends. The `checkout.session.completed` event at trial start has `amount: "0"`, `trial: true` and `trial_end`; treat it as "trial started", not as money received.
 
-**Upgrade or downgrade.** Create the other plan as its own product (same currency, same interval), then move the subscription to it. Quote first, then apply; the quote's `prorationDate` is what makes the charge equal the quote.
+**Upgrade or downgrade.** Create the other plan as its own product (same currency, same interval), then move the subscription to it. Quote first, then apply; the tool echoes the quote's `prorationDate` back so the charge equals the quote.
 
-```bash
-agenta subscriptions change-plan <subscriptionId> --to <linkId> --dry-run --json   # quote only
-agenta subscriptions change-plan <subscriptionId> --to <linkId> --json             # quote, then apply
-```
+- Quote only: `agenta_subscriptions_change_plan` `{"id":"<subscriptionId>","to":"<linkId>","dryRun":true}`.
+- Apply: the same call without `dryRun`.
 
 ```typescript
 const quote = await agentaos.subscriptions.previewPlanChange(subscriptionId, PRO_PLUS_LINK_ID);
@@ -189,9 +146,11 @@ const result = await agentaos.subscriptions.changePlan(subscriptionId, { targetL
 ```
 
 - `direction: "upgrade"` charges the prorated difference (`dueTodayMinor`) on the saved card now and the new price applies immediately.
-- `direction: "downgrade"` charges nothing today; the buyer keeps the current plan until `effectiveAt`, the current period end, and the subscription shows the scheduled change as `pendingPlanChange` (target plan, amount, date) until then.
-- To cancel a scheduled downgrade, change the plan to the current plan again: `direction: "revert"`, nothing charged, `pendingPlanChange` becomes null. Picking the plan that is already pending is refused as "already scheduled".
+- `direction: "downgrade"` charges nothing today; the buyer keeps the current plan until `effectiveAt`, the current period end, and the subscription shows the scheduled change as `pendingPlanChange` until then.
+- To cancel a scheduled downgrade, change the plan to the current plan again: `direction: "revert"`, nothing charged. Picking the plan that is already pending is refused as "already scheduled".
 - The subscription must be `active` or `trialing`; changing currency or billing interval is refused.
+
+**Tell the user** (after the quote, before applying): what is due today and the next renewal amount and date, in the tool's own words. Apply only once they agree.
 
 Rules for Pattern B:
 
@@ -200,109 +159,126 @@ Rules for Pattern B:
 - Renewals fire `checkout.session.completed` without your `customerId`; match them by the stored `subscription.id`.
 - Full webhook reference (payloads, retries, other languages): `https://docs.agentaos.ai/llms-full.txt`.
 
-## Products and plans (CLI reference)
+## Products and plans
 
-```bash
-agenta products create --name "Launch Kit" -a 49 -c EUR -d "One sentence buyers see" --json
-agenta products create --name "Pro" -a 29 -c EUR --subscription --interval month --json
-agenta products create --name "Pro (annual)" -a 290 -c EUR --subscription --interval year --trial-days 14 --json
-agenta products create --name "Pro" -a 29 -c EUR --success-url https://yourapp.com/thanks --cancel-url https://yourapp.com/pricing --json
-agenta products list --json
-```
+`agenta_products_create`, one product per price, created once:
 
-- One product per price. Create it once; every buyer uses the same one.
-- `--subscription` needs `--interval month|year`. `--trial-days` (1–730) only applies to a plan: the buyer's card is saved with nothing due today and the first charge happens when the trial ends.
-- `--success-url` and `--cancel-url` must be `https://` (no plain http, no localhost). AgentaOS appends `?sessionId=<id>` to the success URL.
-- The response: `id` (= `linkId`), `checkoutUrl` (= buyer link), `type`, `billingInterval`, `amount`, `currency`, `successUrl`, `cancelUrl`.
-- Products created from the CLI are test-mode products (real checkout page, test cards only). Creating one is the merchant's first go-live milestone. Live products are created in the dashboard once the merchant is live.
+- One-time: `{"name":"Launch Kit","amount":49,"currency":"EUR","description":"One sentence buyers see"}`
+- Monthly plan: `{"name":"Pro","amount":29,"currency":"EUR","subscription":true,"interval":"month"}`
+- Annual plan with a trial: `{"name":"Pro (annual)","amount":290,"currency":"EUR","subscription":true,"interval":"year","trialDays":14}`
+- `agenta_products_list` `{}` — everything so far (`limit`, default 10, max 100).
 
-## Onboarding: audit and verification
+Rules: `subscription: true` needs `interval` `month` or `year`; `trialDays` (1–730) only on a plan. `successUrl` and `cancelUrl` must be `https://` (no plain http, no localhost); AgentaOS appends `?sessionId=<id>` to the success URL. The result carries `id` (= `linkId`), `checkoutUrl` (= buyer link), `type`, `billingInterval`, `amount`, `currency`, `status`. A test-mode connection makes test products (real checkout page, test cards only); creating one is the merchant's first go-live milestone.
 
-`agenta status --json` → `goLive` tells you where the account is. Two steps are done from the CLI; both are reviewed by a person, usually within 24 to 48 hours.
-
-**Free Revenue & Pricing Audit** (no identity needed, do this first):
-
-```bash
-agenta audit request --url https://example.com/pricing --description "One sentence on what it does" --category saas --delivery instant_digital --json
-agenta audit show --json                 # state; downloads the report PDF once it exists (default ./revenue-audit.pdf)
-agenta audit show --no-download --json   # state and report link only
-```
-
-**Business verification** (unlocks live payments). Ask the user for every value below before running it; never invent legal details:
-
-```bash
-agenta verify declaration --json          # the five statements --accept-declaration attests to — show them to the user first
-agenta verify submit --entity business --legal-name "Acme OÜ" --registration-number 12345678 \
-  --country EE --street "Sepapaja 6" --city Tallinn --postal 15551 \
-  --url https://example.com --description "One sentence on what it does" \
-  --category saas --delivery instant_digital --volume under_1k --accept-declaration --json
-agenta verify status --json               # unverified | in_review | verified | changes requested | rejected
-agenta verify resubmit --json             # after making the changes we asked for
-```
-
-- `--category`: `saas | digital | services | marketplace | physical | other`. `--delivery`: `instant_digital | email_delivery | subscription_access | manual | scheduled_service | physical_shipped`. `--volume`: `under_1k | 1k_10k | 10k_50k | over_50k`.
-- `--entity individual` needs no registration number. `--display-name` is what buyers see on their statement (defaults to the legal name).
-- Pass `--accept-declaration` only after the user has confirmed the five statements from `agenta verify declaration`.
-- A submitted application cannot be edited from the CLI; `verify submit` on an already-submitted account returns `reason: "already_submitted"`.
-- Results: poll `agenta verify status --json` and `agenta audit show --json`, or read `goLive` from `agenta status --json` (`verification.state`, `audit.grade`, `progress`, `next`). When `next.command` is `null`, the step happens in the dashboard and `next.why` says what.
+**Tell the user:** the product name and price, the link to share, and that its id is the `linkId` for server-side checkouts and plan changes.
 
 ## One-off checkouts
 
-Use `agenta pay checkout` for a single sale at a price you name, with no product behind it. Each session returns a `checkoutUrl` to share with the buyer.
+`agenta_pay_checkout` sells once at a price you name, with no product behind it.
 
-```bash
-agenta pay checkout -a 50 --json
-agenta pay checkout -a 99.99 -c EUR -d "Consulting, September" --json
-agenta pay checkout -a 25 --email buyer@example.com --json
-agenta pay get <sessionId> --json
-agenta pay list --json
-agenta pay list --status completed --limit 5 --json
-```
+- `{"amount":50}` — currency defaults to the organisation's setting (EUR or USD).
+- `{"amount":99.99,"currency":"EUR","description":"Consulting, September"}`
+- `{"amount":25,"email":"buyer@example.com"}` — pre-fills the buyer's email.
+- `agenta_pay_get` `{"sessionId":"<id>"}` — has it been paid? (`completed`, `open`, `expired`, `cancelled`).
+- `agenta_pay_list` `{"status":"completed","limit":5}` — recent sessions.
 
-- `-a, --amount <n>` (required) — the amount to charge. `-c, --currency <code>` — EUR or USD; defaults to the org setting. `-d, --description <text>` — shown to the buyer. `--email <email>` — pre-fill the buyer's email.
-- After creating a checkout, always show the user: the checkout URL, amount, currency, and expiry.
-- Poll `agenta pay get <sessionId> --json` to check whether it completed (`status === "completed"`).
-- If a response contains an error, report it clearly and stop; do not retry checkout creation.
-- Never guess a `sessionId`; use the one returned by checkout creation or `agenta pay list`.
+**Tell the user:** the amount, the link to send to their customer, and when it expires unpaid. To check later, ask for the status; never guess a `sessionId`, use the one the tool returned.
 
-## Manage subscriptions, customers & invoices
+## Onboarding: audit and verification
 
-```bash
-agenta subscriptions list --json                  # active recurring subscribers: id, customerEmail, planName, status, unitAmountMinor, currentPeriodEnd, linkId
-agenta subscriptions cancel <id> --json           # cancel at period end (--now for immediate)
-agenta customers list --json                      # everyone who has paid you
-agenta invoices list --json                       # tax-correct invoices, newest first; status issued = not paid yet, paid, voided
-agenta invoices receipt <id> -o receipt.pdf       # download a paid invoice's receipt PDF
-agenta invoices send-receipt <id> --json          # re-send the receipt email to the buyer
-```
+`agenta_status_get` → `goLive` says where the account is. Two steps are done from the tools; both are reviewed by a person.
 
-- All of these need `paymentTools.ready: true` from `agenta status`. `--limit <n>` caps how many rows a `list` returns.
+**Free Revenue & Pricing Audit** (no identity needed, do this first):
+
+- `agenta_audit_request` `{"url":"https://example.com/pricing","description":"One sentence on what it does","category":"saas","delivery":"instant_digital"}`
+- `agenta_audit_show` `{}` — the state, and the report link once it exists.
+
+**Tell the user:** the audit is being written by a person, it costs nothing and gates nothing, and there is nothing to do until it is ready. When `agenta_audit_show` returns `reportUrl`, give them the link (and the grade if there is one).
+
+**Business verification** (unlocks live payments). Ask the user for every value before calling; never invent legal details.
+
+1. `agenta_verify_declaration` `{}` — read the five statements to the user; they must confirm each.
+2. `agenta_verify_submit` `{"entity":"business","legalName":"Acme OÜ","registrationNumber":"12345678","country":"EE","street":"Sepapaja 6","city":"Tallinn","postal":"15551","url":"https://example.com","description":"One sentence on what it does","category":"saas","delivery":"instant_digital","volume":"under_1k","acceptDeclaration":true}`
+3. `agenta_verify_status` `{}` — unverified, in review, changes requested, verified, on hold, rejected.
+4. `agenta_verify_resubmit` `{}` — after the user has made the changes we asked for; nothing is retyped.
+
+- `category`: `saas | digital | services | marketplace | physical | other`. `delivery`: `instant_digital | email_delivery | subscription_access | manual | scheduled_service | physical_shipped | other`. `volume`: `under_1k | 1k_10k | 10k_50k | over_50k`.
+- `entity: "individual"` needs no `registrationNumber`. `displayName` is what buyers see on their statement (defaults to the legal name). `restricted: true` declares a regulated activity: still reviewed, higher chance of a decline.
+- Pass `acceptDeclaration: true` only after the user has confirmed the five statements themselves.
+- A submitted application cannot be edited; `agenta_verify_submit` on an already-submitted account sends nothing and says so.
+
+**Tell the user:** the application is with a person, usually 24 to 48 hours, and nothing to do until AgentaOS writes back; when status says changes were asked for, list them in plain words and offer to resubmit once done.
+
+## Subscriptions, customers, invoices
+
+- `agenta_subscriptions_list` `{}` — recurring subscribers: status, price, buyer, plan, id.
+- `agenta_subscriptions_cancel` `{"id":"<subscriptionId>"}` — at period end; `{"id":"…","now":true}` cancels immediately. Nothing is refunded either way.
+- `agenta_customers_list` `{}` — everyone who has paid.
+- `agenta_invoices_list` `{}` — tax-correct invoices, newest first (`issued` = not paid yet, `paid`, `voided`).
+- `agenta_invoices_receipt` `{"id":"<invoiceId>"}` — the receipt PDF as `pdfBase64`; decode it to a `.pdf` for the user (the CLI saves it to a file).
+- `agenta_invoices_send_receipt` `{"id":"<invoiceId>"}` — re-sends the receipt email to the buyer on file.
+
+**Tell the user:** for a cancellation, when access ends and that nothing is charged after; for a receipt, who it went to.
+
+## Every operation
+
+Same 19 operations on both surfaces. Inputs not listed as required are optional; `limit` defaults to 10.
+
+| What it does | MCP tool | CLI command | Required inputs |
+|---|---|---|---|
+| Account and go-live overview | `agenta_status_get` | `agenta status` (also `status get`) | none |
+| Ask for the free Revenue & Pricing Audit | `agenta_audit_request` | `agenta audit request` | `url` |
+| The audit state, and the report PDF once it exists | `agenta_audit_show` | `agenta audit show` | none (`download`, `output` are CLI-only) |
+| The five statements verification attests to | `agenta_verify_declaration` | `agenta verify declaration` | none |
+| Submit business verification for live payments | `agenta_verify_submit` | `agenta verify submit` | `legalName`, `country`, `street`, `city`, `url`, `acceptDeclaration`; `registrationNumber` for a business |
+| Where the verification has got to | `agenta_verify_status` | `agenta verify status` | none |
+| Send back for review after the changes we asked for | `agenta_verify_resubmit` | `agenta verify resubmit` | none |
+| Create a product (one-time) or a subscription plan | `agenta_products_create` | `agenta products create` | `name`, `amount` (+ `interval` with `subscription`) |
+| List products and plans | `agenta_products_list` | `agenta products list` | none |
+| Create a checkout session | `agenta_pay_checkout` | `agenta pay checkout` | `amount` |
+| Get checkout session status | `agenta_pay_get` | `agenta pay get <sessionId>` | `sessionId` |
+| List checkout sessions | `agenta_pay_list` | `agenta pay list` | none |
+| List subscriptions | `agenta_subscriptions_list` | `agenta subscriptions list` | none |
+| Cancel a subscription (at period end by default) | `agenta_subscriptions_cancel` | `agenta subscriptions cancel <id>` | `id` |
+| Move a subscription to another plan | `agenta_subscriptions_change_plan` | `agenta subscriptions change-plan <id>` | `id`, `to` |
+| List customers | `agenta_customers_list` | `agenta customers list` | none |
+| List invoices | `agenta_invoices_list` | `agenta invoices list` | none |
+| The receipt PDF for a paid invoice | `agenta_invoices_receipt` | `agenta invoices receipt <id>` | `id` |
+| Re-send the receipt email to the buyer on file | `agenta_invoices_send_receipt` | `agenta invoices send-receipt <id>` | `id` |
 
 ## Facts to get right
 
-- `agenta login` is the only human step; it also creates the account.
+- Connecting is the only human step; it also creates the account. Login and logout are not tools.
 - Create a product once. There is no `subscriptions.create()`; a buyer paying for a plan is what creates the subscription.
 - `linkId` (UUID) ≠ buyer link (`/pay/…` URL) ≠ `sessionId` (one checkout).
-- Logged-in users get a checkout created with `linkId` + `metadata`, never the shared `/pay/…` link.
+- Logged-in users get a checkout created with `linkId` + `metadata` from the SDK, never the shared `/pay/…` link.
 - Payment proof = webhook event or `checkouts.retrieve(sessionId).status === 'completed'`, never the redirect.
-- Card numbers are typed on the hosted checkout only. Never send a card number to the API or the CLI.
-- Everything is test mode until the merchant is verified and live; the code does not change.
+- Card numbers are typed on the hosted checkout only. Never send a card number to a tool, the API, or the CLI.
+- Everything is test mode until the merchant is verified and connected as Live; the code does not change.
 - API keys stay on the server. Never ship one to a browser or a mobile app.
 
-## Common Issues
+## Common issues
 
 | Issue | Cause | Fix |
 |---|---|---|
-| `agenta: command not found` | CLI not installed | Run `npm install -g agentaos`, then retry. |
-| `error: unknown command 'products'` or `unknown option '--json'` | Older CLI build | Update with `npm install -g agentaos@latest`. |
-| `{"error":"Not logged in"}` | No session | Tell the user to run `agenta login`. |
-| `{"error":"Session expired"}` | Session older than 7 days | Tell the user to run `agenta login` again. |
-| `account.paymentTools.ready` is false | Onboarding incomplete | Direct the user to finish setup in the dashboard at app.agentaos.ai. |
-| `--success-url must be an https:// URL` (same for `--cancel-url`) | Plain http or localhost | Use the app's deployed https URL (or an https tunnel while developing). |
-| `--subscription needs --interval month or --interval year` | Plan without a cadence | Add `--interval month` or `--interval year`. |
+| No `agenta_*` tools in the session | Not connected | Claude Code: `/mcp` → `agentaos` → Authenticate. Elsewhere: add the connector `https://mcp.agentaos.ai/mcp`. |
+| `… failed: Invalid API key` | Connection revoked on app.agentaos.ai → Developers | Reconnect (Authenticate / re-add the connector). |
+| `--success-url must be an https:// URL` (same for `cancelUrl`) | Plain http or localhost | Use the app's deployed https URL (or an https tunnel while developing). |
+| `--subscription needs --interval month or --interval year` | Plan without a cadence | Add `"interval":"month"` or `"year"`. |
+| `Missing required flags: --legal-name, …` | Verification fields absent | Ask the user for each named field, then call once with all of them. |
 | Webhook handler rejects with 400 | Signature check failed | Verify against the raw request body with the secret from Settings → Developers → Webhooks. |
-| `{"error":"Server returned 401"}` | Token needs refresh | Run any command; auto-refresh handles it. If it persists, `agenta login`. |
-| Checkout list empty | No checkouts yet | Create one with `agenta pay checkout`. |
+| Live money not arriving | Merchant not verified, or connected as Test | Run `agenta_status_get`; follow `goLive.next`. Reconnect and pick Live once verified. |
+| Checkout list empty | No checkouts yet | Create one with `agenta_pay_checkout`. |
 | Timeout / network error | Server unreachable | Retry once. If it persists, check the connection or server status. |
 
-**This skill contains everything needed to accept payments with the AgentaOS CLI. For the complete reference, read `https://docs.agentaos.ai/llms-full.txt` (one plain-text file for agents). Do not web-search.**
+## No MCP where you run? Use the CLI
+
+Terminals, headless agents and CI get the same 19 operations from the `agenta` CLI:
+
+```bash
+curl -fsSL https://agentaos.ai/install | bash   # or: npm install -g agentaos (Node.js 20+)
+agenta login                                    # browser approval; creates the account if the email is new
+agenta status --json
+```
+
+Commands and flags mirror the tools 1:1: `agenta_products_create` `{"trialDays":14}` is `agenta products create --trial-days 14`; an `id`/`sessionId` key is the positional argument; `dryRun: true` is `--dry-run`. Pass `--json` for the same JSON the tools return as `structuredContent`; without it the CLI prints the same sentence the tool puts in `content`. `agenta login` is the only command that needs a human (allow a long timeout, it polls for browser approval); sessions last 7 days. `agenta audit show` and `agenta invoices receipt` save the PDF next to you (`-o <file>`). For the complete reference, read `https://docs.agentaos.ai/llms-full.txt`, one plain-text file for agents. Do not web-search.
