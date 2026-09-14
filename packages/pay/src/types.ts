@@ -100,8 +100,15 @@ export interface CreatePaymentLinkParams {
 	type?: 'one_time' | 'subscription';
 	/** Billing cadence — REQUIRED when type is 'subscription', omit otherwise. */
 	billingInterval?: 'month' | 'year';
-	/** Free-trial length in days (1–730). Subscription links only. */
+	/** Trial length in days (1–730). Subscription links only. */
 	trialPeriodDays?: number;
+	/**
+	 * What the trial costs, in currency units — `9` means 9.00 for the whole trial,
+	 * not per month. Leave it out and the trial is free. Needs `trialPeriodDays`: a
+	 * trial price with no trial length is refused. `amount` stays the recurring price,
+	 * charged when the trial ends.
+	 */
+	trialAmount?: number;
 }
 
 export interface PaymentLink {
@@ -122,8 +129,10 @@ export interface PaymentLink {
 	type: 'one_time' | 'subscription';
 	/** Set only for subscription links; null for one-time links. */
 	billingInterval: 'month' | 'year' | null;
-	/** Free-trial length in days on a subscription link; null when there is no trial. */
+	/** Trial length in days on a subscription link; null when there is no trial. */
 	trialPeriodDays: number | null;
+	/** What the trial costs, in currency units, for the whole trial; null when it is free. */
+	trialAmount: number | null;
 	checkoutUrl: string;
 	metadata: Record<string, unknown>;
 	checkoutFields: CheckoutField[];
@@ -323,6 +332,29 @@ export interface Subscription {
 	 * stay what the buyer paid for until `effectiveAt`.
 	 */
 	pendingPlanChange: PendingPlanChange | null;
+	/**
+	 * The code this subscriber typed at checkout, or null. What it took off is on the
+	 * first invoice — read `invoices(id)` for the figure, not this.
+	 */
+	discount: SubscriptionDiscount | null;
+}
+
+/**
+ * A redeemed code. `tracking` means the code took nothing off the price and exists so
+ * the merchant can see who it brought in; `discount` means it did reduce the first
+ * invoice.
+ */
+export interface SubscriptionDiscount {
+	code: string;
+	kind: 'discount' | 'tracking';
+}
+
+export interface ListSubscriptionParams extends ListParams {
+	/**
+	 * Only subscribers who redeemed this code. The code string the merchant knows, not
+	 * a discount-code id. Case-insensitive.
+	 */
+	discountCode?: string;
 }
 
 /** A scheduled downgrade, applied at the next renewal. */
@@ -425,6 +457,110 @@ export type ChangePlanResult =
 			unitAmountMinor: number;
 			currency: string;
 	  };
+
+// ---------------------------------------------------------------------------
+// Subscriber credits
+// ---------------------------------------------------------------------------
+
+export interface GrantCreditParams {
+	/**
+	 * Positive integer minor units of the subscription's currency (`500` = 5.00). There
+	 * is no currency field: it is read off the subscription, because a mismatched one
+	 * parks the money where no invoice can reach it.
+	 */
+	amountMinor: number;
+	/** Why you gave it. The subscriber never sees this; you and your operators do. */
+	reason: string;
+	/**
+	 * Required. Send one string per credit you mean to give, and the SAME one again if
+	 * the call times out and you retry — that is what stops a retry becoming a second
+	 * credit. Nothing on the server survives a retry to recognise it by, so there is no
+	 * safe default we could pick for you. Two different keys for the same amount give
+	 * two credits, which is how you deliberately credit someone twice.
+	 */
+	idempotencyKey: string;
+}
+
+/** The whole screen after a grant: every figure is the server's, none is derived here. */
+export interface Credit {
+	/** The card processor's own id for the entry. There is no id of ours. */
+	id: string;
+	amountMinor: number;
+	currency: string;
+	reason: string;
+	/** All unspent credit this customer has with you now, positive. */
+	creditBalanceMinor: number;
+	/** What the next invoice would have taken before this credit. */
+	nextInvoiceMinor: number;
+	/** What it will take after it. */
+	nextInvoiceDueAfterCreditMinor: number;
+	nextInvoiceAt: string;
+	/** The id of the person who gave it. */
+	createdBy: string;
+	createdAt: string;
+}
+
+/** One row of the credit history. The grant response carries the figures; this does not. */
+export interface CreditEntry {
+	id: string;
+	amountMinor: number;
+	reason: string;
+	createdBy: string;
+	createdAt: string;
+}
+
+export interface CreditList {
+	items: CreditEntry[];
+	/**
+	 * Unspent credit on the CUSTOMER, not on this subscription. A buyer with two
+	 * subscriptions with you shares one balance.
+	 */
+	balanceMinor: number;
+}
+
+// ---------------------------------------------------------------------------
+// Discount codes
+// ---------------------------------------------------------------------------
+
+export interface CreateDiscountCodeParams {
+	/** What the buyer types. Letters, digits, dashes and underscores, up to 64. */
+	code: string;
+	/** Your label for it. A code with no discount cannot carry one — it is its own name. */
+	name?: string;
+	/** 0.01–100. Set at most one of `percentOff` and `amountOffMinor`. */
+	percentOff?: number;
+	/** Integer minor units of the PLAN's currency, which the server resolves. */
+	amountOffMinor?: number;
+	/** Stop applying the code after this many redemptions. */
+	maxRedemptions?: number;
+	/** ISO 8601. After this the code stops working. */
+	expiresAt?: string;
+	/** Limit the code to ONE plan, by its `paymentLinks.id`. Omit for every plan you own. */
+	linkId?: string;
+}
+
+export interface DiscountCode {
+	id: string;
+	code: string;
+	/** `tracking` takes nothing off the price; `discount` reduces the first invoice. */
+	kind: 'discount' | 'tracking';
+	/** The plan the code is limited to; null means every subscription plan you own. */
+	planLinkId: string | null;
+	planName: string | null;
+	archivedAt: string | null;
+	createdAt: string;
+	/** Whether the code still works. On `get` this also reflects the processor's view. */
+	active: boolean;
+}
+
+export interface DiscountCodeDetail extends DiscountCode {
+	/** Ready to print: `20% off`, `€5.00 off`, or `No discount — tracking only`. */
+	termsLabel: string;
+	/** How many subscribers redeemed it. */
+	timesRedeemed: number;
+	/** The redemption cap you set; null when you set none. */
+	maxRedemptions: number | null;
+}
 
 // ---------------------------------------------------------------------------
 // Customers

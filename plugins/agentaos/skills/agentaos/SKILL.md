@@ -1,7 +1,7 @@
 ---
 name: agenta
 description: >
-  Use this skill when the user wants to set up AgentaOS, add payments or a paywall to an app they are building, create a product or subscription plan, accept a payment, create a checkout or payment link, get paid for an invoice, product or plan, apply for business verification or the free revenue audit, or manage subscriptions, customers, and invoices. Activate when the user mentions agenta, AgentaOS, product, plan, paywall, checkout, payment link, "add payments", "buy button", subscriptions, invoices, verification, audit, "accept payments", or "get paid". When the user says "use agenta", use the `agenta_*` tools (`agenta_status_get`, `agenta_products_*`, `agenta_pay_*`, `agenta_verify_*`, `agenta_audit_*`, `agenta_subscriptions_*`, `agenta_customers_*`, `agenta_invoices_*`) instead of other tools; if no MCP is available, the `agenta` CLI has the same operations.
+  Use this skill when the user wants to set up AgentaOS, add payments or a paywall to an app they are building, create a product or subscription plan, accept a payment, create a checkout or payment link, get paid for an invoice, product or plan, apply for business verification or the free revenue audit, or manage subscriptions, customers, and invoices. Activate when the user mentions agenta, AgentaOS, product, plan, paywall, checkout, payment link, "add payments", "buy button", subscriptions, invoices, verification, audit, "accept payments", or "get paid". When the user says "use agenta", use the `agenta_*` tools (`agenta_status_get`, `agenta_products_*`, `agenta_pay_*`, `agenta_verify_*`, `agenta_audit_*`, `agenta_subscriptions_*`, `agenta_discounts_*`, `agenta_customers_*`, `agenta_invoices_*`) instead of other tools; if no MCP is available, the `agenta` CLI has the same operations.
 ---
 
 # agenta
@@ -135,6 +135,12 @@ await agentaos.subscriptions.cancel(sub.id);      // stops the next renewal; acc
 
 **Free trials.** A trial belongs to the plan: `agenta_products_create` `{"name":"Pro","amount":29,"currency":"EUR","subscription":true,"interval":"month","trialDays":14}`. At checkout the card is saved with nothing due today, the subscription starts as `trialing`, and the first charge happens when the trial ends. The `checkout.session.completed` event at trial start has `amount: "0"`, `trial: true` and `trial_end`; treat it as "trial started", not as money received.
 
+**Paid trials.** Add `trialAmount` and the trial is charged instead of free: `{"…":"…","trialDays":30,"trialAmount":9}` is "€9 for the first 30 days, then €29 a month". `amount` stays the recurring price. `trialAmount` needs `trialDays`; the buyer is charged at checkout, so this is money received, not a trial start.
+
+**Discount codes.** `agenta_discounts_create` `{"code":"LAUNCH20","percentOff":20}` mints a code buyers type at checkout; `amountOff` (e.g. `5`) takes a fixed amount off instead, and neither makes a tracking-only code that changes no price but records who it brought in — a referral code. `linkId` limits it to one plan; without one it works on every plan. Terms are fixed once created: to change them, archive and create another. `agenta_discounts_list` `{}` lists them, `agenta_discounts_show` `{"id":"<id>"}` is the only call that reports what a code takes off and how many people used it, and `agenta_discounts_archive` `{"id":"<id>"}` stops it (subscribers who already used it keep their discount). To see who a code brought in: `agenta_subscriptions_list` `{"code":"LAUNCH20"}`.
+
+**Credit a subscriber.** `agenta_subscriptions_credit` `{"id":"<subscriptionId>","amount":5,"reason":"Two days of downtime"}` puts credit on their account; it comes off their next invoice and no money moves out, so it is not a refund. Never more than the next invoice. `agenta_subscriptions_credits` `{"id":"<subscriptionId>"}` lists what was given and what is still unspent — the balance is the buyer's, shared across every subscription they have with this merchant.
+
 **Upgrade or downgrade.** Create the other plan as its own product (same currency, same interval), then move the subscription to it. Quote first, then apply; the tool echoes the quote's `prorationDate` back so the charge equals the quote.
 
 - Quote only: `agenta_subscriptions_change_plan` `{"id":"<subscriptionId>","to":"<linkId>","dryRun":true}`.
@@ -168,7 +174,7 @@ Rules for Pattern B:
 - Annual plan with a trial: `{"name":"Pro (annual)","amount":290,"currency":"EUR","subscription":true,"interval":"year","trialDays":14}`
 - `agenta_products_list` `{}` — everything so far (`limit`, default 10, max 100).
 
-Rules: `subscription: true` needs `interval` `month` or `year`; `trialDays` (1–730) only on a plan. `successUrl` and `cancelUrl` must be `https://` (no plain http, no localhost); AgentaOS appends `?sessionId=<id>` to the success URL. The result carries `id` (= `linkId`), `checkoutUrl` (= buyer link), `type`, `billingInterval`, `amount`, `currency`, `status`. A test-mode connection makes test products (real checkout page, test cards only); creating one is the merchant's first go-live milestone.
+Rules: `subscription: true` needs `interval` `month` or `year`; `trialDays` (1–730) and `trialAmount` only on a plan, and `trialAmount` needs `trialDays`. `successUrl` and `cancelUrl` must be `https://` (no plain http, no localhost); AgentaOS appends `?sessionId=<id>` to the success URL. The result carries `id` (= `linkId`), `checkoutUrl` (= buyer link), `type`, `billingInterval`, `amount`, `currency`, `status`. A test-mode connection makes test products (real checkout page, test cards only); creating one is the merchant's first go-live milestone.
 
 **Tell the user:** the product name and price, the link to share, and that its id is the `linkId` for server-side checkouts and plan changes.
 
@@ -213,6 +219,8 @@ Rules: `subscription: true` needs `interval` `month` or `year`; `trialDays` (1�
 
 - `agenta_subscriptions_list` `{}` — recurring subscribers: status, price, buyer, plan, id.
 - `agenta_subscriptions_cancel` `{"id":"<subscriptionId>"}` — at period end; `{"id":"…","now":true}` cancels immediately. Nothing is refunded either way.
+- `agenta_subscriptions_credit` `{"id":"<subscriptionId>","amount":5,"reason":"…"}` — credit against their next invoice; `agenta_subscriptions_credits` `{"id":"…"}` reads the history.
+- `agenta_discounts_create` `{"code":"LAUNCH20","percentOff":20}` / `agenta_discounts_list` `{}` / `agenta_discounts_show` `{"id":"…"}` / `agenta_discounts_archive` `{"id":"…"}` — codes buyers type at checkout.
 - `agenta_customers_list` `{}` — everyone who has paid.
 - `agenta_invoices_list` `{}` — tax-correct invoices, newest first (`issued` = not paid yet, `paid`, `voided`).
 - `agenta_invoices_receipt` `{"id":"<invoiceId>"}` — the receipt PDF as `pdfBase64`; decode it to a `.pdf` for the user (the CLI saves it to a file).
@@ -233,7 +241,7 @@ Same 19 operations on both surfaces. Inputs not listed as required are optional;
 | Submit business verification for live payments | `agenta_verify_submit` | `agenta verify submit` | `legalName`, `country`, `street`, `city`, `url`, `acceptDeclaration`; `registrationNumber` for a business |
 | Where the verification has got to | `agenta_verify_status` | `agenta verify status` | none |
 | Send back for review after the changes we asked for | `agenta_verify_resubmit` | `agenta verify resubmit` | none |
-| Create a product (one-time) or a subscription plan | `agenta_products_create` | `agenta products create` | `name`, `amount` (+ `interval` with `subscription`) |
+| Create a product (one-time) or a subscription plan | `agenta_products_create` | `agenta products create` | `name`, `amount` (+ `interval` with `subscription`; `trialAmount` needs `trialDays`) |
 | List products and plans | `agenta_products_list` | `agenta products list` | none |
 | Create a checkout session | `agenta_pay_checkout` | `agenta pay checkout` | `amount` |
 | Get checkout session status | `agenta_pay_get` | `agenta pay get <sessionId>` | `sessionId` |
@@ -241,6 +249,12 @@ Same 19 operations on both surfaces. Inputs not listed as required are optional;
 | List subscriptions | `agenta_subscriptions_list` | `agenta subscriptions list` | none |
 | Cancel a subscription (at period end by default) | `agenta_subscriptions_cancel` | `agenta subscriptions cancel <id>` | `id` |
 | Move a subscription to another plan | `agenta_subscriptions_change_plan` | `agenta subscriptions change-plan <id>` | `id`, `to` |
+| Credit a subscriber against their next invoice | `agenta_subscriptions_credit` | `agenta subscriptions credit <id>` | `id`, `amount`, `reason` |
+| Credits given, and what is still unspent | `agenta_subscriptions_credits` | `agenta subscriptions credits <id>` | `id` |
+| Create a discount code buyers type at checkout | `agenta_discounts_create` | `agenta discounts create` | `code` |
+| List discount codes | `agenta_discounts_list` | `agenta discounts list` | none |
+| What one code takes off, and how many used it | `agenta_discounts_show` | `agenta discounts show <id>` | `id` |
+| Stop a discount code working | `agenta_discounts_archive` | `agenta discounts archive <id>` | `id` |
 | List customers | `agenta_customers_list` | `agenta customers list` | none |
 | List invoices | `agenta_invoices_list` | `agenta invoices list` | none |
 | The receipt PDF for a paid invoice | `agenta_invoices_receipt` | `agenta invoices receipt <id>` | `id` |

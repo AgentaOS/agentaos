@@ -325,6 +325,155 @@ describe('subscriptions', () => {
 			issuedAt: '2026-08-18T00:00:00Z',
 		});
 	});
+
+	it('list({ discountCode }) → sends the code as a query filter', async () => {
+		const calls = stubRoutes({ items: [], total: 0, has_more: false });
+		await client().subscriptions.list({ discountCode: 'LAUNCH20' });
+		expect(new URL(calls[0]?.url ?? '').searchParams.get('discountCode')).toBe('LAUNCH20');
+	});
+
+	it('list carries each row’s redeemed code through', async () => {
+		stubRoutes({
+			items: [{ id: 'sub_1', discount: { code: 'LAUNCH20', kind: 'discount' } }],
+			total: 1,
+			has_more: false,
+		});
+		const page = await client().subscriptions.list();
+		expect(page.items[0]?.discount).toEqual({ code: 'LAUNCH20', kind: 'discount' });
+	});
+});
+
+describe('subscription credits', () => {
+	const granted = {
+		id: 'cbtxn_1',
+		amount_minor: 500,
+		currency: 'eur',
+		reason: 'Two days of downtime',
+		credit_balance_minor: 500,
+		next_invoice_minor: 1900,
+		next_invoice_due_after_credit_minor: 1400,
+		next_invoice_at: '2026-10-01T00:00:00.000Z',
+		created_by: 'user_1',
+		created_at: '2026-09-14T10:00:00.000Z',
+	};
+
+	it('credit → POST /api/v1/gateway/subscriptions/:id/credits', async () => {
+		const calls = stubRoutes(granted);
+		await client().subscriptions.credit('sub_1', {
+			amountMinor: 500,
+			reason: 'Two days of downtime',
+			idempotencyKey: 'key-1',
+		});
+		expect(calls[0]?.method).toBe('POST');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/subscriptions/sub_1/credits');
+	});
+
+	// The key is a header, not a field: sending it in the body would make the server
+	// reject the call for an unknown property and leave the retry unprotected.
+	it('credit sends the caller’s key as the Idempotency-Key header, not in the body', async () => {
+		const headers: Array<Record<string, string>> = [];
+		vi.stubGlobal(
+			'fetch',
+			vi.fn(async (_url: string, init?: RequestInit) => {
+				headers.push(init?.headers as Record<string, string>);
+				return new Response(JSON.stringify(granted), {
+					status: 200,
+					headers: { 'content-type': 'application/json' },
+				});
+			}),
+		);
+		await client().subscriptions.credit('sub_1', {
+			amountMinor: 500,
+			reason: 'Two days of downtime',
+			idempotencyKey: 'key-1',
+		});
+		expect(headers[0]?.['idempotency-key']).toBe('key-1');
+	});
+
+	it('credit keeps amountMinor and reason in the body', async () => {
+		const calls = stubRoutes(granted);
+		await client().subscriptions.credit('sub_1', {
+			amountMinor: 500,
+			reason: 'Two days of downtime',
+			idempotencyKey: 'key-1',
+		});
+		expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual({
+			amountMinor: 500,
+			reason: 'Two days of downtime',
+		});
+	});
+
+	it('credit camelizes the figures the merchant is shown', async () => {
+		stubRoutes(granted);
+		const credit = await client().subscriptions.credit('sub_1', {
+			amountMinor: 500,
+			reason: 'Two days of downtime',
+			idempotencyKey: 'key-1',
+		});
+		expect(credit).toMatchObject({
+			creditBalanceMinor: 500,
+			nextInvoiceDueAfterCreditMinor: 1400,
+		});
+	});
+
+	it('credits → GET /api/v1/gateway/subscriptions/:id/credits', async () => {
+		const calls = stubRoutes({ items: [], balance_minor: 0 });
+		const page = await client().subscriptions.credits('sub_1');
+		expect(calls[0]?.method).toBe('GET');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/subscriptions/sub_1/credits');
+		expect(page.balanceMinor).toBe(0);
+	});
+});
+
+describe('discountCodes', () => {
+	it('create → POST /api/v1/gateway/discount-codes with the terms', async () => {
+		const calls = stubRoutes({ id: 'dc_1', code: 'LAUNCH20', kind: 'discount' });
+		await client().discountCodes.create({ code: 'LAUNCH20', percentOff: 20 });
+		expect(calls[0]?.method).toBe('POST');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/discount-codes');
+		expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual({ code: 'LAUNCH20', percentOff: 20 });
+	});
+
+	it('list → GET /api/v1/gateway/discount-codes with pagination params', async () => {
+		const calls = stubRoutes({ items: [], total: 0, has_more: false });
+		await client().discountCodes.list({ limit: 5, offset: 10 });
+		const url = new URL(calls[0]?.url ?? '');
+		expect(calls[0]?.method).toBe('GET');
+		expect(url.pathname).toBe('/api/v1/gateway/discount-codes');
+		expect(url.searchParams.get('limit')).toBe('5');
+	});
+
+	it('list camelizes the plan each code is limited to', async () => {
+		stubRoutes({
+			items: [{ id: 'dc_1', code: 'LAUNCH20', plan_link_id: 'link_1', plan_name: 'Pro' }],
+			total: 1,
+			has_more: false,
+		});
+		const page = await client().discountCodes.list();
+		expect(page.items[0]).toMatchObject({ planLinkId: 'link_1', planName: 'Pro' });
+	});
+
+	it('get → GET /api/v1/gateway/discount-codes/:id, the one call that carries the terms', async () => {
+		const calls = stubRoutes({
+			id: 'dc_1',
+			code: 'LAUNCH20',
+			terms_label: '20% off',
+			times_redeemed: 14,
+			max_redemptions: 100,
+		});
+		const detail = await client().discountCodes.get('dc_1');
+		expect(calls[0]?.method).toBe('GET');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/discount-codes/dc_1');
+		expect(detail).toMatchObject({ termsLabel: '20% off', timesRedeemed: 14 });
+	});
+
+	it('archive → POST /api/v1/gateway/discount-codes/:id/archive', async () => {
+		const calls = stubRoutes({ id: 'dc_1', code: 'LAUNCH20', active: false });
+		const code = await client().discountCodes.archive('dc_1');
+		expect(calls[0]?.method).toBe('POST');
+		expect(pathOf(calls[0])).toBe('/api/v1/gateway/discount-codes/dc_1/archive');
+		expect(code.active).toBe(false);
+	});
 });
 
 describe('customers', () => {

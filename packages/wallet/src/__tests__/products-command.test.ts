@@ -1,7 +1,22 @@
 import { describe, expect, it } from 'vitest';
-import { buildCreateParams } from '../ops/products.js';
+import { type ProductView, buildCreateParams, productsCreate } from '../ops/products.js';
 
 const oneTime = { name: 'Launch Kit', amount: '49', currency: 'EUR' };
+
+const plan: ProductView = {
+	id: 'link_1',
+	name: 'Pro',
+	type: 'subscription',
+	billingInterval: 'month',
+	amount: 29,
+	currency: 'EUR',
+	status: 'active',
+	checkoutUrl: 'https://app.agentaos.ai/pay/abc',
+	successUrl: null,
+	cancelUrl: null,
+	trialPeriodDays: null,
+	trialAmount: null,
+};
 
 describe('agenta products create — flags to API params', () => {
 	it('builds a one-time product by default', () => {
@@ -39,6 +54,53 @@ describe('agenta products create — flags to API params', () => {
 	it('refuses plan-only flags on a one-time product', () => {
 		expect(buildCreateParams({ ...oneTime, interval: 'month' }).ok).toBe(false);
 		expect(buildCreateParams({ ...oneTime, trialDays: '7' }).ok).toBe(false);
+		expect(buildCreateParams({ ...oneTime, trialAmount: '9' }).ok).toBe(false);
+	});
+
+	it('carries a paid trial price through as the plan’s trialAmount', () => {
+		const built = buildCreateParams({
+			...oneTime,
+			subscription: true,
+			interval: 'month',
+			trialDays: '30',
+			trialAmount: '9',
+		});
+		expect(built.ok).toBe(true);
+		if (!built.ok) return;
+		expect(built.params.trialAmount).toBe(9);
+	});
+
+	it('leaves trialAmount unset for a free trial, so the trial stays free', () => {
+		const built = buildCreateParams({
+			...oneTime,
+			subscription: true,
+			interval: 'month',
+			trialDays: '30',
+		});
+		expect(built.ok).toBe(true);
+		if (!built.ok) return;
+		expect(built.params.trialAmount).toBeUndefined();
+	});
+
+	// A price for a trial nobody gets would never be charged; the API refuses it too.
+	it('refuses a trial price with no trial length', () => {
+		expect(
+			buildCreateParams({ ...oneTime, subscription: true, interval: 'month', trialAmount: '9' }),
+		).toEqual({
+			ok: false,
+			error: '--trial-amount needs --trial-days: a trial price needs a trial to price.',
+		});
+	});
+
+	it.each(['0', '-1', 'free'])('refuses trial price %s', (trialAmount) => {
+		const built = buildCreateParams({
+			...oneTime,
+			subscription: true,
+			interval: 'month',
+			trialDays: '30',
+			trialAmount,
+		});
+		expect(built.ok).toBe(false);
 	});
 
 	it('passes the return URLs through so buyers land back in the app', () => {
@@ -84,5 +146,29 @@ describe('agenta products create — flags to API params', () => {
 			trialDays,
 		});
 		expect(built.ok).toBe(false);
+	});
+});
+
+describe('agenta products create — what the merchant reads back', () => {
+	it('says nothing about a trial on a plan that has none', () => {
+		expect(productsCreate.describe(plan)).not.toContain('New subscribers get');
+	});
+
+	it('names the price of a paid trial and the price it renews at', () => {
+		const text = productsCreate.describe({ ...plan, trialPeriodDays: 30, trialAmount: 9 });
+		expect(text).toContain(
+			'New subscribers get 30 days for €9.00, then it renews at €29.00/month.',
+		);
+	});
+
+	it('says a trial with no price is free', () => {
+		const text = productsCreate.describe({ ...plan, trialPeriodDays: 14 });
+		expect(text).toContain('New subscribers get 14 days free');
+	});
+
+	// "The first 1 day are free" is the sentence this phrasing exists to avoid.
+	it('reads correctly for a one-day trial', () => {
+		const text = productsCreate.describe({ ...plan, trialPeriodDays: 1 });
+		expect(text).toContain('New subscribers get 1 day free');
 	});
 });

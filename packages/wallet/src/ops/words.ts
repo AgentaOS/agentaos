@@ -25,6 +25,15 @@ export function moneyMinor(minor: number, currency: string): string {
 	return money(minor / 100, currency);
 }
 
+/**
+ * `plainMinor(500)` → `5.00`. For the one response that carries amounts without the
+ * currency they are in — the credit history. Guessing a symbol there would state
+ * something the server never said.
+ */
+export function plainMinor(minor: number): string {
+	return (minor / 100).toFixed(2);
+}
+
 /** `day('2026-09-22T10:00:00Z')` → `22 Sep 2026`. */
 export function day(iso: string): string {
 	const d = new Date(iso);

@@ -3,7 +3,10 @@ import type {
 	CancelSubscriptionResult,
 	ChangePlanParams,
 	ChangePlanResult,
-	ListParams,
+	Credit,
+	CreditList,
+	GrantCreditParams,
+	ListSubscriptionParams,
 	PaginatedList,
 	PlanChangePreview,
 	Subscription,
@@ -20,8 +23,11 @@ const BASE_PATH = '/api/v1/gateway/subscriptions';
  * the dashboard. There is no `create` here by design.
  */
 export class SubscriptionsResource extends BaseResource {
-	/** List subscriptions in the current environment (test/live from the API key), paginated. */
-	async list(params?: ListParams): Promise<PaginatedList<Subscription>> {
+	/**
+	 * List subscriptions in the current environment (test/live from the API key),
+	 * paginated. Pass `discountCode` to see only the subscribers one code brought in.
+	 */
+	async list(params?: ListSubscriptionParams): Promise<PaginatedList<Subscription>> {
 		return this.getJson<PaginatedList<Subscription>>(
 			BASE_PATH,
 			params as Record<string, string | number | undefined>,
@@ -42,6 +48,28 @@ export class SubscriptionsResource extends BaseResource {
 	/** Per-cycle invoices for one subscription, newest first. */
 	async invoices(id: string): Promise<SubscriptionInvoice[]> {
 		return this.getJson<SubscriptionInvoice[]>(`${BASE_PATH}/${id}/invoices`);
+	}
+
+	/**
+	 * Put credit on this subscriber's account with you. It comes off their next
+	 * invoice, reducing what their card is charged; it is not a refund and no money
+	 * moves out. Owner or admin on a signed-in session only — an API key cannot,
+	 * because the credit has to name the person who gave it.
+	 *
+	 * `idempotencyKey` is required, not optional. It rides the `Idempotency-Key`
+	 * header, and it is the ONLY thing standing between a timeout you retry and a
+	 * subscriber credited twice: there is no local record of a credit for the server
+	 * to recognise a repeat by. Generating one for you would defeat it, because a
+	 * retry would generate a second.
+	 */
+	async credit(id: string, params: GrantCreditParams): Promise<Credit> {
+		const { idempotencyKey, ...body } = params;
+		return this.postJson<Credit>(`${BASE_PATH}/${id}/credits`, body, idempotencyKey);
+	}
+
+	/** Credits given on this subscription, newest first, and what is still unspent. */
+	async credits(id: string): Promise<CreditList> {
+		return this.getJson<CreditList>(`${BASE_PATH}/${id}/credits`);
 	}
 
 	/**
