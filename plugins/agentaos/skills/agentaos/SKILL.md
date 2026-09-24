@@ -60,6 +60,7 @@ From `agenta_status_get`, tell the user: test payments work now; the go-live ste
 |---|---|
 | Has no login, or sells to anyone (buy button, link in bio, invoice, landing page) | **Pattern A — frontend only**: links and redirect URLs, no server code |
 | Has logged-in users and must unlock something when they pay (paywall, Pro plan, credits) | **Pattern B — server side**: the server creates the checkout with the user's id, then webhook or polling |
+| Wants the checkout ON its own page (Paddle/Stripe-style inline or overlay) instead of a hosted page | **Embedded checkout** (below) — with Pattern A's product link, or Pattern B's server-created checkout |
 
 Both patterns start from the same product. A product is created once, never once per buyer.
 
@@ -158,6 +159,25 @@ Rules for Pattern B:
 - Key idempotency on `sessionId`; the same event can be delivered more than once.
 - Renewals fire `checkout.session.completed` without your `customerId`; match them by the stored `subscription.id`.
 - Full webhook reference (payloads, retries, other languages): `https://docs.agentaos.ai/llms-full.txt`.
+
+## Embedded checkout (inline or overlay on the app's own page)
+
+The same checkout, shown on the app's page instead of a hosted one. Money, VAT, trials and 3D Secure are unchanged; AgentaOS stays the merchant of record.
+
+1. The user adds each site it will embed on in the dashboard: **Settings → Developers → Approved sites** (e.g. `https://yourapp.com`). The browser refuses every other site. Test products also work on `localhost`. Their look (button colour, font, corners, background) is set in **Settings → Business → Checkout appearance**.
+2. Script tag, no build step — inline where `#checkout` is; leave out `target` for an overlay:
+   ```html
+   <script src="https://app.agentaos.ai/v1/agentaos.js"></script>
+   <div id="checkout"></div>
+   <script>
+     AgentaOS.checkout.open({ link: '<checkoutUrl>', target: '#checkout', onEvent: (e) => console.log(e.name, e.data) });
+   </script>
+   ```
+3. React/Next: `pnpm add @agentaos/checkout`, then `<AgentaOSCheckout link={checkoutUrl} onEvent={…} />` (inline) or `useAgentaOSCheckout().open({ link })` (overlay) from `@agentaos/checkout/react`. A Monthly/Yearly toggle just changes `link`.
+4. Logged-in users (Pattern B): create the checkout on the server as usual and pass `session: checkout.sessionId` instead of `link`.
+5. Events: `checkout.loaded`, `checkout.completed` (`kind`: `payment` | `trial` | `bank_transfer`, `amountMinor`, `sessionId`), `checkout.closed`, `checkout.error` (`not_loaded` usually means the site is not approved). After payment the whole page goes to the product's success URL with `sessionId`, or pass `successUrl: false` and handle `checkout.completed` yourself.
+
+**Never unlock on the event** — confirm with the webhook or `agenta_pay_get`, once per `sessionId`.
 
 ## Products and plans
 

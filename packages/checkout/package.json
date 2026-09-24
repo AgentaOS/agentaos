@@ -1,0 +1,52 @@
+{
+	"name": "@agentaos/checkout",
+	"version": "0.0.0",
+	"description": "AgentaOS embedded checkout for the browser — inline or overlay on your own page, with React support",
+	"license": "Apache-2.0",
+	"author": "AgentaOS <hello@agentaos.ai>",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/AgentaOS/agentaos.git",
+		"directory": "packages/checkout"
+	},
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./react": {
+			"types": "./dist/react.d.ts",
+			"import": "./dist/react.js"
+		}
+	},
+	"files": ["dist"],
+	"sideEffects": false,
+	"publishConfig": {
+		"access": "public"
+	},
+	"peerDependencies": {
+		"react": ">=18"
+	},
+	"peerDependenciesMeta": {
+		"react": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@types/react": "^18.3.0",
+		"@types/react-dom": "^18.3.7",
+		"jsdom": "^25.0.0",
+		"react": "^18.3.0",
+		"react-dom": "^18.3.0"
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.build.json",
+		"lint": "biome check src/",
+		"test": "vitest run",
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf dist"
+	}
+}
