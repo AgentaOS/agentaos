@@ -6,7 +6,8 @@ export const DEFAULT_ORIGIN = 'https://app.agentaos.ai';
 export interface LoadOptions {
 	/**
 	 * The AgentaOS app origin. Leave out in production. Point it at a local stack while
-	 * developing, e.g. `http://localhost:3000`.
+	 * developing, e.g. `http://localhost:3000`. Only the first load on a page counts: the script
+	 * is loaded once, and later calls reuse it whatever origin they pass.
 	 */
 	origin?: string;
 }
@@ -42,17 +43,16 @@ function injectScript(src: string): Promise<AgentaOS> {
 		const script =
 			document.querySelector<HTMLScriptElement>(`script[src="${src}"]`) ??
 			document.createElement('script');
-		const fail = () =>
+		const fail = () => {
+			script.remove(); // so a later call inserts a fresh tag instead of waiting on a dead one
 			reject(
 				new Error(
 					`AgentaOS: the checkout script didn't load from ${src}. Check the network, and that the origin is right.`,
 				),
 			);
+		};
 		script.addEventListener('load', () => (window.AgentaOS ? resolve(window.AgentaOS) : fail()));
-		script.addEventListener('error', () => {
-			script.remove(); // so a later call inserts a fresh tag instead of waiting on a dead one
-			fail();
-		});
+		script.addEventListener('error', fail);
 		if (!script.isConnected) {
 			script.src = src;
 			script.async = true;

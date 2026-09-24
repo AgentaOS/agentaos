@@ -37,7 +37,7 @@ const agentaos = await loadAgentaOS(); // null on the server
 agentaos?.checkout.open({ link, target: '#checkout', onEvent });
 ```
 
-`loadAgentaOS()` adds the script once, however many times it's called. While developing against a local AgentaOS, pass `loadAgentaOS({ origin: 'http://localhost:3000' })`.
+`loadAgentaOS()` adds the script once, however many times it's called (the first call's `origin` wins). While developing against a local AgentaOS, pass `loadAgentaOS({ origin: 'http://localhost:3000' })`. If the script can't load, the promise rejects with a plain sentence and a later call tries again; `<AgentaOSCheckout>` reports it to `onEvent` as `checkout.error` `not_loaded`.
 
 ## React
 
@@ -47,7 +47,7 @@ import { AgentaOSCheckout, useAgentaOSCheckout } from '@agentaos/checkout/react'
 // Inline — switching `link` (e.g. a Monthly/Yearly toggle) updates the open checkout.
 <AgentaOSCheckout link={yearly ? YEARLY_LINK : MONTHLY_LINK} email={user.email} onEvent={onEvent} />
 
-// Overlay, from a button
+// Overlay, from a button — it lives as long as this component (unmounting closes it)
 const { open } = useAgentaOSCheckout();
 <button onClick={() => open({ link: STARTER_LINK })}>Buy</button>
 ```
@@ -63,7 +63,7 @@ const { open } = useAgentaOSCheckout();
 | `successUrl` | Where the whole page goes after payment, with `sessionId` added (https only). Defaults to the product's success URL. `false` keeps the page where it is. |
 | `onEvent` | Receives the events below. |
 
-`open()` returns `{ update({ link | session }), close() }`.
+`open()` returns `{ update({ link | session }), close() }`. Prefill and `successUrl` are read when the checkout opens; `update()` switches only the product or checkout.
 
 ## Events
 
@@ -71,7 +71,7 @@ const { open } = useAgentaOSCheckout();
 |---|---|
 | `checkout.loaded` | `{ product: { name, type, billingInterval, trialDays }, currency, testMode }` |
 | `checkout.completed` | `{ sessionId, kind: 'payment' \| 'trial' \| 'bank_transfer', email, amountMinor, currency, successUrl }` |
-| `checkout.closed` | `{}` — the buyer closed the overlay |
+| `checkout.closed` | `{}` — the overlay closed: by the buyer, by `close()`, or because the React component that opened it unmounted |
 | `checkout.error` | `{ code: 'not_loaded' \| 'not_found' \| 'unavailable', message }` |
 
 `amountMinor` is what was charged today in minor units (0 for a free trial), or what the buyer was asked to send for a bank transfer. A bank transfer never moves the page: the buyer needs the bank details on screen.

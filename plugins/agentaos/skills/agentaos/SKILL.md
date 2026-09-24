@@ -175,7 +175,7 @@ The same checkout, shown on the app's page instead of a hosted one. Money, VAT, 
    ```
 3. React/Next: `pnpm add @agentaos/checkout`, then `<AgentaOSCheckout link={checkoutUrl} onEvent={…} />` (inline) or `useAgentaOSCheckout().open({ link })` (overlay) from `@agentaos/checkout/react`. A Monthly/Yearly toggle just changes `link`.
 4. Logged-in users (Pattern B): create the checkout on the server as usual and pass `session: checkout.sessionId` instead of `link`.
-5. Events: `checkout.loaded`, `checkout.completed` (`kind`: `payment` | `trial` | `bank_transfer`, `amountMinor`, `sessionId`), `checkout.closed`, `checkout.error` (`not_loaded` usually means the site is not approved). After payment the whole page goes to the product's success URL with `sessionId`, or pass `successUrl: false` and handle `checkout.completed` yourself.
+5. Events: `checkout.loaded`, `checkout.completed` (`kind`: `payment` | `trial` | `bank_transfer`, `amountMinor`, `sessionId`), `checkout.closed`, `checkout.error` (`not_loaded` usually means the site is not approved). After payment the whole page goes to the product's success URL with `sessionId` (https only; never for `bank_transfer`, where the buyer must keep the bank details on screen), or pass `successUrl: false` and handle `checkout.completed` yourself.
 
 **Never unlock on the event** — confirm with the webhook or `agenta_pay_get`, once per `sessionId`.
 

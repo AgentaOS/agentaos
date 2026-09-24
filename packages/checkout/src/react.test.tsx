@@ -27,6 +27,7 @@ beforeEach(() => {
 
 afterEach(() => {
 	act(() => root.unmount());
+	for (const script of document.querySelectorAll('script')) script.remove();
 	host.remove();
 	window.AgentaOS = undefined;
 	resetForTests();
@@ -79,6 +80,22 @@ describe('<AgentaOSCheckout>', () => {
 		expect(handle.close).toHaveBeenCalled();
 	});
 
+	it('tells onEvent when the script cannot load, instead of leaving an empty box', async () => {
+		window.AgentaOS = undefined;
+		const onEvent = vi.fn();
+		await render(<AgentaOSCheckout link={MONTHLY} onEvent={onEvent} />);
+
+		await act(async () => {
+			const script = document.querySelector('script');
+			script?.dispatchEvent(new Event('error'));
+		});
+
+		expect(onEvent).toHaveBeenCalledWith({
+			name: 'checkout.error',
+			data: { code: 'not_loaded', message: expect.stringMatching(/didn't load/) },
+		});
+	});
+
 	it('opens a checkout your server created', async () => {
 		await render(<AgentaOSCheckout session="cs_abc" />);
 
@@ -95,6 +112,33 @@ describe('useAgentaOSCheckout', () => {
 			</button>
 		);
 	}
+
+	it('never opens after the component that asked has gone', async () => {
+		window.AgentaOS = undefined;
+		await render(<BuyButton />);
+		await act(async () => {
+			host.querySelector('button')?.click();
+		});
+		act(() => root.render(null));
+
+		window.AgentaOS = { checkout: { open } } as never;
+		await act(async () => {
+			document.querySelector('script')?.dispatchEvent(new Event('load'));
+		});
+
+		expect(open).not.toHaveBeenCalled();
+	});
+
+	it('requires exactly one of link or session (checked by the type)', () => {
+		const typeCheckOnly = (openOverlay: ReturnType<typeof useAgentaOSCheckout>['open']) => {
+			// @ts-expect-error — neither link nor session
+			void openOverlay({ email: 'ann@acme.com' });
+			// @ts-expect-error — both
+			void openOverlay({ link: MONTHLY, session: 'cs_1' });
+			void openOverlay({ session: 'cs_1' });
+		};
+		expect(typeCheckOnly).toBeTypeOf('function');
+	});
 
 	it('opens the overlay (no target) from a click', async () => {
 		await render(<BuyButton />);

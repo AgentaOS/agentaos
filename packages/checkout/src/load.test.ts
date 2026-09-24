@@ -59,10 +59,16 @@ describe('loadAgentaOS', () => {
 		await expect(second).resolves.toBe(FAKE);
 	});
 
-	it('rejects when the file loads but is not the checkout script', async () => {
+	it('rejects when the file loads but is not the checkout script, and a later call tries again', async () => {
 		const loading = loadAgentaOS();
 		scriptLoads(false);
 
 		await expect(loading).rejects.toThrow(/didn't load/);
+		expect(scripts()).toHaveLength(0);
+
+		const retry = loadAgentaOS();
+		expect(scripts()).toHaveLength(1);
+		scriptLoads();
+		await expect(retry).resolves.toBe(FAKE);
 	});
 });

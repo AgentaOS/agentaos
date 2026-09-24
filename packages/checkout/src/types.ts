@@ -16,7 +16,8 @@ export type CheckoutSource =
 			link?: never;
 	  };
 
-export type OpenOptions = CheckoutSource & {
+/** Everything `open()` takes besides where the checkout comes from. */
+export interface CheckoutBehaviour {
 	/** CSS selector or element to render into (inline). Leave out for the overlay. */
 	target?: string | HTMLElement;
 	/** Prefills the buyer's email. Sent in the handshake, never in a URL. */
@@ -29,7 +30,10 @@ export type OpenOptions = CheckoutSource & {
 	 */
 	successUrl?: string | false;
 	onEvent?: (event: CheckoutEvent) => void;
-};
+}
+
+/** Read when the checkout opens; `update()` changes only the product or checkout. */
+export type OpenOptions = CheckoutSource & CheckoutBehaviour;
 
 export interface CheckoutLoadedData {
 	product: {
@@ -66,6 +70,7 @@ export interface CheckoutErrorData {
 export type CheckoutEvent =
 	| { name: 'checkout.loaded'; data: CheckoutLoadedData }
 	| { name: 'checkout.completed'; data: CheckoutCompletedData }
+	/** The overlay closed — by the buyer, or by `close()` (including a React unmount). */
 	| { name: 'checkout.closed'; data: Record<string, never> }
 	| { name: 'checkout.error'; data: CheckoutErrorData };
 
