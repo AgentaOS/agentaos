@@ -26,7 +26,8 @@ export interface CheckoutBehaviour {
 	country?: string;
 	/**
 	 * Where the whole page goes after a completed payment (https only; `sessionId` is added).
-	 * Defaults to the product's success URL. `false` keeps the page where it is.
+	 * Defaults to the checkout's success URL: the one given to
+	 * `checkouts.create`, else the product's. `false` keeps the page where it is.
 	 */
 	successUrl?: string | false;
 	onEvent?: (event: CheckoutEvent) => void;

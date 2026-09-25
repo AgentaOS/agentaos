@@ -60,7 +60,7 @@ const { open } = useAgentaOSCheckout();
 | `session` | Instead of `link`: the `sessionId` of a checkout your server created with `checkouts.create` (logged-in users, with your own `metadata`). |
 | `target` | Selector or element for inline. Leave out for the overlay. |
 | `email`, `country` | Prefill (ISO country code). Sent to the checkout directly, never in a URL. |
-| `successUrl` | Where the whole page goes after payment, with `sessionId` added (https only). Defaults to the product's success URL. `false` keeps the page where it is. |
+| `successUrl` | Where the whole page goes after payment, with `sessionId` added (https only). Defaults to the checkout's success URL (the one given to `checkouts.create`, else the product's). `false` keeps the page where it is. |
 | `onEvent` | Receives the events below. |
 
 `open()` returns `{ update({ link | session }), close() }`. Prefill and `successUrl` are read when the checkout opens; `update()` switches only the product or checkout.
