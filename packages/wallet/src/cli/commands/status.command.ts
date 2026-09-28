@@ -18,17 +18,22 @@ export function statusCommand(ctx: CliContext): Command {
 		.alias('whoami')
 		.usage('[options]')
 		.description(statusGet.description)
-		.action(() => showStatus(ctx));
+		// Connect (PRD §6.1 R9-3): see where a business you manage stands.
+		.option('--business <id>', 'Act for this business you manage. Omit to act as yourself.')
+		.action((opts: { business?: string }) => showStatus(ctx, opts.business));
 	// `agenta status get` is the catalogue's name for the same thing; hidden,
 	// and the usage line above keeps `[command]` out of the help it had in 3.0.0.
 	status.addCommand(
-		new Command('get').description(statusGet.description).action(() => showStatus(ctx)),
+		new Command('get')
+			.description(statusGet.description)
+			.option('--business <id>', 'Act for this business you manage. Omit to act as yourself.')
+			.action((opts: { business?: string }) => showStatus(ctx, opts.business)),
 		{ hidden: true },
 	);
 	return status;
 }
 
-async function showStatus(ctx: CliContext): Promise<void> {
+async function showStatus(ctx: CliContext, business?: string): Promise<void> {
 	try {
 		const session = await ensureSession();
 		if (!session.ok) {
@@ -40,7 +45,7 @@ async function showStatus(ctx: CliContext): Promise<void> {
 			return;
 		}
 
-		const { sdk, account } = await ctx.connect();
+		const { sdk, account } = await ctx.connect(business ? { business } : undefined);
 		if (!account.orgId) {
 			console.log(JSON.stringify({ account: { ...account, serverReachable: false } }));
 			return;

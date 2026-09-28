@@ -33,6 +33,12 @@ const EXPECTED_TOOLS = [
 	'agenta_invoices_list',
 	'agenta_invoices_receipt',
 	'agenta_invoices_send_receipt',
+	'agenta_businesses_list',
+	'agenta_businesses_get',
+	'agenta_businesses_create',
+	'agenta_businesses_invite',
+	'agenta_businesses_revoke_invite',
+	'agenta_businesses_id_link',
 ];
 
 describe('AgentaOS Terminal MCP Server', () => {

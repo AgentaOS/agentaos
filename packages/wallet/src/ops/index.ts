@@ -1,4 +1,5 @@
 import { AUDIT } from './audit.js';
+import { BUSINESSES } from './businesses.js';
 import { CUSTOMERS } from './customers.js';
 import { DISCOUNTS } from './discounts.js';
 import { INVOICES } from './invoices.js';
@@ -25,6 +26,7 @@ const GROUPS: readonly OperationGroup[] = [
 	DISCOUNTS,
 	CUSTOMERS,
 	INVOICES,
+	BUSINESSES,
 ];
 
 export const OPERATIONS: readonly Operation[] = GROUPS.flatMap((group) => group.operations);
