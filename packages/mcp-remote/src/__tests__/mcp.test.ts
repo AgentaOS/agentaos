@@ -51,6 +51,25 @@ async function readJsonRpcResult(response: Response): Promise<{ tools: { name: s
 }
 
 describe('remote MCP endpoint', () => {
+	it('turns the server-initiated SSE stream down instead of holding one open', async () => {
+		// The stream this GET asks for is the one that put the Worker in a reconnect loop.
+		const request = new Request('http://mcp.test/mcp', {
+			method: 'GET',
+			headers: { accept: 'text/event-stream' },
+		});
+
+		const response = await handleMcp(request, env, {
+			apiKey: 'sk_test_dummy',
+			keyPrefix: 'sk_test_dumm',
+			mode: 'test',
+		});
+
+		expect(response.status).toBe(405);
+		expect(response.headers.get('allow')).toBe('POST');
+		// No body and no content type: nothing for the client to hold open.
+		expect(response.headers.get('content-type')).toBeNull();
+	});
+
 	it('lists every merchant operation as a tool for a connection', async () => {
 		const request = new Request('http://mcp.test/mcp', {
 			method: 'POST',
