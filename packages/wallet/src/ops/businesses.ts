@@ -57,9 +57,6 @@ export const businessesGet = operation({
 	describe(b) {
 		return lines(
 			businessLine(b).trimStart().slice(2),
-			b.platformFee.bps || b.platformFee.fixedMinor
-				? `Your share: ${b.platformFee.bps / 100}% of each sale's price before VAT + ${(b.platformFee.fixedMinor / 100).toFixed(2)} fixed`
-				: 'Your share: none (set it in the dashboard)',
 			`Act as it: add --business ${b.id} to any command.`,
 		);
 	},
