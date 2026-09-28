@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { Env } from '../env.js';
 import { handleMcp } from '../mcp.js';
@@ -29,6 +29,12 @@ const EXPECTED_TOOLS = [
 	'agenta_invoices_list',
 	'agenta_invoices_receipt',
 	'agenta_invoices_send_receipt',
+	'agenta_businesses_list',
+	'agenta_businesses_get',
+	'agenta_businesses_create',
+	'agenta_businesses_invite',
+	'agenta_businesses_revoke_invite',
+	'agenta_businesses_id_link',
 ];
 
 const env = {
@@ -90,4 +96,45 @@ describe('remote MCP endpoint', () => {
 		const { tools } = await readJsonRpcResult(response);
 		expect(tools.map((t) => t.name).sort()).toEqual([...EXPECTED_TOOLS].sort());
 	});
+
+	// Connect (PRD §6.1 R9-3): a tool called with `business` acts for that business upstream —
+	// on the hosted connector too, never silently as the platform.
+	it('a tool called with business sends AgentaOS-Account to the API', async () => {
+		const seen: Array<string | null> = [];
+		vi.stubGlobal(
+			'fetch',
+			vi.fn(async (_url: string, init?: RequestInit) => {
+				seen.push(((init?.headers ?? {}) as Record<string, string>)['agentaos-account'] ?? null);
+				return new Response(JSON.stringify({ items: [], total: 0, hasMore: false }), {
+					status: 200,
+					headers: { 'content-type': 'application/json' },
+				});
+			}),
+		);
+		const call = (args: Record<string, unknown>) =>
+			handleMcp(
+				new Request('http://mcp.test/mcp', {
+					method: 'POST',
+					headers: {
+						'content-type': 'application/json',
+						accept: 'application/json, text/event-stream',
+					},
+					body: JSON.stringify({
+						jsonrpc: '2.0',
+						id: 2,
+						method: 'tools/call',
+						params: { name: 'agenta_products_list', arguments: args },
+					}),
+				}),
+				env,
+				{ apiKey: 'sk_test_dummy', keyPrefix: 'sk_test_dumm', mode: 'test' },
+			);
+
+		await (await call({ business: 'biz_1' })).text();
+		await (await call({})).text();
+
+		expect(seen).toEqual(['biz_1', null]);
+	});
 });
+
+afterEach(() => vi.unstubAllGlobals());

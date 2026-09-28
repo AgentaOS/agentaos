@@ -27,7 +27,16 @@ export async function handleMcp(
 	}
 
 	const server = new McpServer({ name: 'agentaos', version: '0.1.0' });
-	registerAgentaTools(server, () => new AgentaOS(props.apiKey, { baseUrl: env.AGENTAOS_API_URL }));
+	// `business`: the managed business a tool call acts for (Connect) — passed on, never dropped,
+	// or the call would run as the platform itself.
+	registerAgentaTools(
+		server,
+		(opts) =>
+			new AgentaOS(props.apiKey, {
+				baseUrl: env.AGENTAOS_API_URL,
+				...(opts?.business ? { business: opts.business } : {}),
+			}),
+	);
 
 	// enableJsonResponse for the same reason: a stateless server has no use for a streamed
 	// answer, and a plain JSON response completes inside the request instead of leaving a
