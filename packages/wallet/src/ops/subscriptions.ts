@@ -1,8 +1,15 @@
-import type { ChangePlanResult, PlanChangePreview, Subscription } from '@agentaos/pay';
+import { randomUUID } from 'node:crypto';
+import type {
+	ChangePlanResult,
+	Credit,
+	CreditList,
+	PlanChangePreview,
+	Subscription,
+} from '@agentaos/pay';
 import { z } from 'zod';
-import { pageLimit } from './schema.js';
+import { minorUnits, pageLimit, positiveAmount } from './schema.js';
 import { type OperationGroup, operation } from './types.js';
-import { count, day, lines, moneyMinor, moreLine } from './words.js';
+import { count, day, lines, moneyMinor, moreLine, plainMinor } from './words.js';
 
 /**
  * Recurring subscribers. Subscriptions are CREATED by buyers paying for a plan
@@ -17,9 +24,12 @@ function planPrice(s: Subscription): string {
 export const subscriptionsList = operation({
 	name: 'subscriptions.list',
 	description: 'List subscriptions',
-	input: z.object({ limit: pageLimit }),
+	input: z.object({
+		limit: pageLimit,
+		code: z.string().optional().describe('Only subscribers who typed this discount code'),
+	}),
 	async run(sdk, input) {
-		const page = await sdk.subscriptions.list({ limit: input.limit });
+		const page = await sdk.subscriptions.list({ limit: input.limit, discountCode: input.code });
 		return { total: page.total, hasMore: page.hasMore, items: page.items };
 	},
 	describe(page) {
@@ -28,9 +38,72 @@ export const subscriptionsList = operation({
 			`${count(page.total, 'subscription')}:`,
 			...page.items.map(
 				(s) =>
-					`  - ${s.status} — ${planPrice(s)} — ${s.customerEmail ?? s.customerName ?? 'unknown buyer'}${s.planName ? ` on ${s.planName}` : ''} — ${s.id}`,
+					`  - ${s.status} — ${planPrice(s)} — ${s.customerEmail ?? s.customerName ?? 'unknown buyer'}${s.planName ? ` on ${s.planName}` : ''}${codeNote(s)} — ${s.id}`,
 			),
 			moreLine(page.items.length, page.total, page.hasMore),
+		);
+	},
+});
+
+/** ` via LAUNCH20` when the subscriber typed a code, nothing when they did not. */
+function codeNote(s: Subscription): string {
+	return s.discount ? ` via ${s.discount.code}` : '';
+}
+
+export const subscriptionsCredit = operation({
+	name: 'subscriptions.credit',
+	description: 'Put credit on a subscriber’s account, taken off their next invoice',
+	input: z.object({
+		id: z.string().min(1).describe('The subscription id'),
+		amount: positiveAmount.describe('Credit to give (e.g. 5.00), in the plan’s currency'),
+		reason: z.string().min(1).describe('Why you are giving it — for you, not the subscriber'),
+	}),
+	positional: 'id',
+	async run(sdk, input): Promise<CreditGiven> {
+		// One key per invocation. Running the command twice is two deliberate credits;
+		// a network retry inside this one call is not, and the key is what tells them
+		// apart. It is reported so a caller who must retry can send the same one.
+		const idempotencyKey = randomUUID();
+		const credit = await sdk.subscriptions.credit(input.id, {
+			amountMinor: minorUnits(input.amount),
+			reason: input.reason,
+			idempotencyKey,
+		});
+		return { ...credit, idempotencyKey };
+	},
+	describe(credit) {
+		return lines(
+			`${moneyMinor(credit.amountMinor, credit.currency)} credited.`,
+			`It comes off their next invoice on ${day(credit.nextInvoiceAt)}, leaving ${moneyMinor(credit.nextInvoiceDueAfterCreditMinor, credit.currency)} to pay.`,
+			`They now hold ${moneyMinor(credit.creditBalanceMinor, credit.currency)} in unspent credit with you.`,
+		);
+	},
+});
+
+type CreditGiven = Credit & { idempotencyKey: string };
+
+export const subscriptionsCredits = operation({
+	name: 'subscriptions.credits',
+	description: 'Credits given on a subscription, and what is still unspent',
+	input: z.object({ id: z.string().min(1).describe('The subscription id') }),
+	positional: 'id',
+	async run(sdk, input): Promise<CreditList> {
+		return sdk.subscriptions.credits(input.id);
+	},
+	// The history reports amounts without naming a currency, so these print as plain
+	// figures: they are in the plan's own currency, and saying which one would be us
+	// guessing rather than the server telling.
+	describe(page) {
+		if (!page.items.length) {
+			return 'No credit given on this subscription yet. Give some with subscriptions credit.';
+		}
+		return lines(
+			`${count(page.items.length, 'credit')} given, in the plan’s currency:`,
+			...page.items.map(
+				(entry) =>
+					`  - ${plainMinor(entry.amountMinor)} — ${entry.reason} — ${day(entry.createdAt)}`,
+			),
+			`${plainMinor(page.balanceMinor)} is still unspent, across every subscription this buyer has with you.`,
 		);
 	},
 });
@@ -132,6 +205,12 @@ function appliedLine(result: ChangePlanResult): string {
 
 export const SUBSCRIPTIONS: OperationGroup = {
 	name: 'subscriptions',
-	description: 'Subscription management (list, cancel, change-plan)',
-	operations: [subscriptionsChangePlan, subscriptionsList, subscriptionsCancel],
+	description: 'Subscription management (list, cancel, change-plan, credit)',
+	operations: [
+		subscriptionsChangePlan,
+		subscriptionsList,
+		subscriptionsCancel,
+		subscriptionsCredit,
+		subscriptionsCredits,
+	],
 };

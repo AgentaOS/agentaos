@@ -166,6 +166,20 @@ const subscription = await agentaos.paymentLinks.create({
 });
 ```
 
+**Paid trial** — `trialAmount` is what the whole trial costs, in currency units. Leave it out and the trial is free. It needs `trialPeriodDays`; `amount` stays the recurring price charged when the trial ends:
+
+```typescript
+// €9 for the first 30 days, then €29.99 a month
+const plan = await agentaos.paymentLinks.create({
+  amount: 29.99,
+  currency: 'EUR',
+  type: 'subscription',
+  billingInterval: 'month',
+  trialPeriodDays: 30,
+  trialAmount: 9,
+});
+```
+
 **Response:**
 
 | Field | Type | Description |
@@ -180,6 +194,8 @@ const subscription = await agentaos.paymentLinks.create({
 | `sellerMode` | `'mor' \| 'crypto'` | How this link settles |
 | `type` | `'one_time' \| 'subscription'` | Link type |
 | `billingInterval` | `'month' \| 'year' \| null` | Cadence for subscriptions; null for one-time |
+| `trialPeriodDays` | `number \| null` | Trial length in days; null when there is no trial |
+| `trialAmount` | `number \| null` | What the whole trial costs; null when it is free |
 | `paymentCount` | `number` | Times this link has been paid |
 | `createdAt` | `string` | ISO 8601 |
 
@@ -213,8 +229,9 @@ Paginated — returns `{ items, total, hasMore }` (`total` is the full count, `h
 
 ```typescript
 const page = await agentaos.subscriptions.list({
-  limit: 20,   // 1-100, default 20
+  limit: 20,            // 1-100, default 20
   offset: 0,
+  discountCode: 'LAUNCH20',   // optional: only subscribers who typed this code
 });
 console.log(page.total, page.hasMore);
 ```
@@ -229,6 +246,7 @@ console.log(page.total, page.hasMore);
 | `planName` | `string \| null` | The plan (subscription payment link) name or description |
 | `billingInterval` | `'month' \| 'year' \| null` | Billing cadence |
 | `status` | `'incomplete' \| 'incomplete_expired' \| 'trialing' \| 'active' \| 'past_due' \| 'canceled' \| 'unpaid' \| 'paused'` | Current status |
+| `discount` | `{ code, kind } \| null` | The code this subscriber typed; `kind` is `'discount'` or `'tracking'`. What it took off is on the first invoice |
 | `unitAmountMinor` | `number` | Per-cycle amount in integer minor units (e.g. `1999` = €19.99) |
 | `currency` | `string` | Settlement currency |
 | `currentPeriodEnd` | `string \| null` | ISO 8601 end of the current paid period; null before the first cycle books |
@@ -254,6 +272,84 @@ await agentaos.subscriptions.cancel('uuid', { atPeriodEnd: false });
 | `currentPeriodEnd` | `string \| null` | ISO 8601 end of the current paid period |
 | `cancelAtPeriodEnd` | `boolean` | Whether the subscription is scheduled to cancel at period end |
 | `effectiveCancelDate` | `string \| null` | ISO 8601 date the cancellation takes effect |
+
+### `subscriptions.credit(id, params)`
+
+Put credit on a subscriber's account with you. It comes off their next invoice, reducing what their card is charged; it is not a refund and no money moves out. Owner or admin on a signed-in session only — an API key cannot, because the credit has to name the person who gave it.
+
+`idempotencyKey` is **required**. It rides the `Idempotency-Key` header, and it is the only thing standing between a timeout you retry and a subscriber credited twice: there is no local record of a credit for the server to recognise a repeat by. Send the same key when you retry the same grant; send a different one when you mean to credit twice.
+
+```typescript
+const credit = await agentaos.subscriptions.credit('uuid', {
+  amountMinor: 500,                        // 5.00 in the subscription's currency
+  reason: 'Two days of downtime in August',
+  idempotencyKey: 'credit-2026-08-downtime-acme',
+});
+console.log(credit.nextInvoiceDueAfterCreditMinor);   // what the next invoice will take
+```
+
+**Response:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | The card processor's own id for the entry |
+| `amountMinor` | `number` | Credit given, integer minor units |
+| `currency` | `string` | The subscription's currency |
+| `creditBalanceMinor` | `number` | All unspent credit this customer has with you |
+| `nextInvoiceMinor` | `number` | What the next invoice would have taken |
+| `nextInvoiceDueAfterCreditMinor` | `number` | What it will take now |
+| `nextInvoiceAt` | `string` | ISO 8601 |
+| `createdBy` | `string` | Id of the person who gave it |
+
+### `subscriptions.credits(id)`
+
+Credits given on this subscription, newest first, and what is still unspent. `balanceMinor` is the **customer's** whole unspent credit with you: a buyer with two subscriptions shares one balance.
+
+```typescript
+const { items, balanceMinor } = await agentaos.subscriptions.credits('uuid');
+```
+
+---
+
+## Discount codes
+
+Codes a buyer types at checkout on a subscription plan. A code can take a percentage off, a fixed amount off, or nothing at all — a code that changes no price still records who it brought in, which is how a referral works when the referred buyer pays full price. The code string is yours, so two merchants can both run `SAVE20`.
+
+### `discountCodes.create(params)`
+
+Terms are fixed once the code exists: to change them, archive it and create another.
+
+```typescript
+const code = await agentaos.discountCodes.create({
+  code: 'LAUNCH20',
+  name: 'Launch week',
+  percentOff: 20,          // or amountOffMinor: 500 — at most one of the two
+  maxRedemptions: 100,     // optional
+  linkId: 'plan-uuid',     // optional: limit it to one plan
+});
+```
+
+Set neither `percentOff` nor `amountOffMinor` and you get a tracking-only code, which changes no price.
+
+### `discountCodes.list(params?)` · `get(id)` · `archive(id)`
+
+`list` is paginated and reads no terms — what each code takes off comes from the card processor, and fetching one per row would be a call per row. `get` is the one call that reports them.
+
+```typescript
+const page = await agentaos.discountCodes.list({ limit: 20 });
+const detail = await agentaos.discountCodes.get('code-uuid');
+console.log(detail.termsLabel, detail.timesRedeemed);   // '20% off', 14
+
+await agentaos.discountCodes.archive('code-uuid');       // stops it now
+```
+
+Archiving stops the code working immediately; subscribers who already used it keep their discount.
+
+To see who one code brought in, filter the subscription list by it:
+
+```typescript
+const page = await agentaos.subscriptions.list({ discountCode: 'LAUNCH20' });
+```
 
 ---
 

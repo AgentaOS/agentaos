@@ -28,7 +28,10 @@ const createInput = z.object({
 		.min(1, TRIAL_MESSAGE)
 		.max(730, TRIAL_MESSAGE)
 		.optional()
-		.describe('Free trial length for a plan, in days'),
+		.describe('Trial length for a plan, in days'),
+	trialAmount: positiveAmount
+		.optional()
+		.describe('Price of the whole trial (e.g. 9.00). Leave it out and the trial is free'),
 	successUrl: httpsUrl('--success-url')
 		.optional()
 		.describe('https URL buyers return to after paying (we append ?sessionId=…)'),
@@ -53,11 +56,20 @@ export function buildCreateParams(
 /** The rules that span two flags; zod checks one field at a time. */
 function planRuleBroken(input: CreateInput): string | null {
 	if (!input.subscription) {
-		return input.interval || input.trialDays !== undefined
-			? '--interval and --trial-days need --subscription.'
+		return input.interval || hasTrial(input)
+			? '--interval, --trial-days and --trial-amount need --subscription.'
 			: null;
 	}
-	return input.interval ? null : '--subscription needs --interval month or --interval year.';
+	if (!input.interval) return '--subscription needs --interval month or --interval year.';
+	// A price for a trial nobody gets is a price that is never charged; the API says the
+	// same, and a founder should hear it before the round-trip.
+	return input.trialAmount !== undefined && input.trialDays === undefined
+		? '--trial-amount needs --trial-days: a trial price needs a trial to price.'
+		: null;
+}
+
+function hasTrial(input: CreateInput): boolean {
+	return input.trialDays !== undefined || input.trialAmount !== undefined;
 }
 
 function toParams(input: CreateInput): CreatePaymentLinkParams {
@@ -73,6 +85,7 @@ function toParams(input: CreateInput): CreatePaymentLinkParams {
 		params.type = 'subscription';
 		params.billingInterval = input.interval;
 		if (input.trialDays !== undefined) params.trialPeriodDays = input.trialDays;
+		if (input.trialAmount !== undefined) params.trialAmount = input.trialAmount;
 	}
 	return params;
 }
@@ -88,6 +101,8 @@ export interface ProductView {
 	checkoutUrl: string;
 	successUrl: string | null;
 	cancelUrl: string | null;
+	trialPeriodDays: number | null;
+	trialAmount: number | null;
 }
 
 function productView(link: PaymentLink): ProductView {
@@ -102,6 +117,8 @@ function productView(link: PaymentLink): ProductView {
 		checkoutUrl: link.checkoutUrl,
 		successUrl: link.successUrl,
 		cancelUrl: link.cancelUrl,
+		trialPeriodDays: link.trialPeriodDays ?? null,
+		trialAmount: link.trialAmount ?? null,
 	};
 }
 
@@ -109,6 +126,17 @@ function productView(link: PaymentLink): ProductView {
 function price(product: ProductView): string {
 	const cadence = product.billingInterval ? `/${product.billingInterval}` : '';
 	return `${money(product.amount, product.currency)}${cadence}`;
+}
+
+/** What a new subscriber pays before the first full cycle, when there is a trial. */
+function trialLine(product: ProductView): string | null {
+	const days = product.trialPeriodDays;
+	if (days === null) return null;
+	const trial =
+		product.trialAmount === null
+			? `${count(days, 'day')} free`
+			: `${count(days, 'day')} for ${money(product.trialAmount, product.currency)}`;
+	return `New subscribers get ${trial}, then it renews at ${price(product)}.`;
 }
 
 export const productsCreate = operation({
@@ -124,6 +152,7 @@ export const productsCreate = operation({
 		const kind = product.type === 'subscription' ? 'plan' : 'product';
 		return lines(
 			`Created the ${kind} "${product.name}" at ${price(product)}.`,
+			trialLine(product),
 			`Buyers pay at ${product.checkoutUrl}; share it anywhere, it works for every sale.`,
 			`Its id is ${product.id} (the linkId for checkouts and plan changes).`,
 		);

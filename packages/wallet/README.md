@@ -61,7 +61,7 @@ Every row is also an MCP tool (`agenta products create` = `agenta_products_creat
 | `agenta verify submit --legal-name ... --accept-declaration` | Submit business verification so the merchant can accept live payments |
 | `agenta verify status` | Where the verification has got to |
 | `agenta verify resubmit` | Send back for review after making the changes we asked for |
-| `agenta products create --name <name> -a <amount>` | Create a product (one-time) or a subscription plan (`--subscription --interval month\|year`, `--trial-days <n>`) |
+| `agenta products create --name <name> -a <amount>` | Create a product (one-time) or a subscription plan (`--subscription --interval month\|year`, `--trial-days <n>`, `--trial-amount <price>` for a paid trial) |
 | `agenta products list` | List products and plans |
 | `agenta pay checkout -a <amount>` | Create a checkout session |
 | `agenta pay get <sessionId>` | Get checkout session status |
@@ -69,6 +69,12 @@ Every row is also an MCP tool (`agenta products create` = `agenta_products_creat
 | `agenta subscriptions list` | List subscriptions |
 | `agenta subscriptions cancel <id>` | Cancel a subscription (at period end; `--now` for immediate) |
 | `agenta subscriptions change-plan <id> --to <linkId>` | Move a subscription to another plan (`--dry-run` quotes only) |
+| `agenta subscriptions credit <id> -a <amount> --reason <text>` | Put credit on a subscriber's account, taken off their next invoice |
+| `agenta subscriptions credits <id>` | Credits given on a subscription, and what is still unspent |
+| `agenta discounts create --code <code>` | Create a discount code buyers type at checkout (`--percent-off`, `--amount-off`, or neither to only track referrals) |
+| `agenta discounts list` | List discount codes |
+| `agenta discounts show <id>` | What one code takes off, and how many people used it |
+| `agenta discounts archive <id>` | Stop a discount code working |
 | `agenta customers list` | List customers |
 | `agenta invoices list` | List invoices |
 | `agenta invoices receipt <id>` | Download the receipt PDF |
@@ -182,12 +188,18 @@ When invoked with no arguments, runs as an MCP server over stdio. This lets AI a
 | `agenta_subscriptions_list` | List subscriptions |
 | `agenta_subscriptions_cancel` | Cancel a subscription (at period end by default) |
 | `agenta_subscriptions_change_plan` | Move a subscription to another plan (upgrade charges now, downgrade at period end) |
+| `agenta_subscriptions_credit` | Put credit on a subscriber's account, taken off their next invoice |
+| `agenta_subscriptions_credits` | Credits given on a subscription, and what is still unspent |
+| `agenta_discounts_create` | Create a discount code buyers type at checkout |
+| `agenta_discounts_list` | List discount codes |
+| `agenta_discounts_show` | What one code takes off, and how many people used it |
+| `agenta_discounts_archive` | Stop a discount code working |
 | `agenta_customers_list` | List customers |
 | `agenta_invoices_list` | List invoices |
 | `agenta_invoices_receipt` | The receipt PDF for a paid invoice |
 | `agenta_invoices_send_receipt` | Re-send the receipt email to the buyer on file |
 
-The 19 payment tools and the `agenta` CLI are one operations catalogue: `agenta_products_create` is `agenta products create`, with the same inputs and the same merchant-readable output.
+The 25 payment tools and the `agenta` CLI are one operations catalogue: `agenta_products_create` is `agenta products create`, with the same inputs and the same merchant-readable output.
 
 ### Claude Desktop
 

@@ -29,13 +29,18 @@ export class BaseResource {
 		});
 	}
 
-	protected async postJson<T>(path: string, body?: unknown, req?: RequestOptions): Promise<T> {
+	protected async postJson<T>(
+		path: string,
+		body?: unknown,
+		req?: RequestOptions & { idempotencyKey?: string },
+	): Promise<T> {
 		return request<T>({
 			...this.transport(req),
 			method: 'POST',
 			path,
 			query: this.scoped(),
 			body,
+			idempotencyKey: req?.idempotencyKey,
 		});
 	}
 
