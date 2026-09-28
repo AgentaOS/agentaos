@@ -159,3 +159,30 @@ describe('WebhookEvent', () => {
 		expectTypeOf<WebhookEvent['business']>().toEqualTypeOf<string>();
 	});
 });
+
+describe('webhooks.verify on Connect events', () => {
+	it('account.updated reads in camelCase, like every event the SDK returns', async () => {
+		const { createHmac } = await import('node:crypto');
+		const agentaos = new AgentaOS('sk_test_key', BASE);
+		const body = JSON.stringify({
+			id: 'evt_1',
+			type: 'account.updated',
+			business: 'biz_1',
+			data: {
+				verification: 'verified',
+				changes_requested: false,
+				identity_verified: true,
+				livemode: true,
+			},
+		});
+		const t = Math.floor(Date.now() / 1000);
+		const v1 = createHmac('sha256', 'whsec_test').update(`${t}.${body}`).digest('hex');
+
+		const event = agentaos.webhooks.verify(body, `t=${t},v1=${v1}`, 'whsec_test');
+
+		expect(event.business).toBe('biz_1');
+		if (event.type !== 'account.updated') throw new Error('wrong type');
+		expect(event.data.identityVerified).toBe(true);
+		expect(event.data.changesRequested).toBe(false);
+	});
+});

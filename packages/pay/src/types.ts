@@ -872,22 +872,23 @@ export interface SubscriptionData {
 
 /** `dispute.created` / `dispute.closed`: a buyer's bank opened, or closed, a chargeback on a sale. */
 export interface DisputeData {
-	dispute_id: string;
+	disputeId: string;
 	status: string;
-	transaction_id: string;
-	amount_minor: number;
+	transactionId: string;
+	amountMinor: number;
 	currency: string;
 	livemode: boolean;
 }
 
-/** `account.updated` (Connect, Stripe's name): a business's verification changed. */
+/** `account.updated` (Connect, Stripe's name): a business's verification changed. Field names are
+ *  camelCase, as `webhooks.verify()` returns every event (the wire JSON is snake_case). */
 export interface AccountUpdatedData {
 	/** Where the business's review stands, in the words the dashboard uses. */
 	verification: 'unverified' | 'in_review' | 'verified' | 'on_hold' | 'rejected';
 	/** We have asked the business something and are waiting on it. */
-	changes_requested: boolean;
+	changesRequested: boolean;
 	/** The identity check is done — its own, or its company's for another app of the same company. */
-	identity_verified: boolean;
+	identityVerified: boolean;
 	livemode: boolean;
 }
 
