@@ -1,4 +1,4 @@
-import type { GoLiveReadiness } from '../types.js';
+import type { GoLiveReadiness, RequestOptions } from '../types.js';
 import { BaseResource } from './base.js';
 
 const BASE_PATH = '/api/v1/gateway/go-live';
@@ -11,7 +11,7 @@ const BASE_PATH = '/api/v1/gateway/go-live';
 export class GoLiveResource extends BaseResource {
 	/** Where the merchant is on the road to live payments: verification state,
 	 *  payout account, open change requests, the free audit, milestones. */
-	async get(): Promise<GoLiveReadiness> {
-		return this.getJson<GoLiveReadiness>(BASE_PATH);
+	async get(req?: RequestOptions): Promise<GoLiveReadiness> {
+		return this.getJson<GoLiveReadiness>(BASE_PATH, undefined, req);
 	}
 }

@@ -55,6 +55,7 @@ export class AgentaOS {
 			// A key is bound to one org server-side; only a session user can be in
 			// several, so only a session ever carries the choice.
 			orgId: isApiKey ? undefined : options?.orgId,
+			business: options?.business,
 		};
 
 		this.checkouts = new CheckoutsResource(baseUrl, apiKey, resourceOptions);

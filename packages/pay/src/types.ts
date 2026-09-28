@@ -40,6 +40,18 @@ export interface AgentaOSOptions {
 	 * `?orgId=` on every request. API keys are bound to one org and need it not.
 	 */
 	orgId?: string;
+
+	/**
+	 * Act for a business you manage (Connect): every request of this client is sent with
+	 * `AgentaOS-Account: <business>` — Stripe's `stripeAccount`. Omit to act as yourself.
+	 */
+	business?: string;
+}
+
+/** Per-request options, the last argument of every method (Stripe's per-request options). */
+export interface RequestOptions {
+	/** Act for this managed business on this call only; overrides the client's `business`. */
+	business?: string;
 }
 
 // ---------------------------------------------------------------------------
