@@ -163,7 +163,7 @@ export const businessesIdLink = operation({
 
 export const BUSINESSES: OperationGroup = {
 	name: 'businesses',
-	description: "Businesses you manage (Connect): your clients' businesses and your other apps",
+	description: "Businesses you manage: your clients' businesses and your other apps",
 	operations: [
 		businessesList,
 		businessesGet,
