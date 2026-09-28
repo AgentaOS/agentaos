@@ -1,4 +1,5 @@
 import { AccountReviewResource } from './resources/account-review.js';
+import { BusinessesResource } from './resources/businesses.js';
 import { CheckoutsResource } from './resources/checkouts.js';
 import { CustomersResource } from './resources/customers.js';
 import { DiscountCodesResource } from './resources/discount-codes.js';
@@ -24,6 +25,7 @@ export class AgentaOS {
 	readonly discountCodes: DiscountCodesResource;
 	readonly goLive: GoLiveResource;
 	readonly accountReview: AccountReviewResource;
+	readonly businesses: BusinessesResource;
 	readonly webhooks: WebhooksResource;
 
 	constructor(apiKey: string, options?: AgentaOSOptions) {
@@ -69,6 +71,7 @@ export class AgentaOS {
 		this.discountCodes = new DiscountCodesResource(baseUrl, apiKey, resourceOptions);
 		this.goLive = new GoLiveResource(baseUrl, apiKey, resourceOptions);
 		this.accountReview = new AccountReviewResource(baseUrl, apiKey, resourceOptions);
+		this.businesses = new BusinessesResource(baseUrl, apiKey, resourceOptions);
 		this.webhooks = new WebhooksResource();
 	}
 }

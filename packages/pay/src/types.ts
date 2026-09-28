@@ -870,7 +870,38 @@ export interface SubscriptionData {
 	livemode: boolean;
 }
 
-export type WebhookEvent =
+/** `dispute.created` / `dispute.closed`: a buyer's bank opened, or closed, a chargeback on a sale. */
+export interface DisputeData {
+	dispute_id: string;
+	status: string;
+	transaction_id: string;
+	amount_minor: number;
+	currency: string;
+	livemode: boolean;
+}
+
+/** `account.updated` (Connect, Stripe's name): a business's verification changed. */
+export interface AccountUpdatedData {
+	/** Where the business's review stands, in the words the dashboard uses. */
+	verification: 'unverified' | 'in_review' | 'verified' | 'on_hold' | 'rejected';
+	/** We have asked the business something and are waiting on it. */
+	changes_requested: boolean;
+	/** The identity check is done — its own, or its company's for another app of the same company. */
+	identity_verified: boolean;
+	livemode: boolean;
+}
+
+/** `webhook.test`: the sample event the dashboard sends so you can check your endpoint. */
+export interface WebhookTestData {
+	message: string;
+	livemode: boolean;
+}
+
+/**
+ * Every event we send. `business` names the business it happened in — your own id, or one of
+ * the businesses you manage (Connect: your webhook also receives your clients' events).
+ */
+export type WebhookEvent = (
 	| { type: 'checkout.session.completed'; data: CheckoutCompletedData }
 	| { type: 'send.completed'; data: SendCompletedData }
 	| { type: 'send.failed'; data: SendFailedData }
@@ -878,4 +909,75 @@ export type WebhookEvent =
 	| { type: 'subscription.renewed'; data: SubscriptionData }
 	| { type: 'subscription.payment_failed'; data: SubscriptionData }
 	| { type: 'subscription.updated'; data: SubscriptionData }
-	| { type: 'subscription.canceled'; data: SubscriptionData };
+	| { type: 'subscription.canceled'; data: SubscriptionData }
+	| { type: 'dispute.created'; data: DisputeData }
+	| { type: 'dispute.closed'; data: DisputeData }
+	| { type: 'account.updated'; data: AccountUpdatedData }
+	| { type: 'webhook.test'; data: WebhookTestData }
+) & { business: string };
+
+// ---------------------------------------------------------------------------
+// Businesses (Connect)
+// ---------------------------------------------------------------------------
+
+/** Where a business stands — the pill the Businesses list shows. */
+export type BusinessStatus =
+	| 'test_only'
+	| 'in_review'
+	| 'changes_needed'
+	| 'on_hold'
+	| 'rejected'
+	| 'live';
+
+/** A business you manage: a client's business, or another app of your own company. */
+export interface Business {
+	id: string;
+	name: string;
+	country: string | null;
+	status: BusinessStatus;
+	/** You — the platform that manages it. */
+	platformOrgId: string;
+	createdAt: string;
+	/** Your share of its sales: basis points of the price before VAT, plus a fixed amount. */
+	platformFee: { bps: number; fixedMinor: number };
+	/** Another app of your own company: verified and priced with you, carries no share. */
+	sameLegalEntity: boolean;
+	/** Your share of its live sales this month, per currency, ready to show. */
+	feesThisMonth: Array<{ currency: string; feesMinor: number; feesDisplay: string }>;
+	/** Who an open invitation is waiting on, or null. */
+	invitedEmail: string | null;
+	/** Its identity check is done (its own, or its company's). */
+	identityVerified: boolean;
+}
+
+export interface CreateBusinessParams {
+	/** What buyers see. */
+	name: string;
+	/** Where it is registered, ISO 3166-1 alpha-2. */
+	country: string;
+	/** Invite your client as its admin. Omit to run it yourself. */
+	clientEmail?: string;
+	/** Another app of your own company instead of a client's business. */
+	sameLegalEntity?: boolean;
+	/** Default true. False: no email from us — send `inviteUrl` yourself (white-label). */
+	sendInvitationEmail?: boolean;
+}
+
+export interface CreatedBusiness {
+	business: Business;
+	/** Present when `clientEmail` was given. */
+	inviteToken: string | null;
+	/** The link your client opens to accept. */
+	inviteUrl: string | null;
+}
+
+export interface BusinessInvitation {
+	inviteToken: string;
+	inviteUrl: string;
+}
+
+export interface VerificationLink {
+	/** The identity check your client completes — only they can. Null: already verified. */
+	url: string | null;
+	status: string;
+}

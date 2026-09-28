@@ -160,6 +160,8 @@ export async function request<T>(options: RequestOptions): Promise<T> {
 			const requestId = response.headers.get('x-request-id') ?? undefined;
 
 			if (response.ok) {
+				// 204 No Content (a DELETE): success with no body to parse.
+				if (response.status === 204) return undefined as T;
 				const json = await response.json();
 				return snakeToCamel(json) as T;
 			}
