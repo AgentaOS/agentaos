@@ -248,9 +248,21 @@ Rules: `subscription: true` needs `interval` `month` or `year`; `trialDays` (1�
 
 **Tell the user:** for a cancellation, when access ends and that nothing is charged after; for a receipt, who it went to.
 
+## Platforms: businesses you manage (Connect)
+
+For a user who runs other people's businesses (an agency, a marketplace, a SaaS) or several apps of one company. It works like Stripe Connect: each client is a **business** you manage, and you act as it by naming it.
+
+- `agenta_businesses_create` `{"name":"ClientCo","country":"EE","clientEmail":"ana@clientco.com","inviteEmail":false}` — adds the business in test mode and invites the client as its admin. With `inviteEmail:false` we send no email: give the user the returned `inviteUrl` to send themselves. `sameCompany:true` = another app of their own company (verified and priced with them, no share).
+- To act **as** a business, pass `business: "<id>"` to any tool (CLI: `--business <id>` on any command), e.g. `agenta_products_create` with `business`, or `agenta_verify_submit` with `business` to file the client's verification for them (recorded as filed by the platform).
+- `agenta_businesses_id_link` `{"id":"…"}` — the identity check link. **Only the client can complete it**; give the link to the user to send. Needs a live key. A null link means already verified.
+- `agenta_businesses_list` / `agenta_businesses_get` — status, `identityVerified`, open invitation. `agenta_businesses_invite` sends the invitation again (new link); `agenta_businesses_revoke_invite` withdraws it.
+- The platform's share of each client sale is set in the dashboard only (a % of the price before VAT + a fixed amount). Every webhook event carries `business`; the platform's own webhook also receives its clients' events, and `account.updated` says when a client's verification changes.
+
+**Tell the user:** after creating a business, its id and either "we emailed ana@…" or the link to send; after an ID check link, that only their client can complete it.
+
 ## Every operation
 
-Same 19 operations on both surfaces. Inputs not listed as required are optional; `limit` defaults to 10.
+Same 31 operations on both surfaces. Every one also takes `business` (CLI `--business <id>`) to act for a business you manage. Inputs not listed as required are optional; `limit` defaults to 10.
 
 | What it does | MCP tool | CLI command | Required inputs |
 |---|---|---|---|
@@ -279,6 +291,12 @@ Same 19 operations on both surfaces. Inputs not listed as required are optional;
 | List invoices | `agenta_invoices_list` | `agenta invoices list` | none |
 | The receipt PDF for a paid invoice | `agenta_invoices_receipt` | `agenta invoices receipt <id>` | `id` |
 | Re-send the receipt email to the buyer on file | `agenta_invoices_send_receipt` | `agenta invoices send-receipt <id>` | `id` |
+| List the businesses you manage | `agenta_businesses_list` | `agenta businesses list` | none |
+| One business you manage | `agenta_businesses_get` | `agenta businesses get <id>` | `id` |
+| Add a business (a client's, or another app of yours) | `agenta_businesses_create` | `agenta businesses create` | `name`, `country` |
+| Send the client's invitation again | `agenta_businesses_invite` | `agenta businesses invite <id>` | `id` |
+| Withdraw the client's invitation | `agenta_businesses_revoke_invite` | `agenta businesses revoke-invite <id>` | `id` |
+| The identity check link only the client can complete | `agenta_businesses_id_link` | `agenta businesses id-link <id>` | `id` |
 
 ## Facts to get right
 
