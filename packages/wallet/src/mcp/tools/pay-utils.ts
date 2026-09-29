@@ -4,7 +4,7 @@ import { AgentaOS } from '@agentaos/pay';
  * Create an AgentaOS Pay SDK client from environment.
  * Requires AGENTAOS_GATEWAY_KEY (sk_live_... or sk_test_...).
  */
-export function createPayClient(): AgentaOS {
+export function createPayClient(opts?: { business?: string }): AgentaOS {
 	const apiKey = process.env.AGENTAOS_GATEWAY_KEY;
 	if (!apiKey) {
 		throw new Error(
@@ -14,7 +14,10 @@ export function createPayClient(): AgentaOS {
 		);
 	}
 	const baseUrl = process.env.AGENTA_SERVER;
-	return new AgentaOS(apiKey, baseUrl ? { baseUrl } : undefined);
+	return new AgentaOS(apiKey, {
+		...(baseUrl ? { baseUrl } : {}),
+		...(opts?.business ? { business: opts.business } : {}),
+	});
 }
 
 /** What the merchant can do when the API refuses the key: it was revoked on the

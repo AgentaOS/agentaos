@@ -49,14 +49,15 @@ describe.each(OPERATIONS.map((op) => [op.name, op] as const))('%s', (_name, op) 
 		expect(listedTools.map((tool) => tool.name)).toContain(mcpToolName(op));
 	});
 
-	const catalogueKeys = Object.keys(op.input.shape).sort();
+	// Connect (PRD §6.1 R9-3): every command and tool can act for a business you manage.
+	const catalogueKeys = [...Object.keys(op.input.shape), 'business'].sort();
 
-	it('the CLI argument and flags are exactly the catalogue keys', () => {
+	it('the CLI argument and flags are exactly the catalogue keys, plus --business', () => {
 		const command = resolve(program, cliCommand(op).split(' ')) as Command;
 		expect([...inputKeysOf(command)].sort()).toEqual(catalogueKeys);
 	});
 
-	it('the tool schema properties are exactly the catalogue keys', () => {
+	it('the tool schema properties are exactly the catalogue keys, plus business', () => {
 		const tool = listedTools.find((candidate) => candidate.name === mcpToolName(op));
 		expect(Object.keys(tool?.inputSchema.properties ?? {}).sort()).toEqual(catalogueKeys);
 	});

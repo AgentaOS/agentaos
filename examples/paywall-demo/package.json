@@ -1,0 +1,26 @@
+{
+	"name": "agentaos-example-paywall-demo",
+	"private": true,
+	"type": "module",
+	"description": "A tiny Notes app with a Pro plan: checkout, webhooks, access check, invoices, cancel and upgrade.",
+	"engines": {
+		"node": ">=20.6.0"
+	},
+	"scripts": {
+		"dev": "tsx watch --env-file=.env src/server.ts",
+		"start": "tsx --env-file=.env src/server.ts",
+		"cert": "mkdir -p certs && openssl req -x509 -newkey rsa:2048 -nodes -days 30 -subj /CN=127.0.0.1 -addext subjectAltName=IP:127.0.0.1 -keyout certs/key.pem -out certs/cert.pem",
+		"webhook:test": "tsx --env-file=.env scripts/send-test-webhook.ts",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@agentaos/pay": "workspace:*",
+		"express": "^5.2.1"
+	},
+	"devDependencies": {
+		"@types/express": "^5.0.6",
+		"@types/node": "^20.19.32",
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3"
+	}
+}

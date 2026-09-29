@@ -1,0 +1,4 @@
+.env
+data.json
+certs/
+node_modules/

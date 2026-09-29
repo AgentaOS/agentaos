@@ -1,5 +1,11 @@
 import { NotFoundError } from '../errors.js';
-import type { AccountReview, AuditRequested, RequestAudit, SubmitAccountReview } from '../types.js';
+import type {
+	AccountReview,
+	AuditRequested,
+	RequestAudit,
+	RequestOptions,
+	SubmitAccountReview,
+} from '../types.js';
 import { BaseResource } from './base.js';
 
 const BASE_PATH = '/api/v1/gateway/account-review';
@@ -18,9 +24,13 @@ interface ReviewEnvelope<T extends AccountReview | null = AccountReview> {
 export class AccountReviewResource extends BaseResource {
 	/** The verification on file, or null when the merchant has never asked for
 	 *  an audit nor submitted anything. */
-	async get(): Promise<AccountReview | null> {
+	async get(req?: RequestOptions): Promise<AccountReview | null> {
 		try {
-			const { review } = await this.getJson<ReviewEnvelope<AccountReview | null>>(BASE_PATH);
+			const { review } = await this.getJson<ReviewEnvelope<AccountReview | null>>(
+				BASE_PATH,
+				undefined,
+				req,
+			);
 			return review;
 		} catch (error) {
 			if (error instanceof NotFoundError) return null;
@@ -30,23 +40,23 @@ export class AccountReviewResource extends BaseResource {
 
 	/** Submit business details for verification. The server rejects a submit
 	 *  while a rejection cooldown is running or the account is on hold. */
-	async submit(body: SubmitAccountReview): Promise<AccountReview> {
-		const { review } = await this.postJson<ReviewEnvelope>(BASE_PATH, body);
+	async submit(body: SubmitAccountReview, req?: RequestOptions): Promise<AccountReview> {
+		const { review } = await this.postJson<ReviewEnvelope>(BASE_PATH, body, req);
 		return review;
 	}
 
 	/** Send the details already on file back for review after making the
 	 *  changes ops asked for. No body: nothing is retyped. */
-	async resubmit(): Promise<AccountReview> {
-		const { review } = await this.postJson<ReviewEnvelope>(`${BASE_PATH}/resubmit`, {});
+	async resubmit(req?: RequestOptions): Promise<AccountReview> {
+		const { review } = await this.postJson<ReviewEnvelope>(`${BASE_PATH}/resubmit`, {}, req);
 		return review;
 	}
 
 	/** Ask for the free audit. Gates nothing and never marks the account as
 	 *  submitted; asking twice updates the product details but keeps the
 	 *  original `requestedAt`. */
-	async requestAudit(body: RequestAudit): Promise<AuditRequested> {
-		const { review } = await this.postJson<ReviewEnvelope>(`${BASE_PATH}/audit`, body);
+	async requestAudit(body: RequestAudit, req?: RequestOptions): Promise<AuditRequested> {
+		const { review } = await this.postJson<ReviewEnvelope>(`${BASE_PATH}/audit`, body, req);
 		return review;
 	}
 }

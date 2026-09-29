@@ -40,6 +40,18 @@ export interface AgentaOSOptions {
 	 * `?orgId=` on every request. API keys are bound to one org and need it not.
 	 */
 	orgId?: string;
+
+	/**
+	 * Act for a business you manage (Connect): every request of this client is sent with
+	 * `AgentaOS-Account: <business>` — Stripe's `stripeAccount`. Omit to act as yourself.
+	 */
+	business?: string;
+}
+
+/** Per-request options, the last argument of every method (Stripe's per-request options). */
+export interface RequestOptions {
+	/** Act for this managed business on this call only; overrides the client's `business`. */
+	business?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -100,8 +112,15 @@ export interface CreatePaymentLinkParams {
 	type?: 'one_time' | 'subscription';
 	/** Billing cadence — REQUIRED when type is 'subscription', omit otherwise. */
 	billingInterval?: 'month' | 'year';
-	/** Free-trial length in days (1–730). Subscription links only. */
+	/** Trial length in days (1–730). Subscription links only. */
 	trialPeriodDays?: number;
+	/**
+	 * What the trial costs, in currency units — `9` means 9.00 for the whole trial,
+	 * not per month. Leave it out and the trial is free. Needs `trialPeriodDays`: a
+	 * trial price with no trial length is refused. `amount` stays the recurring price,
+	 * charged when the trial ends.
+	 */
+	trialAmount?: number;
 }
 
 export interface PaymentLink {
@@ -122,8 +141,10 @@ export interface PaymentLink {
 	type: 'one_time' | 'subscription';
 	/** Set only for subscription links; null for one-time links. */
 	billingInterval: 'month' | 'year' | null;
-	/** Free-trial length in days on a subscription link; null when there is no trial. */
+	/** Trial length in days on a subscription link; null when there is no trial. */
 	trialPeriodDays: number | null;
+	/** What the trial costs, in currency units, for the whole trial; null when it is free. */
+	trialAmount: number | null;
 	checkoutUrl: string;
 	metadata: Record<string, unknown>;
 	checkoutFields: CheckoutField[];
@@ -323,6 +344,29 @@ export interface Subscription {
 	 * stay what the buyer paid for until `effectiveAt`.
 	 */
 	pendingPlanChange: PendingPlanChange | null;
+	/**
+	 * The code this subscriber typed at checkout, or null. What it took off is on the
+	 * first invoice — read `invoices(id)` for the figure, not this.
+	 */
+	discount: SubscriptionDiscount | null;
+}
+
+/**
+ * A redeemed code. `tracking` means the code took nothing off the price and exists so
+ * the merchant can see who it brought in; `discount` means it did reduce the first
+ * invoice.
+ */
+export interface SubscriptionDiscount {
+	code: string;
+	kind: 'discount' | 'tracking';
+}
+
+export interface ListSubscriptionParams extends ListParams {
+	/**
+	 * Only subscribers who redeemed this code. The code string the merchant knows, not
+	 * a discount-code id. Case-insensitive.
+	 */
+	discountCode?: string;
 }
 
 /** A scheduled downgrade, applied at the next renewal. */
@@ -425,6 +469,110 @@ export type ChangePlanResult =
 			unitAmountMinor: number;
 			currency: string;
 	  };
+
+// ---------------------------------------------------------------------------
+// Subscriber credits
+// ---------------------------------------------------------------------------
+
+export interface GrantCreditParams {
+	/**
+	 * Positive integer minor units of the subscription's currency (`500` = 5.00). There
+	 * is no currency field: it is read off the subscription, because a mismatched one
+	 * parks the money where no invoice can reach it.
+	 */
+	amountMinor: number;
+	/** Why you gave it. The subscriber never sees this; you and your operators do. */
+	reason: string;
+	/**
+	 * Required. Send one string per credit you mean to give, and the SAME one again if
+	 * the call times out and you retry — that is what stops a retry becoming a second
+	 * credit. Nothing on the server survives a retry to recognise it by, so there is no
+	 * safe default we could pick for you. Two different keys for the same amount give
+	 * two credits, which is how you deliberately credit someone twice.
+	 */
+	idempotencyKey: string;
+}
+
+/** The whole screen after a grant: every figure is the server's, none is derived here. */
+export interface Credit {
+	/** The card processor's own id for the entry. There is no id of ours. */
+	id: string;
+	amountMinor: number;
+	currency: string;
+	reason: string;
+	/** All unspent credit this customer has with you now, positive. */
+	creditBalanceMinor: number;
+	/** What the next invoice would have taken before this credit. */
+	nextInvoiceMinor: number;
+	/** What it will take after it. */
+	nextInvoiceDueAfterCreditMinor: number;
+	nextInvoiceAt: string;
+	/** The id of the person who gave it. */
+	createdBy: string;
+	createdAt: string;
+}
+
+/** One row of the credit history. The grant response carries the figures; this does not. */
+export interface CreditEntry {
+	id: string;
+	amountMinor: number;
+	reason: string;
+	createdBy: string;
+	createdAt: string;
+}
+
+export interface CreditList {
+	items: CreditEntry[];
+	/**
+	 * Unspent credit on the CUSTOMER, not on this subscription. A buyer with two
+	 * subscriptions with you shares one balance.
+	 */
+	balanceMinor: number;
+}
+
+// ---------------------------------------------------------------------------
+// Discount codes
+// ---------------------------------------------------------------------------
+
+export interface CreateDiscountCodeParams {
+	/** What the buyer types. Letters, digits, dashes and underscores, up to 64. */
+	code: string;
+	/** Your label for it. A code with no discount cannot carry one — it is its own name. */
+	name?: string;
+	/** 0.01–100. Set at most one of `percentOff` and `amountOffMinor`. */
+	percentOff?: number;
+	/** Integer minor units of the PLAN's currency, which the server resolves. */
+	amountOffMinor?: number;
+	/** Stop applying the code after this many redemptions. */
+	maxRedemptions?: number;
+	/** ISO 8601. After this the code stops working. */
+	expiresAt?: string;
+	/** Limit the code to ONE plan, by its `paymentLinks.id`. Omit for every plan you own. */
+	linkId?: string;
+}
+
+export interface DiscountCode {
+	id: string;
+	code: string;
+	/** `tracking` takes nothing off the price; `discount` reduces the first invoice. */
+	kind: 'discount' | 'tracking';
+	/** The plan the code is limited to; null means every subscription plan you own. */
+	planLinkId: string | null;
+	planName: string | null;
+	archivedAt: string | null;
+	createdAt: string;
+	/** Whether the code still works. On `get` this also reflects the processor's view. */
+	active: boolean;
+}
+
+export interface DiscountCodeDetail extends DiscountCode {
+	/** Ready to print: `20% off`, `€5.00 off`, or `No discount — tracking only`. */
+	termsLabel: string;
+	/** How many subscribers redeemed it. */
+	timesRedeemed: number;
+	/** The redemption cap you set; null when you set none. */
+	maxRedemptions: number | null;
+}
 
 // ---------------------------------------------------------------------------
 // Customers
@@ -722,7 +870,39 @@ export interface SubscriptionData {
 	livemode: boolean;
 }
 
-export type WebhookEvent =
+/** `dispute.created` / `dispute.closed`: a buyer's bank opened, or closed, a chargeback on a sale. */
+export interface DisputeData {
+	disputeId: string;
+	status: string;
+	transactionId: string;
+	amountMinor: number;
+	currency: string;
+	livemode: boolean;
+}
+
+/** `account.updated` (Connect, Stripe's name): a business's verification changed. Field names are
+ *  camelCase, as `webhooks.verify()` returns every event (the wire JSON is snake_case). */
+export interface AccountUpdatedData {
+	/** Where the business's review stands, in the words the dashboard uses. */
+	verification: 'unverified' | 'in_review' | 'verified' | 'on_hold' | 'rejected';
+	/** We have asked the business something and are waiting on it. */
+	changesRequested: boolean;
+	/** The identity check is done — its own, or its company's for another app of the same company. */
+	identityVerified: boolean;
+	livemode: boolean;
+}
+
+/** `webhook.test`: the sample event the dashboard sends so you can check your endpoint. */
+export interface WebhookTestData {
+	message: string;
+	livemode: boolean;
+}
+
+/**
+ * Every event we send. `business` names the business it happened in — your own id, or one of
+ * the businesses you manage (Connect: your webhook also receives your clients' events).
+ */
+export type WebhookEvent = (
 	| { type: 'checkout.session.completed'; data: CheckoutCompletedData }
 	| { type: 'send.completed'; data: SendCompletedData }
 	| { type: 'send.failed'; data: SendFailedData }
@@ -730,4 +910,75 @@ export type WebhookEvent =
 	| { type: 'subscription.renewed'; data: SubscriptionData }
 	| { type: 'subscription.payment_failed'; data: SubscriptionData }
 	| { type: 'subscription.updated'; data: SubscriptionData }
-	| { type: 'subscription.canceled'; data: SubscriptionData };
+	| { type: 'subscription.canceled'; data: SubscriptionData }
+	| { type: 'dispute.created'; data: DisputeData }
+	| { type: 'dispute.closed'; data: DisputeData }
+	| { type: 'account.updated'; data: AccountUpdatedData }
+	| { type: 'webhook.test'; data: WebhookTestData }
+) & { business: string };
+
+// ---------------------------------------------------------------------------
+// Businesses (Connect)
+// ---------------------------------------------------------------------------
+
+/** Where a business stands — the pill the Businesses list shows. */
+export type BusinessStatus =
+	| 'test_only'
+	| 'in_review'
+	| 'changes_needed'
+	| 'on_hold'
+	| 'rejected'
+	| 'live';
+
+/** A business you manage: a client's business, or another app of your own company. */
+export interface Business {
+	id: string;
+	name: string;
+	country: string | null;
+	status: BusinessStatus;
+	/** You — the platform that manages it. */
+	platformOrgId: string;
+	createdAt: string;
+	/** Your share of its sales: basis points of the price before VAT, plus a fixed amount. */
+	platformFee: { bps: number; fixedMinor: number };
+	/** Another app of your own company: verified and priced with you, carries no share. */
+	sameLegalEntity: boolean;
+	/** Your share of its live sales this month, per currency, ready to show. */
+	feesThisMonth: Array<{ currency: string; feesMinor: number; feesDisplay: string }>;
+	/** Who an open invitation is waiting on, or null. */
+	invitedEmail: string | null;
+	/** Its identity check is done (its own, or its company's). */
+	identityVerified: boolean;
+}
+
+export interface CreateBusinessParams {
+	/** What buyers see. */
+	name: string;
+	/** Where it is registered, ISO 3166-1 alpha-2. */
+	country: string;
+	/** Invite your client as its admin. Omit to run it yourself. */
+	clientEmail?: string;
+	/** Another app of your own company instead of a client's business. */
+	sameLegalEntity?: boolean;
+	/** Default true. False: no email from us — send `inviteUrl` yourself (white-label). */
+	sendInvitationEmail?: boolean;
+}
+
+export interface CreatedBusiness {
+	business: Business;
+	/** Present when `clientEmail` was given. */
+	inviteToken: string | null;
+	/** The link your client opens to accept. */
+	inviteUrl: string | null;
+}
+
+export interface BusinessInvitation {
+	inviteToken: string;
+	inviteUrl: string;
+}
+
+export interface VerificationLink {
+	/** The identity check your client completes — only they can. Null: already verified. */
+	url: string | null;
+	status: string;
+}

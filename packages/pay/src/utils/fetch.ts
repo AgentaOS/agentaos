@@ -24,6 +24,8 @@ interface RequestOptions {
 	debug?: boolean;
 	logger?: (level: string, message: string) => void;
 	authMode?: 'api-key' | 'jwt';
+	/** Act for a business the key's platform manages: sent as `AgentaOS-Account` (Stripe's `Stripe-Account`). */
+	business?: string;
 }
 
 function buildUrl(
@@ -122,6 +124,7 @@ export async function request<T>(options: RequestOptions): Promise<T> {
 	} else {
 		headers['x-api-key'] = apiKey;
 	}
+	if (options.business) headers['agentaos-account'] = options.business;
 
 	if (method === 'POST' && body !== undefined) {
 		headers['content-type'] = 'application/json';
@@ -157,6 +160,8 @@ export async function request<T>(options: RequestOptions): Promise<T> {
 			const requestId = response.headers.get('x-request-id') ?? undefined;
 
 			if (response.ok) {
+				// 204 No Content (a DELETE): success with no body to parse.
+				if (response.status === 204) return undefined as T;
 				const json = await response.json();
 				return snakeToCamel(json) as T;
 			}
@@ -234,6 +239,7 @@ export async function requestRaw(options: RequestOptions): Promise<Buffer> {
 	} else {
 		headers['x-api-key'] = apiKey;
 	}
+	if (options.business) headers['agentaos-account'] = options.business;
 
 	const controller = new AbortController();
 	const timer = setTimeout(() => controller.abort(), timeout);
@@ -280,6 +286,7 @@ export async function requestText(options: RequestOptions): Promise<string> {
 	} else {
 		headers['x-api-key'] = apiKey;
 	}
+	if (options.business) headers['agentaos-account'] = options.business;
 
 	const controller = new AbortController();
 	const timer = setTimeout(() => controller.abort(), timeout);

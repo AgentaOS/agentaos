@@ -47,6 +47,14 @@ const BY_OPERATION: Record<string, Record<string, FlagSpec>> = {
 	'audit.show': {
 		download: { flags: '--no-download', help: 'Return the link without saving the PDF' },
 	},
+	// The invitation switches: `email` is a boolean here, so the shared `--email <email>` value
+	// flag must not win (Connect PRD §6.1 R9-3 promises `--no-email`).
+	'businesses.create': {
+		inviteEmail: { flags: '--no-invite-email', help: 'Send no email; you pass the link on' },
+	},
+	'businesses.invite': {
+		email: { flags: '--no-email', help: 'Send no email; you pass the link on' },
+	},
 };
 
 export function flagSpec(operationName: string, key: string): FlagSpec | undefined {

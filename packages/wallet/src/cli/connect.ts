@@ -21,7 +21,8 @@ export interface Connection {
 
 /** What a command needs to reach the API. Injected so tests can fake it. */
 export interface CliContext {
-	connect(): Promise<Connection>;
+	/** `business`: act for a business you manage (Connect, `--business`). */
+	connect(opts?: { business?: string }): Promise<Connection>;
 }
 
 /**
@@ -29,7 +30,7 @@ export interface CliContext {
  * for was resolved once at first use and lives with the session; the SDK
  * stamps it on every request.
  */
-export async function connect(): Promise<Connection> {
+export async function connect(opts?: { business?: string }): Promise<Connection> {
 	const session = await ensureSession();
 	if (!session.ok) {
 		throw new Error(
@@ -38,7 +39,11 @@ export async function connect(): Promise<Connection> {
 				: 'Not logged in. Run agenta login.',
 		);
 	}
-	const sdk = new AgentaOS(session.token, { baseUrl: session.serverUrl, orgId: session.orgId });
+	const sdk = new AgentaOS(session.token, {
+		baseUrl: session.serverUrl,
+		orgId: session.orgId,
+		...(opts?.business ? { business: opts.business } : {}),
+	});
 	return { sdk, account: accountOf(session) };
 }
 

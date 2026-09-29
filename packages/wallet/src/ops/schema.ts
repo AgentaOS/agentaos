@@ -12,6 +12,15 @@ export const positiveAmount = z.coerce
 	.number({ invalid_type_error: AMOUNT_MESSAGE })
 	.positive(AMOUNT_MESSAGE);
 
+/**
+ * `5` → `500`. A founder types euros; two endpoints (credits and a fixed-amount
+ * discount) take integer minor units. This is the ONLY place the CLI turns one into
+ * the other, and it never touches a figure coming back — those arrive render-ready.
+ */
+export function minorUnits(amount: number): number {
+	return Math.round(amount * 100);
+}
+
 export const pageLimit = z.coerce
 	.number()
 	.int()

@@ -1,6 +1,8 @@
 import { AccountReviewResource } from './resources/account-review.js';
+import { BusinessesResource } from './resources/businesses.js';
 import { CheckoutsResource } from './resources/checkouts.js';
 import { CustomersResource } from './resources/customers.js';
+import { DiscountCodesResource } from './resources/discount-codes.js';
 import { GoLiveResource } from './resources/go-live.js';
 import { InvoicesResource } from './resources/invoices.js';
 import { PaymentLinksResource } from './resources/payment-links.js';
@@ -20,8 +22,10 @@ export class AgentaOS {
 	readonly invoices: InvoicesResource;
 	readonly subscriptions: SubscriptionsResource;
 	readonly customers: CustomersResource;
+	readonly discountCodes: DiscountCodesResource;
 	readonly goLive: GoLiveResource;
 	readonly accountReview: AccountReviewResource;
+	readonly businesses: BusinessesResource;
 	readonly webhooks: WebhooksResource;
 
 	constructor(apiKey: string, options?: AgentaOSOptions) {
@@ -55,6 +59,7 @@ export class AgentaOS {
 			// A key is bound to one org server-side; only a session user can be in
 			// several, so only a session ever carries the choice.
 			orgId: isApiKey ? undefined : options?.orgId,
+			business: options?.business,
 		};
 
 		this.checkouts = new CheckoutsResource(baseUrl, apiKey, resourceOptions);
@@ -63,8 +68,10 @@ export class AgentaOS {
 		this.invoices = new InvoicesResource(baseUrl, apiKey, resourceOptions);
 		this.subscriptions = new SubscriptionsResource(baseUrl, apiKey, resourceOptions);
 		this.customers = new CustomersResource(baseUrl, apiKey, resourceOptions);
+		this.discountCodes = new DiscountCodesResource(baseUrl, apiKey, resourceOptions);
 		this.goLive = new GoLiveResource(baseUrl, apiKey, resourceOptions);
 		this.accountReview = new AccountReviewResource(baseUrl, apiKey, resourceOptions);
+		this.businesses = new BusinessesResource(baseUrl, apiKey, resourceOptions);
 		this.webhooks = new WebhooksResource();
 	}
 }

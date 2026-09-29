@@ -23,10 +23,22 @@ const EXPECTED_TOOLS = [
 	'agenta_subscriptions_list',
 	'agenta_subscriptions_cancel',
 	'agenta_subscriptions_change_plan',
+	'agenta_subscriptions_credit',
+	'agenta_subscriptions_credits',
+	'agenta_discounts_create',
+	'agenta_discounts_list',
+	'agenta_discounts_show',
+	'agenta_discounts_archive',
 	'agenta_customers_list',
 	'agenta_invoices_list',
 	'agenta_invoices_receipt',
 	'agenta_invoices_send_receipt',
+	'agenta_businesses_list',
+	'agenta_businesses_get',
+	'agenta_businesses_create',
+	'agenta_businesses_invite',
+	'agenta_businesses_revoke_invite',
+	'agenta_businesses_id_link',
 ];
 
 describe('AgentaOS Terminal MCP Server', () => {

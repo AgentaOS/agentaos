@@ -80,6 +80,10 @@ export function commandFromOperation(op: Operation, ctx: CliContext): Command {
 	for (const field of fields) {
 		if (field !== positional) command.addOption(optionFor(op, field));
 	}
+	// Connect (PRD §6.1 R9-3): every command can act for a business you manage.
+	command.addOption(
+		new Option('--business <id>', 'Act for this business you manage. Omit to act as yourself.'),
+	);
 
 	command.action(async (...args: unknown[]) => {
 		const invoked = args[args.length - 1] as Command;
@@ -101,13 +105,14 @@ export async function runOperation(
 	ctx: CliContext,
 	raw: Record<string, unknown>,
 ): Promise<void> {
-	const parsed = op.input.safeParse(raw);
+	const { business, ...opRaw } = raw as Record<string, unknown> & { business?: string };
+	const parsed = op.input.safeParse(opRaw);
 	if (!parsed.success) {
 		fail(issuesText(parsed.error));
 		return;
 	}
 	try {
-		const { sdk } = await ctx.connect();
+		const { sdk } = await ctx.connect(business ? { business } : undefined);
 		const result = await applySideEffect(op, parsed.data, await op.run(sdk, parsed.data));
 		print(op, result);
 	} catch (error: unknown) {
