@@ -39,7 +39,9 @@ export interface NextStep {
  * The single most useful next command, or null when there is nothing to chase.
  *
  * Ordered the way the journey actually blocks: a change request is the
- * merchant's move and outranks everything, then verification, then payouts.
+ * merchant's move and outranks everything, then verification. A verified
+ * merchant can already sell; what is left is the bank account we pay into,
+ * which they need before their first payout, not before their first sale.
  * States we cannot act on from a terminal (in review, on hold, rejected)
  * deliberately return null rather than inventing busywork.
  *
@@ -61,7 +63,7 @@ export function nextStep(r: GoLiveReadiness): NextStep | null {
 	if (r.verifyState === 'verified' && !r.hasPayoutAccount) {
 		return {
 			command: null,
-			why: 'add a payout account in the dashboard (Payments → Payout account) to get paid',
+			why: 'add a bank account in the dashboard (Balances → Payout accounts) before your first payout',
 		};
 	}
 	return null;

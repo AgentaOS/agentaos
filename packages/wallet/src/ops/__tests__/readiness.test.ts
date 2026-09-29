@@ -11,7 +11,7 @@ function fresh(over: Partial<GoLiveReadiness> = {}): GoLiveReadiness {
 		verifyState: 'unverified',
 		hasPayoutAccount: false,
 		canGoLive: false,
-		progress: { done: 0, total: 3 },
+		progress: { done: 0, total: 2 },
 		rejectReason: null,
 		cooldownUntil: null,
 		heldReason: null,
@@ -124,24 +124,38 @@ describe('nextStep', () => {
 		expect(nextStep(fresh({ audit: requestedAudit() }))?.command).toBe('agenta verify submit');
 	});
 
-	// Payout accounts are added in the dashboard; there is no CLI command, so the
-	// step carries no command — only the reason. Naming a command that does not
-	// exist would send an agent into a wall.
-	it('asks for a payout account once verified, as a dashboard step', () => {
-		const r = fresh({ verifyState: 'verified', hasPayoutAccount: false, audit: requestedAudit() });
+	// Bank accounts are added in the dashboard; there is no CLI command, so the
+	// step carries no command, only the reason. Naming a command that does not
+	// exist would send an agent into a wall. The account is needed before the
+	// first payout, never to go live: a verified merchant can already sell.
+	it('asks a verified merchant for a bank account before the first payout, as a dashboard step', () => {
+		const r = fresh({
+			verifyState: 'verified',
+			canGoLive: true,
+			hasPayoutAccount: false,
+			audit: requestedAudit(),
+		});
 		const step = nextStep(r);
 		expect(step?.command).toBeNull();
-		expect(step?.why).toMatch(/payout account in the dashboard/);
+		expect(step?.why).toBe(
+			'add a bank account in the dashboard (Balances → Payout accounts) before your first payout',
+		);
+		expect(step?.why).not.toMatch(/to get paid|go live/);
 	});
 
 	// The audit is a gift, never a gate. A verified merchant who skipped it needs
-	// a payout account, and telling them to go get an audit first would put a
-	// present in front of getting paid.
+	// a bank account before the first payout, and telling them to go get an audit
+	// first would put a present in front of getting paid.
 	it('does not send a verified merchant back for an audit they never asked for', () => {
-		const r = fresh({ verifyState: 'verified', hasPayoutAccount: false, audit: null });
+		const r = fresh({
+			verifyState: 'verified',
+			canGoLive: true,
+			hasPayoutAccount: false,
+			audit: null,
+		});
 		const step = nextStep(r);
 		expect(step?.command).toBeNull();
-		expect(step?.why).toMatch(/payout account/);
+		expect(step?.why).toMatch(/bank account/);
 	});
 
 	it('has nothing to chase once the merchant can go live', () => {

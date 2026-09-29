@@ -190,7 +190,7 @@ Your account starts in test mode. Verify your business to take live payments.
 
 | Method | What it does |
 |---|---|
-| `goLive.get()` | Where the account is on the way to live payments: verification, payout account, open change requests |
+| `goLive.get()` | Where the account is on the way to live payments: verification and open change requests, plus whether a payout account exists (needed before the first payout) |
 | `accountReview.submit(details)` | Submit business verification |
 | `accountReview.get()` | The verification on file, or `null` |
 | `accountReview.resubmit()` | Send the verification back for review after you make the requested changes |
