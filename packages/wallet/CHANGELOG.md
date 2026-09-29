@@ -1,5 +1,20 @@
 # agentaos
 
+## 3.2.0
+
+### Minor Changes
+
+- [#48](https://github.com/AgentaOS/agentaos/pull/48) [`32afd60`](https://github.com/AgentaOS/agentaos/commit/32afd601a85d2b26927784883450c366ee8fa7f9) Thanks [@PancheI](https://github.com/PancheI)! - Connect — `agenta businesses list | get | create | invite | revoke-invite | id-link` for the businesses you manage (your clients' businesses and your other apps), and `--business <id>` on every command to act as one of them (`agenta products create … --business <id>`). The MCP server has the same six `agenta_businesses_*` tools and an optional `business` input on every tool.
+
+- [#48](https://github.com/AgentaOS/agentaos/pull/48) [`32afd60`](https://github.com/AgentaOS/agentaos/commit/32afd601a85d2b26927784883450c366ee8fa7f9) Thanks [@PancheI](https://github.com/PancheI)! - Six new operations, on both the CLI and the MCP tools (25 in total): `discounts create|list|show|archive` for codes buyers type at checkout, and `subscriptions credit|credits` for credit against a subscriber's next invoice. `subscriptions list --code` shows who one code brought in.
+  `products create --trial-amount` prices a trial, so a plan can sell "9 for the first 30 days, then 29 a month"; the created plan now says what the trial costs before it renews.
+  The credit command mints one idempotency key per invocation and reports it under `--json`, so running it twice is two deliberate credits while a network retry inside one call is not.
+
+### Patch Changes
+
+- Updated dependencies [[`32afd60`](https://github.com/AgentaOS/agentaos/commit/32afd601a85d2b26927784883450c366ee8fa7f9), [`32afd60`](https://github.com/AgentaOS/agentaos/commit/32afd601a85d2b26927784883450c366ee8fa7f9)]:
+  - @agentaos/pay@2.4.0
+
 ## 3.1.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
 	"name": "@agentaos/mcp-remote",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"private": true,
 	"description": "AgentaOS hosted MCP server: lets AI assistants set up billing, subscriptions and invoices with a merchant of record",
 	"license": "Apache-2.0",

@@ -1,5 +1,13 @@
 # @agentaos/sdk
 
+## 3.2.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @agentaos/core@3.2.0
+  - @agentaos/engine@3.2.0
+
 ## 3.1.0
 
 ### Patch Changes
