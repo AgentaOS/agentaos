@@ -1,310 +1,144 @@
-# agenta
+# agentaos
 
-**AgentaOS CLI + MCP Server -- threshold signing for AI agents.**
+The AgentaOS command line tool (`agenta`) and MCP server. Sell digital products with AgentaOS as your merchant of record from your terminal, your CI, or your AI coding agent.
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE)
 [![npm](https://img.shields.io/npm/v/agentaos)](https://www.npmjs.com/package/agentaos)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](https://nodejs.org)
 
-CLI and [MCP](https://modelcontextprotocol.io/) server for [AgentaOS](https://github.com/AgentaOS/agentaos). Gives AI agents (Claude, GPT, custom) secure on-chain spending power through threshold ECDSA -- the full private key never exists.
+AgentaOS sells your product in its own name. It takes the payment, charges the VAT, issues the invoice and pays you out. With this package you create products and plans, go live, and manage subscriptions, discount codes, customers and invoices. Full guides are at [docs.agentaos.ai](https://docs.agentaos.ai/cli/install).
 
 ## Install
 
 ```bash
 npm install -g agentaos
-# or
-npx agentaos --help
 ```
 
-## Quick Start
+The package installs two commands, `agenta` and `agentaos`. They are the same program. It needs Node.js 20 or later.
+
+## Quickstart
 
 ```bash
-# Sign in via browser (creates account + wallet)
-agenta login
-
-# Check account status
-agenta status
-
-# Create a payment checkout
-agenta pay checkout -a 50 -c EUR
-
-# Create an agent sub-account
-agenta sub create --name trading-bot
-
-# Send ETH from sub-account
-agenta sub send 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 0.001
+agenta login                     # sign in in your browser
+agenta status                    # your account, and what is left before live payments
+agenta products create --name "Pro" -a 29 -c EUR --subscription --interval month
 ```
 
-## CLI
+`products create` prints the buyer link. Share it anywhere: every buyer who opens it gets a checkout.
+
+Your account starts in test mode. To take live payments, submit your business for verification:
 
 ```bash
-agenta --help
+agenta verify declaration        # read the five statements first
+agenta verify submit --legal-name "Acme OÜ" --registration-number 16000000 \
+  --country EE --street "Narva mnt 5" --city Tallinn \
+  --url https://acme.example --accept-declaration
+agenta verify status
 ```
 
-### Account
+`agenta verify submit --help` lists every field. A sole trader uses `--entity individual` and needs no registration number.
 
-| Command | Description |
-|---------|-------------|
-| `agenta login` | Sign in via browser (device-code flow) |
-| `agenta status` | Account and go-live overview |
-| `agenta logout` | Clear session |
+## Commands
 
-### Payments
+`agenta login` opens your browser and stores the session in `~/.agenta/`. Every other command uses that session. `agenta logout` clears it.
 
-Every row is also an MCP tool (`agenta products create` = `agenta_products_create`), same inputs, same output.
+Each command below is also an MCP tool with the same inputs and the same output. The tool name is `agenta_` followed by the command words, with underscores: `agenta products create` is `agenta_products_create`. The one exception is `agenta status`, whose tool is `agenta_status_get`.
 
-| Command | Description |
-|---------|-------------|
-| `agenta audit request --url <url>` | Ask for the free Revenue & Pricing Audit |
-| `agenta audit show` | The audit state, and the report PDF once it exists (`--no-download` for the link only) |
-| `agenta verify declaration` | The five statements `--accept-declaration` attests to |
-| `agenta verify submit --legal-name ... --accept-declaration` | Submit business verification so the merchant can accept live payments |
-| `agenta verify status` | Where the verification has got to |
-| `agenta verify resubmit` | Send back for review after making the changes we asked for |
-| `agenta products create --name <name> -a <amount>` | Create a product (one-time) or a subscription plan (`--subscription --interval month\|year`, `--trial-days <n>`, `--trial-amount <price>` for a paid trial) |
+| Command | What it does |
+|---|---|
+| **Account** | |
+| `agenta status` | Your account and go-live overview. `agenta whoami` is the same command |
+| **Audit** | |
+| `agenta audit request --url <url>` | Ask for the free Revenue & Pricing Audit of your product page |
+| `agenta audit show` | The audit state, and save the report PDF once it exists. `--no-download` returns only the link |
+| **Verification** | |
+| `agenta verify declaration` | The five statements that `--accept-declaration` attests to |
+| `agenta verify submit` | Submit business verification, so you can accept live payments |
+| `agenta verify status` | Where the verification is |
+| `agenta verify resubmit` | Send the verification back for review after you make the requested changes |
+| **Products** | |
+| `agenta products create --name <name> -a <price>` | Create a one-time product, or a plan with `--subscription --interval month\|year`. Add `--trial-days <n>`, and `--trial-amount <price>` for a paid trial |
 | `agenta products list` | List products and plans |
+| **Checkouts** | |
 | `agenta pay checkout -a <amount>` | Create a checkout session |
-| `agenta pay get <sessionId>` | Get checkout session status |
-| `agenta pay list` | List checkout sessions |
-| `agenta subscriptions list` | List subscriptions |
-| `agenta subscriptions cancel <id>` | Cancel a subscription (at period end; `--now` for immediate) |
-| `agenta subscriptions change-plan <id> --to <linkId>` | Move a subscription to another plan (`--dry-run` quotes only) |
-| `agenta subscriptions credit <id> -a <amount> --reason <text>` | Put credit on a subscriber's account, taken off their next invoice |
+| `agenta pay get <sessionId>` | Read a checkout and its status |
+| `agenta pay list` | List checkouts |
+| **Subscriptions** | |
+| `agenta subscriptions list` | List subscriptions. `--code <code>` shows only the subscribers one discount code brought in |
+| `agenta subscriptions cancel <id>` | Cancel at the end of the paid period, or now with `--now` |
+| `agenta subscriptions change-plan <id> --to <productId>` | Move a subscription to another plan. `--dry-run` shows the quote only |
+| `agenta subscriptions credit <id> -a <amount> --reason <text>` | Give credit that comes off the subscriber's next invoice |
 | `agenta subscriptions credits <id>` | Credits given on a subscription, and what is still unspent |
-| `agenta discounts create --code <code>` | Create a discount code buyers type at checkout (`--percent-off`, `--amount-off`, or neither to only track referrals) |
+| **Discount codes** | |
+| `agenta discounts create --code <code>` | Create a code buyers type at checkout. Use `--percent-off` or `--amount-off`, or neither for a code that only tracks referrals |
 | `agenta discounts list` | List discount codes |
-| `agenta discounts show <id>` | What one code takes off, and how many people used it |
-| `agenta discounts archive <id>` | Stop a discount code working |
+| `agenta discounts show <id>` | What one code takes off, and how many subscribers used it |
+| `agenta discounts archive <id>` | Stop a code working |
+| **Customers and invoices** | |
 | `agenta customers list` | List customers |
 | `agenta invoices list` | List invoices |
-| `agenta invoices receipt <id>` | Download the receipt PDF |
-| `agenta invoices send-receipt <id>` | Re-send the receipt email to the buyer on file |
+| `agenta invoices receipt <id>` | Save the receipt PDF of a paid invoice. `-o <path>` sets the file |
+| `agenta invoices send-receipt <id>` | Send the receipt email to the buyer again |
+| **Businesses (platforms, private preview)** | |
+| `agenta businesses list` | List the businesses you manage |
+| `agenta businesses get <id>` | Show one business you manage |
+| `agenta businesses create --name <name> --country <code>` | Add a client's business, or another app of your company with `--same-company`. `--client-email` invites your client as its admin |
+| `agenta businesses invite <id>` | Send your client's invitation again, with a new link |
+| `agenta businesses revoke-invite <id>` | Withdraw your client's open invitation |
+| `agenta businesses id-link <id>` | Get the identity check link for your client |
 
-### Agent Sub-accounts
+These options work on every command except `login` and `logout`, which take only `--json`:
 
-| Command | Description |
-|---------|-------------|
-| `agenta sub create --name <name>` | Create a sub-account |
-| `agenta sub import --name <name> --api-key ... --api-secret ...` | Import existing |
-| `agenta sub info <name>` | Show sub-account details |
-| `agenta sub balance` | ETH and token balances |
-| `agenta sub send <to> <amount>` | Send ETH — threshold-signed, policy-checked |
-| `agenta sub sign-message <msg>` | Sign a message (EIP-191) |
-| `agenta sub deploy <bytecode>` | Deploy a contract |
-| `agenta sub proxy` | JSON-RPC signing proxy for Foundry/Hardhat |
-| `agenta sub policies get` | View signing policies |
-| `agenta sub policies set --file p.json` | Set policies from JSON |
-| `agenta sub pause` / `resume` | Pause or resume signing |
-| `agenta sub audit` | View signing audit log |
+| Option | What it does |
+|---|---|
+| `--json` | Print JSON instead of sentences, for scripts, CI and agents |
+| `--business <id>` | Act for a business you manage. Leave it out to act for your own account |
+| `--help` | Show the command's options |
 
-All commands support `--json` for machine-readable output.
+Amounts on the command line are in currency units: `-a 29` is 29.00.
 
-### Multiple Sub-accounts
+## MCP server
 
-Each sub-account gets its own config under `~/.agenta/signers/`.
+The MCP server gives an AI assistant the same 31 operations as the CLI. There are two ways to connect.
 
-```bash
-agenta sub create --name my-agent
-agenta sub create --name trading-bot
+### Claude Code plugin
 
-# Use a specific sub-account
-agenta --signer trading-bot sub send 0x... 0.01
-agenta --signer my-agent sub balance
-```
-
-### Policies
-
-Manage signing policies for your sub-accounts. Requires `agenta login`.
+The plugin connects Claude Code to the hosted MCP server and adds a guide to the integration patterns. You approve the connection in your browser, so there is no key to paste.
 
 ```bash
-# View current policy
-agenta sub policies get --json
-
-# Set policy from JSON file
-agenta sub policies set --file policy.json
-
-# Pause/resume signing
-agenta sub pause
-agenta sub resume
-
-# Audit log
-agenta sub audit                         # last 20 signing requests
-agenta sub audit --limit 50             # more results
+claude plugin marketplace add AgentaOS/agentaos
+claude plugin install agentaos@agentaos
 ```
 
-### Config Layout
+In Claude Code, type `/mcp`, choose `agentaos`, then **Authenticate**.
 
-```
-~/.agenta/
-  signers/
-    my-agent.json           # { serverUrl, apiKey, apiSecret, network, ... }
-    trading-bot.json
-  admin/
-    my-agent.token          # SHA-256(userShare) -- admin auth credential
-  .default                  # default signer name
+### Local server over stdio
 
-OS Keychain (service: agenta):
-  my-agent/user-share       # user share for admin auth + backup signing
-```
-
-## MCP Server
-
-When invoked with no arguments, runs as an MCP server over stdio. This lets AI agents interact with the wallet through the [Model Context Protocol](https://modelcontextprotocol.io/).
-
-### 37 Tools
-
-| Tool | Description |
-|------|-------------|
-| `agenta_wallet_overview` | Wallet address, balances, recent activity |
-| `agenta_list_signers` | List all signers |
-| `agenta_get_status` | Server health and vault connectivity |
-| `agenta_list_networks` | Available networks and chain IDs |
-| `agenta_get_balances` | ETH and token balances |
-| `agenta_get_audit_log` | Transaction history and audit trail |
-| `agenta_resolve_address` | Resolve ENS names or validate addresses |
-| `agenta_simulate` | Simulate a transaction (gas estimate) |
-| `agenta_read_contract` | Read from any smart contract |
-| `agenta_sign_message` | Sign an EIP-191 message |
-| `agenta_sign_typed_data` | Sign EIP-712 typed data |
-| `agenta_send_eth` | Send ETH to an address |
-| `agenta_send_token` | Send ERC-20 tokens |
-| `agenta_call_contract` | Call any smart contract function |
-| `agenta_execute` | Execute a raw transaction |
-| `agenta_x402_check` | Check if a URL requires x402 payment |
-| `agenta_x402_discover` | Discover x402-protected endpoints |
-| `agenta_x402_fetch` | Fetch a 402-protected resource with auto-payment |
-| `agenta_status_get` | Account and go-live overview |
-| `agenta_audit_request` | Ask for the free Revenue & Pricing Audit |
-| `agenta_audit_show` | The audit state, and the report PDF once it exists |
-| `agenta_verify_declaration` | The five statements verification attests to |
-| `agenta_verify_submit` | Submit business verification so the merchant can accept live payments |
-| `agenta_verify_status` | Where the verification has got to |
-| `agenta_verify_resubmit` | Send back for review after making the changes we asked for |
-| `agenta_products_create` | Create a product (one-time) or a subscription plan |
-| `agenta_products_list` | List products and plans |
-| `agenta_pay_checkout` | Create a checkout session |
-| `agenta_pay_get` | Get checkout session status |
-| `agenta_pay_list` | List checkout sessions |
-| `agenta_subscriptions_list` | List subscriptions |
-| `agenta_subscriptions_cancel` | Cancel a subscription (at period end by default) |
-| `agenta_subscriptions_change_plan` | Move a subscription to another plan (upgrade charges now, downgrade at period end) |
-| `agenta_subscriptions_credit` | Put credit on a subscriber's account, taken off their next invoice |
-| `agenta_subscriptions_credits` | Credits given on a subscription, and what is still unspent |
-| `agenta_discounts_create` | Create a discount code buyers type at checkout |
-| `agenta_discounts_list` | List discount codes |
-| `agenta_discounts_show` | What one code takes off, and how many people used it |
-| `agenta_discounts_archive` | Stop a discount code working |
-| `agenta_customers_list` | List customers |
-| `agenta_invoices_list` | List invoices |
-| `agenta_invoices_receipt` | The receipt PDF for a paid invoice |
-| `agenta_invoices_send_receipt` | Re-send the receipt email to the buyer on file |
-
-The 25 payment tools and the `agenta` CLI are one operations catalogue: `agenta_products_create` is `agenta products create`, with the same inputs and the same merchant-readable output.
-
-### Claude Desktop
-
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+Any MCP client can run the server from this package. When the program starts with no arguments and without a terminal, it runs as an MCP server over stdio. Create an API key in [app.agentaos.ai](https://app.agentaos.ai) under **Settings → Developers**, then add this to your client's MCP configuration:
 
 ```json
 {
   "mcpServers": {
-    "agenta": {
+    "agentaos": {
       "command": "npx",
-      "args": ["-y", "agentaos", "mcp"],
+      "args": ["-y", "agentaos"],
       "env": {
-        "AGENTA_API_KEY": "your-api-key",
-        "AGENTA_API_SECRET": "your-api-secret"
+        "AGENTAOS_GATEWAY_KEY": "sk_test_..."
       }
     }
   }
 }
 ```
 
-### Cursor
+Use an `sk_test_` key for test mode and an `sk_live_` key for live mode. The local server authenticates with the API key, so `agenta_subscriptions_credit` does not work there: a credit needs an owner or admin signed in with `agenta login`. See [MCP setup](https://docs.agentaos.ai/mcp/setup) for other clients.
 
-Add to `.cursor/mcp.json`:
+## Environment variables
 
-```json
-{
-  "mcpServers": {
-    "agenta": {
-      "command": "npx",
-      "args": ["-y", "agentaos", "mcp"],
-      "env": {
-        "AGENTA_API_KEY": "your-api-key",
-        "AGENTA_API_SECRET": "your-api-secret"
-      }
-    }
-  }
-}
-```
-
-### From Source (development)
-
-```json
-{
-  "mcpServers": {
-    "agenta": {
-      "command": "node",
-      "args": ["packages/wallet/dist/index.js"],
-      "env": {
-        "AGENTA_API_KEY": "your-api-key",
-        "AGENTA_API_SECRET": "your-api-secret"
-      }
-    }
-  }
-}
-```
-
-## JSON-RPC Proxy
-
-The `agenta sub proxy` command starts a local HTTP server that acts as an Ethereum JSON-RPC endpoint. It intercepts signing methods (`eth_sendTransaction`, `eth_signTransaction`, `eth_sign`, `personal_sign`) and routes them through Agenta's threshold signing, while forwarding all other calls to the upstream RPC.
-
-```bash
-agenta sub proxy --port 8545 --rpc-url https://sepolia.base.org
-
-# Use with Foundry
-forge script Deploy.s.sol --rpc-url http://localhost:8545
-
-# Use with cast
-cast send 0x... "transfer(address,uint256)" 0x... 1000000 --rpc-url http://localhost:8545
-```
-
-## x402 Payment Support
-
-Built-in support for the [x402 payment protocol](https://www.x402.org/). AI agents can discover, check, and pay for 402-protected resources automatically.
-
-```bash
-# Check if a URL requires payment
-# (via MCP: agenta_x402_check)
-
-# Discover protected endpoints on a domain
-# (via MCP: agenta_x402_discover)
-
-# Fetch and auto-pay
-# (via MCP: agenta_x402_fetch)
-```
-
-## Environment Variables
-
-Environment variables are an alternative to file-based config. Useful for CI/CD, Docker, or MCP server mode.
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `AGENTA_API_KEY` | API key for authentication | Yes |
-| `AGENTA_API_SECRET` | Base64-encoded signer key share | Yes |
-| `AGENTA_SERVER` | Server URL (defaults to `https://api.agentaos.ai`) | No |
-| `AGENTA_NETWORK` | Default network name (e.g. `base-sepolia`, `mainnet`) | No |
-
-## Security
-
-- The full private key **never exists** -- not in memory, not on disk, not ever
-- Signing is a distributed MPC protocol between your signer share and the server share
-- Signer share stored in config file (`chmod 600`)
-- User share stored in OS keychain (macOS Keychain, Windows Credential Manager, Linux libsecret)
-- Admin auth uses a Bitwarden-model double hash -- server never stores raw credentials
-- Server shares wiped from memory after every operation
+| Variable | Used by | What it does |
+|---|---|---|
+| `AGENTAOS_GATEWAY_KEY` | MCP server | The API key the server acts with. Required |
+| `AGENTA_SERVER` | CLI and MCP server | The API URL. Default `https://api.agentaos.ai` |
 
 ## License
 
-Apache-2.0 -- see [LICENSE](../../LICENSE).
+Apache-2.0. See [LICENSE](../../LICENSE).

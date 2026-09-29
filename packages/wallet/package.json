@@ -1,7 +1,7 @@
 {
 	"name": "agentaos",
 	"version": "3.1.0",
-	"description": "AgentaOS — CLI + MCP server for threshold signing. The key never exists.",
+	"description": "AgentaOS CLI (agenta) and MCP server: set up billing, subscriptions, discount codes and invoices with a merchant of record, from your terminal or your AI coding agent",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",
 	"repository": {
@@ -11,7 +11,18 @@
 	},
 	"homepage": "https://github.com/AgentaOS/agentaos",
 	"bugs": "https://github.com/AgentaOS/agentaos/issues",
-	"keywords": ["mcp", "threshold", "wallet", "mpc", "ethereum", "agent", "signing", "cli", "x402"],
+	"keywords": [
+		"payments",
+		"merchant-of-record",
+		"billing",
+		"subscriptions",
+		"invoices",
+		"checkout",
+		"vat",
+		"cli",
+		"mcp",
+		"ai-agents"
+	],
 	"type": "module",
 	"bin": {
 		"agentaos": "./dist/index.js",

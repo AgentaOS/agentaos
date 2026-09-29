@@ -1,8 +1,17 @@
 {
 	"name": "@agentaos/checkout",
 	"version": "0.0.0",
-	"description": "AgentaOS embedded checkout for the browser — inline or overlay on your own page, with React support",
+	"description": "AgentaOS embedded checkout for the browser: inline or overlay on your own page, with React support",
 	"license": "Apache-2.0",
+	"keywords": [
+		"payments",
+		"merchant-of-record",
+		"checkout",
+		"embedded-checkout",
+		"subscriptions",
+		"billing",
+		"react"
+	],
 	"author": "AgentaOS <hello@agentaos.ai>",
 	"repository": {
 		"type": "git",

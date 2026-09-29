@@ -1,6 +1,8 @@
 # @agentaos/pay
 
-Accept regulated stablecoin payments from your Node.js backend. Server-side SDK for the AgentaOS Payment API.
+The server-side TypeScript SDK for AgentaOS, the merchant of record for founders who sell digital products. Create products and checkouts, manage subscriptions, discount codes, customers and invoices, and verify webhooks from your Node.js backend.
+
+AgentaOS sells your product in its own name. It takes the payment, charges the VAT, issues the invoice and pays you out. Full guides are at [docs.agentaos.ai](https://docs.agentaos.ai/sdk/pay-overview).
 
 ## Install
 
@@ -8,7 +10,9 @@ Accept regulated stablecoin payments from your Node.js backend. Server-side SDK 
 npm install @agentaos/pay
 ```
 
-## Quick Start
+The SDK needs Node.js 20 or later and is ESM only.
+
+## Quickstart
 
 ```typescript
 import { AgentaOS } from '@agentaos/pay';
@@ -18,159 +22,47 @@ const agentaos = new AgentaOS(process.env.AGENTAOS_API_KEY!);
 const checkout = await agentaos.checkouts.create({
   amount: 49.99,
   currency: 'EUR',
-  description: 'Pro Plan — Monthly',
-  successUrl: 'https://myshop.com/success',
-  cancelUrl: 'https://myshop.com/cart',
-  webhookUrl: 'https://myshop.com/webhooks',
+  description: 'Pro plan, monthly',
+  successUrl: 'https://example.com/welcome',
+  cancelUrl: 'https://example.com/pricing',
+  metadata: { userId: 'user_123' },
 });
 
-console.log(checkout.checkoutUrl);
-// → https://app.agentaos.ai/checkout/mZrESFyR7RC9RPsJfZCVkg
+// Send the buyer to checkout.checkoutUrl
 ```
+
+When the buyer pays, confirm it on your server before you give access. Read the checkout with `checkouts.retrieve(sessionId)` and check that `status` is `'completed'`, or handle the `checkout.session.completed` webhook.
 
 ## Authentication
 
-Get your API key from [app.agentaos.ai](https://app.agentaos.ai) → Developer → API Keys.
+Create an API key in [app.agentaos.ai](https://app.agentaos.ai) under **Settings → Developers**. A key that starts with `sk_test_` works in test mode, and `sk_live_` works in live mode.
 
 ```typescript
-const agentaos = new AgentaOS('sk_live_...', {
+const agentaos = new AgentaOS('sk_test_...', {
   baseUrl: 'https://api.agentaos.ai', // default
-  timeout: 30000,                      // ms, default
-  maxRetries: 2,                       // on 5xx, default
-  debug: false,                        // log requests to stderr
+  timeout: 30000,                     // ms, default
+  maxRetries: 2,                      // retries on 5xx, default
+  debug: false,                       // log requests to stderr, without the key or bodies
 });
 ```
 
-> **Backend only** — never use this SDK in browser code. Your API key grants full access to all payments.
+The SDK runs on the server only. Its constructor throws in a browser, because the API key gives full access to your account. For a checkout on your own page, use [`@agentaos/checkout`](../checkout).
 
----
+## Products and plans
 
-## Checkouts
-
-Create a checkout session to collect a payment. The customer visits the `checkoutUrl` to pay.
-
-### `checkouts.create(params)`
+A product is a reusable buyer link: every buyer who opens `checkoutUrl` gets a checkout. The SDK calls products `paymentLinks`.
 
 ```typescript
-const checkout = await agentaos.checkouts.create({
-  // --- Required (if no linkId) ---
-  amount: 100.00,           // Amount in currency units
-  currency: 'EUR',          // 'EUR' or 'USD'
-
-  // --- Optional: from a payment link template ---
-  linkId: 'uuid',           // Create session from existing link (inherits amount/currency)
-
-  // --- Optional: checkout config ---
-  description: 'Order #123',
-  successUrl: 'https://shop.com/success',    // Redirect after payment (HTTPS)
-  cancelUrl: 'https://shop.com/cart',        // "Cancel" link on checkout (HTTPS)
-  webhookUrl: 'https://shop.com/webhooks',   // Server notification on payment (HTTPS)
-  expiresIn: 1800,                           // Seconds until expiry (300-86400, default 1800)
-  taxRateId: 'uuid',                         // Pre-created tax rate UUID
-  dueDate: '2026-09-30',                     // Invoice due date (YYYY-MM-DD), presentation only
-
-  // --- Optional: pre-populate buyer info ---
-  buyerEmail: 'john@example.com',
-  buyerName: 'John Doe',
-  buyerCompany: 'Acme Corp',
-  buyerCountry: 'DE',                        // ISO 3166-1 alpha-2
-  buyerAddress: '123 Main St, Berlin',
-  buyerVat: 'DE123456789',
-
-  // --- Optional: custom data ---
-  metadata: { orderId: '12345', plan: 'pro' },
-});
-```
-
-**Response:**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | Session UUID |
-| `sessionId` | `string` | Public session ID (used in checkout URL) |
-| `checkoutUrl` | `string` | URL to send your human customer to |
-| `x402Url` | `string` | x402 protocol URL for AI agent payments |
-| `status` | `'open' \| 'completed' \| 'expired' \| 'cancelled'` | Current status |
-| `sellerMode` | `'mor' \| 'crypto'` | How this session settles |
-| `amountOverride` | `number \| null` | Amount for this session |
-| `currency` | `string` | Settlement currency |
-| `invoiceId` | `string \| null` | Issued invoice UUID (null until an invoice exists) |
-| `invoiceNumber` | `string \| null` | Human-readable invoice number |
-| `expiresAt` | `string` | ISO 8601 expiration time |
-| `createdAt` | `string` | ISO 8601 creation time |
-
-### `checkouts.retrieve(sessionId)`
-
-```typescript
-const checkout = await agentaos.checkouts.retrieve('mZrESFyR7RC9RPsJfZCVkg');
-console.log(checkout.status); // 'open' | 'completed' | 'expired' | 'cancelled'
-```
-
-### `checkouts.list(params?)`
-
-```typescript
-const checkouts = await agentaos.checkouts.list({
-  status: 'completed',  // Filter: 'open' | 'completed' | 'expired' | 'cancelled'
-  limit: 10,
-  offset: 0,
-});
-```
-
-### `checkouts.cancel(sessionId)`
-
-```typescript
-await agentaos.checkouts.cancel('mZrESFyR7RC9RPsJfZCVkg');
-```
-
----
-
-## Payment Links
-
-Reusable payment templates. Share the `checkoutUrl` — each visitor gets a new session.
-
-> **Seller mode is derived from your account — it is not a parameter.** Once your business is verified you accept card + bank via Merchant of Record; otherwise payments settle on-chain to the wallet on file. You never pass it; the server resolves it and returns it as `sellerMode` on the response (a `checkouts.create` with `linkId` inherits the link's mode).
-
-### `paymentLinks.create(params)`
-
-```typescript
-const link = await agentaos.paymentLinks.create({
-  amount: 29.99,
+// One-time product
+const ebook = await agentaos.paymentLinks.create({
+  name: 'Pricing playbook',
+  amount: 19,
   currency: 'EUR',
-  description: 'Pro plan',
-  name: 'Pro Plan',             // shown in the dashboard's Products grid; defaults from `description` if omitted
-  successUrl: 'https://shop.com/success',
-  cancelUrl: 'https://shop.com/cancel',
-  webhookUrl: 'https://shop.com/webhooks',
-  taxRateId: 'uuid',
-  metadata: { plan: 'basic' },
-  expiresAt: '2026-12-31T23:59:59Z',
-  checkoutFields: [
-    { key: 'email', label: 'Email', type: 'email', required: true },
-    { key: 'company', label: 'Company', type: 'text', required: false },
-  ],
 });
 
-console.log(link.checkoutUrl);
-// → https://app.agentaos.ai/pay/7rr6S9ml4BMp829wV5WeAA
-```
-
-**Recurring (subscription) link** — set `type: 'subscription'` and a `billingInterval` (requires a verified account, since subscriptions bill card/bank via Merchant of Record):
-
-```typescript
-const subscription = await agentaos.paymentLinks.create({
-  amount: 29.99,
-  currency: 'EUR',
-  description: 'Pro plan — monthly',
-  type: 'subscription',
-  billingInterval: 'month',     // 'month' | 'year' — REQUIRED for subscriptions
-});
-```
-
-**Paid trial** — `trialAmount` is what the whole trial costs, in currency units. Leave it out and the trial is free. It needs `trialPeriodDays`; `amount` stays the recurring price charged when the trial ends:
-
-```typescript
-// €9 for the first 30 days, then €29.99 a month
-const plan = await agentaos.paymentLinks.create({
+// Subscription plan with a paid trial: 9.00 for the first 30 days, then 29.99 a month
+const pro = await agentaos.paymentLinks.create({
+  name: 'Pro',
   amount: 29.99,
   currency: 'EUR',
   type: 'subscription',
@@ -178,470 +70,205 @@ const plan = await agentaos.paymentLinks.create({
   trialPeriodDays: 30,
   trialAmount: 9,
 });
+
+console.log(pro.checkoutUrl); // https://app.agentaos.ai/pay/...
 ```
 
-**Response:**
+Leave out `trialAmount` for a free trial. `amount` is always the recurring price, charged when the trial ends. Other options are `description`, `imageUrl`, `successUrl`, `cancelUrl`, `webhookUrl`, `taxRateId`, `metadata`, `expiresAt` and `checkoutFields`.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | Link UUID |
-| `checkoutUrl` | `string` | Shareable payment URL |
-| `amount` | `number` | Payment amount |
-| `currency` | `string` | Settlement currency |
-| `name` | `string \| null` | Product name shown in the dashboard's Products grid |
-| `imageUrl` | `string \| null` | Product thumbnail shown in the dashboard's Products grid |
-| `status` | `'active' \| 'cancelled'` | Link status |
-| `sellerMode` | `'mor' \| 'crypto'` | How this link settles |
-| `type` | `'one_time' \| 'subscription'` | Link type |
-| `billingInterval` | `'month' \| 'year' \| null` | Cadence for subscriptions; null for one-time |
-| `trialPeriodDays` | `number \| null` | Trial length in days; null when there is no trial |
-| `trialAmount` | `number \| null` | What the whole trial costs; null when it is free |
-| `paymentCount` | `number` | Times this link has been paid |
-| `createdAt` | `string` | ISO 8601 |
+| Method | What it does |
+|---|---|
+| `paymentLinks.create(params)` | Create a product or a subscription plan |
+| `paymentLinks.retrieve(id)` | Read one product |
+| `paymentLinks.list({ limit, offset })` | List products and plans |
+| `paymentLinks.cancel(id)` | Cancel a product, so its link stops working |
 
-### `paymentLinks.retrieve(id)`
+## Checkouts
+
+A checkout is one buyer's payment session. Create one on your server when you want to attach your own data, such as the signed-in user's ID in `metadata`.
 
 ```typescript
-const link = await agentaos.paymentLinks.retrieve('uuid');
+const checkout = await agentaos.checkouts.create({
+  linkId: pro.id,                 // start from a product; or pass amount and currency
+  buyerEmail: 'ana@example.com',  // prefill; also buyerName, buyerCompany, buyerCountry, buyerAddress, buyerVat
+  metadata: { userId: 'user_123' },
+  expiresIn: 1800,                // seconds, 300 to 86400
+});
 ```
 
-### `paymentLinks.list(params?)`
+The response carries `id`, `sessionId`, `checkoutUrl`, `status` (`'open'`, `'completed'`, `'expired'` or `'cancelled'`), `currency`, `metadata`, `invoiceId`, `invoiceNumber`, `expiresAt` and `createdAt`.
 
-```typescript
-const links = await agentaos.paymentLinks.list({ limit: 20, offset: 0 });
-```
-
-### `paymentLinks.cancel(id)`
-
-```typescript
-await agentaos.paymentLinks.cancel('uuid');
-```
-
----
+| Method | What it does |
+|---|---|
+| `checkouts.create(params)` | Start a checkout from a product, or from an amount and currency |
+| `checkouts.retrieve(sessionId)` | Read one checkout and its status |
+| `checkouts.list({ status, limit, offset })` | List checkouts |
+| `checkouts.cancel(sessionId)` | Cancel an open checkout |
 
 ## Subscriptions
 
-Read + manage subscriptions. Subscriptions are **created by buyers** on the hosted checkout (paying a payment link with `type: 'subscription'`) — this resource is the merchant-side management surface (list, cancel), mirroring the dashboard. There is no `create` here by design.
-
-### `subscriptions.list(params?)`
-
-Paginated — returns `{ items, total, hasMore }` (`total` is the full count, `hasMore` tells you whether another page remains).
+Buyers start subscriptions on the checkout of a subscription plan. The SDK manages them after that, so there is no `create`.
 
 ```typescript
-const page = await agentaos.subscriptions.list({
-  limit: 20,            // 1-100, default 20
-  offset: 0,
-  discountCode: 'LAUNCH20',   // optional: only subscribers who typed this code
+const page = await agentaos.subscriptions.list({ limit: 20 });
+// page.items[0]: { id, customerEmail, planName, status, unitAmountMinor, currency, currentPeriodEnd, discount, ... }
+
+// Cancel at the end of the paid period (default), or now with { atPeriodEnd: false }
+await agentaos.subscriptions.cancel('sub-id');
+
+// Move to another plan: quote first, then apply the same quote
+const quote = await agentaos.subscriptions.previewPlanChange('sub-id', 'target-product-id');
+console.log(quote.direction, quote.dueTodayMinor);
+await agentaos.subscriptions.changePlan('sub-id', {
+  targetLinkId: 'target-product-id',
+  prorationDate: quote.prorationDate,
 });
-console.log(page.total, page.hasMore);
 ```
 
-**Each item in `page.items`:**
+An upgrade charges the prorated difference now. A downgrade starts at the end of the current period and charges nothing today. The target plan must have the same currency and billing interval.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | Subscription UUID |
-| `customerEmail` | `string \| null` | Subscriber email |
-| `customerName` | `string \| null` | Subscriber name |
-| `planName` | `string \| null` | The plan (subscription payment link) name or description |
-| `billingInterval` | `'month' \| 'year' \| null` | Billing cadence |
-| `status` | `'incomplete' \| 'incomplete_expired' \| 'trialing' \| 'active' \| 'past_due' \| 'canceled' \| 'unpaid' \| 'paused'` | Current status |
-| `discount` | `{ code, kind } \| null` | The code this subscriber typed; `kind` is `'discount'` or `'tracking'`. What it took off is on the first invoice |
-| `unitAmountMinor` | `number` | Per-cycle amount in integer minor units (e.g. `1999` = €19.99) |
-| `currency` | `string` | Settlement currency |
-| `currentPeriodEnd` | `string \| null` | ISO 8601 end of the current paid period; null before the first cycle books |
-| `stripeSubscriptionId` | `string \| null` | Underlying Stripe subscription ID |
+Amounts that end in `Minor` are integers in minor units: `1999` is 19.99.
 
-### `subscriptions.cancel(id, params?)`
+| Method | What it does |
+|---|---|
+| `subscriptions.list({ limit, offset, discountCode })` | List subscriptions; `discountCode` shows only the subscribers one code brought in |
+| `subscriptions.cancel(id, { atPeriodEnd })` | Cancel at period end (default) or now. No refund |
+| `subscriptions.previewPlanChange(id, targetLinkId)` | Quote a plan change without applying it |
+| `subscriptions.changePlan(id, { targetLinkId, prorationDate })` | Apply a quoted plan change |
+| `subscriptions.invoices(id)` | The subscription's invoices, newest first |
+| `subscriptions.credit(id, { amountMinor, reason, idempotencyKey })` | Give credit that comes off the next invoice |
+| `subscriptions.credits(id)` | Credits given, and the customer's unspent balance |
 
-Defaults to cancel-at-period-end — the subscriber keeps the current paid period, no refund. Pass `{ atPeriodEnd: false }` to cancel immediately. Idempotent on an already-canceled subscription.
-
-```typescript
-// Cancel at period end (default) — subscriber keeps access until currentPeriodEnd
-await agentaos.subscriptions.cancel('uuid');
-
-// Cancel immediately — access revoked now, no refund
-await agentaos.subscriptions.cancel('uuid', { atPeriodEnd: false });
-```
-
-**Response:**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `status` | `SubscriptionStatus` | Status after the cancellation |
-| `currentPeriodEnd` | `string \| null` | ISO 8601 end of the current paid period |
-| `cancelAtPeriodEnd` | `boolean` | Whether the subscription is scheduled to cancel at period end |
-| `effectiveCancelDate` | `string \| null` | ISO 8601 date the cancellation takes effect |
-
-### `subscriptions.credit(id, params)`
-
-Put credit on a subscriber's account with you. It comes off their next invoice, reducing what their card is charged; it is not a refund and no money moves out. Owner or admin on a signed-in session only — an API key cannot, because the credit has to name the person who gave it.
-
-`idempotencyKey` is **required**. It rides the `Idempotency-Key` header, and it is the only thing standing between a timeout you retry and a subscriber credited twice: there is no local record of a credit for the server to recognise a repeat by. Send the same key when you retry the same grant; send a different one when you mean to credit twice.
-
-```typescript
-const credit = await agentaos.subscriptions.credit('uuid', {
-  amountMinor: 500,                        // 5.00 in the subscription's currency
-  reason: 'Two days of downtime in August',
-  idempotencyKey: 'credit-2026-08-downtime-acme',
-});
-console.log(credit.nextInvoiceDueAfterCreditMinor);   // what the next invoice will take
-```
-
-**Response:**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | The card processor's own id for the entry |
-| `amountMinor` | `number` | Credit given, integer minor units |
-| `currency` | `string` | The subscription's currency |
-| `creditBalanceMinor` | `number` | All unspent credit this customer has with you |
-| `nextInvoiceMinor` | `number` | What the next invoice would have taken |
-| `nextInvoiceDueAfterCreditMinor` | `number` | What it will take now |
-| `nextInvoiceAt` | `string` | ISO 8601 |
-| `createdBy` | `string` | Id of the person who gave it |
-
-### `subscriptions.credits(id)`
-
-Credits given on this subscription, newest first, and what is still unspent. `balanceMinor` is the **customer's** whole unspent credit with you: a buyer with two subscriptions shares one balance.
-
-```typescript
-const { items, balanceMinor } = await agentaos.subscriptions.credits('uuid');
-```
-
----
+A credit reduces what the subscriber's next invoice charges. It is not a refund. Only an owner or admin signed in with `agenta login` can give credit, because the credit records who gave it; an API key cannot. `idempotencyKey` is required: send the same key when you retry the same credit, so the subscriber is not credited twice.
 
 ## Discount codes
 
-Codes a buyer types at checkout on a subscription plan. A code can take a percentage off, a fixed amount off, or nothing at all — a code that changes no price still records who it brought in, which is how a referral works when the referred buyer pays full price. The code string is yours, so two merchants can both run `SAVE20`.
-
-### `discountCodes.create(params)`
-
-Terms are fixed once the code exists: to change them, archive it and create another.
+Buyers type a discount code at checkout on a subscription plan. A code takes a percentage off, a fixed amount off, or nothing. A code that takes nothing off still records who it brought in, which is how a referral works.
 
 ```typescript
 const code = await agentaos.discountCodes.create({
   code: 'LAUNCH20',
-  name: 'Launch week',
-  percentOff: 20,          // or amountOffMinor: 500 — at most one of the two
-  maxRedemptions: 100,     // optional
-  linkId: 'plan-uuid',     // optional: limit it to one plan
+  percentOff: 20,        // or amountOffMinor: 500; set at most one
+  maxRedemptions: 100,   // optional
+  linkId: pro.id,        // optional: limit it to one plan
 });
+
+const detail = await agentaos.discountCodes.get(code.id);
+console.log(detail.termsLabel, detail.timesRedeemed); // '20% off', 14
+
+await agentaos.discountCodes.archive(code.id); // stops the code now
 ```
 
-Set neither `percentOff` nor `amountOffMinor` and you get a tracking-only code, which changes no price.
+The terms of a code do not change after you create it. To change them, archive the code and create a new one. Subscribers who already used an archived code keep their discount. `discountCodes.list({ limit, offset })` lists your codes without their terms; `get` is the call that returns them.
 
-### `discountCodes.list(params?)` · `get(id)` · `archive(id)`
+## Customers and invoices
 
-`list` is paginated and reads no terms — what each code takes off comes from the card processor, and fetching one per row would be a call per row. `get` is the one call that reports them.
+AgentaOS issues an invoice for each paid sale and sends the buyer a receipt.
+
+| Method | What it does |
+|---|---|
+| `customers.list({ limit, offset })` | The customers who paid you |
+| `invoices.list({ from, to, status, limit, offset })` | List invoices; `status` is `'all'`, `'issued'` or `'voided'` |
+| `invoices.retrieve(id)` | Read one invoice |
+| `invoices.void(id)` | Void an invoice |
+| `invoices.downloadPdf(id)` | The invoice PDF, as a `Buffer` |
+| `invoices.getReceipt(id)` | The receipt PDF for a paid invoice, as a `Buffer` |
+| `invoices.sendReceipt(id)` | Send the receipt email to the buyer again; returns `sentTo` |
+| `invoices.downloadStatement({ from, to })` | A statement PDF for a date range |
+| `invoices.exportCsv({ from, to, status })` | Invoices as CSV text |
+| `transactions.list({ direction, from, to, limit, offset })` | Money in and out, by date |
 
 ```typescript
-const page = await agentaos.discountCodes.list({ limit: 20 });
-const detail = await agentaos.discountCodes.get('code-uuid');
-console.log(detail.termsLabel, detail.timesRedeemed);   // '20% off', 14
+import { writeFileSync } from 'node:fs';
 
-await agentaos.discountCodes.archive('code-uuid');       // stops it now
+writeFileSync('receipt.pdf', await agentaos.invoices.getReceipt('invoice-id'));
 ```
 
-Archiving stops the code working immediately; subscribers who already used it keep their discount.
+## Going live
 
-To see who one code brought in, filter the subscription list by it:
+Your account starts in test mode. Verify your business to take live payments.
 
-```typescript
-const page = await agentaos.subscriptions.list({ discountCode: 'LAUNCH20' });
-```
+| Method | What it does |
+|---|---|
+| `goLive.get()` | Where the account is on the way to live payments: verification, payout account, open change requests |
+| `accountReview.submit(details)` | Submit business verification |
+| `accountReview.get()` | The verification on file, or `null` |
+| `accountReview.resubmit()` | Send the verification back for review after you make the requested changes |
+| `accountReview.requestAudit(details)` | Ask for the free Revenue & Pricing Audit |
 
----
+## Platforms
 
-## Customers
-
-Read the customers who have paid you (mirrors the dashboard Customers list).
-
-### `customers.list(params?)`
-
-Paginated — returns `{ items, total, hasMore }` (`total` is the full count, `hasMore` tells you whether another page remains).
+Platforms are in private preview. A platform runs billing for its clients' businesses from one account. To act for a business you manage, create the client with `business`, or pass `{ business }` as the last argument of any call.
 
 ```typescript
-const page = await agentaos.customers.list({
-  limit: 20,   // 1-100, default 20
-  offset: 0,
+const { business, inviteUrl } = await agentaos.businesses.create({
+  name: 'ClientCo',
+  country: 'EE',
+  clientEmail: 'ana@example.com', // invites your client as the business's admin
 });
-console.log(page.total, page.hasMore);
+
+const forClient = new AgentaOS(process.env.AGENTAOS_API_KEY!, { business: business.id });
+await forClient.paymentLinks.list();
 ```
 
-**Each item in `page.items`:**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | Customer UUID |
-| `email` | `string` | Customer email |
-| `name` | `string \| null` | Customer name |
-| `country` | `string \| null` | ISO 3166-1 alpha-2 country code |
-| `vatNumber` | `string \| null` | VAT number on file |
-| `stripeCustomerId` | `string \| null` | Underlying Stripe customer ID |
-| `createdAt` | `string` | ISO 8601 |
-
----
-
-## Transactions
-
-Unified ledger of all confirmed inbound (received) and outbound (sent) payments.
-
-### `transactions.list(params?)`
-
-```typescript
-const txs = await agentaos.transactions.list({
-  direction: 'inbound',   // 'all' | 'inbound' | 'outbound'
-  from: '2026-03-01',     // ISO 8601 date
-  to: '2026-03-31',       // ISO 8601 date
-  limit: 50,
-  offset: 0,
-});
-```
-
-**Response item:**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | Transaction UUID |
-| `direction` | `'inbound' \| 'outbound'` | Payment direction |
-| `amount` | `number` | Amount in settlement token |
-| `paymentToken` | `string` | Token used (e.g. 'USDC') |
-| `txHash` | `string \| null` | On-chain transaction hash |
-| `network` | `string` | CAIP-2 network (e.g. 'eip155:8453') |
-| `payerAddress` | `string` | Sender wallet address |
-| `toAddress` | `string \| null` | Recipient (outbound only) |
-| `status` | `'confirmed' \| 'pending' \| 'failed'` | Transaction status |
-| `createdAt` | `string` | ISO 8601 |
-
----
-
-## Invoices
-
-Tax-compliant invoice records generated from confirmed payments.
-
-### `invoices.list(params?)`
-
-```typescript
-const invoices = await agentaos.invoices.list({
-  from: '2026-03-01',
-  to: '2026-03-31',
-  status: 'issued',        // 'all' | 'issued' | 'voided'
-  limit: 50,
-});
-```
-
-### `invoices.retrieve(id)`
-
-```typescript
-const invoice = await agentaos.invoices.retrieve('uuid');
-```
-
-**Response:**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `invoiceNumber` | `string` | e.g. 'INV-2026-0001' |
-| `amount` | `number` | Crypto amount |
-| `fiatAmount` | `number \| null` | EUR/USD equivalent |
-| `fiatCurrency` | `string \| null` | 'EUR' or 'USD' |
-| `exchangeRate` | `number \| null` | Rate at settlement time |
-| `taxRate` | `number \| null` | Applied tax rate (e.g. 19) |
-| `taxAmount` | `number \| null` | Tax amount |
-| `taxName` | `string \| null` | e.g. 'DE VAT' |
-| `merchantName` | `string \| null` | Your business name |
-| `buyerEmail` | `string \| null` | Customer email |
-| `status` | `'issued' \| 'voided'` | Invoice status |
-
-### `invoices.void(id)`
-
-```typescript
-await agentaos.invoices.void('uuid');
-```
-
-### `invoices.downloadPdf(id)`
-
-```typescript
-const pdf = await agentaos.invoices.downloadPdf('uuid');
-fs.writeFileSync('invoice.pdf', pdf);
-```
-
-### `invoices.downloadStatement(params)`
-
-Monthly statement PDF (Wise-style) with balance reconciliation, VAT summary, and transaction ledger.
-
-```typescript
-const statement = await agentaos.invoices.downloadStatement({
-  from: '2026-03-01',
-  to: '2026-03-31',
-});
-fs.writeFileSync('march-statement.pdf', statement);
-```
-
-### `invoices.exportCsv(params?)`
-
-```typescript
-const csv = await agentaos.invoices.exportCsv({
-  from: '2026-03-01',
-  to: '2026-03-31',
-  status: 'issued',
-});
-fs.writeFileSync('invoices.csv', csv);
-```
-
-### `invoices.getReceipt(id)`
-
-Download the receipt PDF for a paid invoice. Falls back to the invoice PDF for invoices issued before receipts existed.
-
-```typescript
-const receipt = await agentaos.invoices.getReceipt('uuid');
-fs.writeFileSync('receipt.pdf', receipt);
-```
-
-### `invoices.sendReceipt(id)`
-
-Re-send the receipt email to the buyer on file. Paid invoices only.
-
-```typescript
-const result = await agentaos.invoices.sendReceipt('uuid');
-console.log(result.sentTo); // buyer email the receipt was sent to
-```
-
----
+The other methods are `businesses.list()`, `retrieve(id)`, `resendInvitation(id)`, `revokeInvitation(id)` and `createVerificationLink(id)`. See [Build a platform](https://docs.agentaos.ai/guides/build-a-platform).
 
 ## Webhooks
 
-Verify incoming webhook signatures. Uses HMAC-SHA256 with timing-safe comparison.
-
-### `webhooks.verify(payload, signature, secret)`
+Set `webhookUrl` on a product or a checkout. AgentaOS signs each event with HMAC-SHA256. Verify the signature against the raw request body, before any JSON parser runs:
 
 ```typescript
 import express from 'express';
 
 app.post('/webhooks', express.raw({ type: 'application/json' }), (req, res) => {
+  let event;
   try {
-    const event = agentaos.webhooks.verify(
-      req.body,                                    // raw body (string or Buffer)
-      req.headers['x-agentaos-signature'] as string, // signature header
-      process.env.AGENTAOS_WEBHOOK_SECRET!,        // your webhook secret
+    event = agentaos.webhooks.verify(
+      req.body,                                // raw body: string or Buffer
+      req.header('x-agentaos-signature') ?? '',
+      process.env.AGENTAOS_WEBHOOK_SECRET!,
     );
-
-    switch (event.type) {
-      case 'checkout.session.completed':
-        // Payment received
-        console.log('Paid:', event.data.amount, event.data.currency);
-        console.log('Tx:', event.data.txHash);
-        console.log('Session:', event.data.sessionId);
-        break;
-
-      case 'send.completed':
-        // Outbound send confirmed
-        console.log('Sent:', event.data.amount, event.data.token);
-        break;
-
-      case 'send.failed':
-        // Outbound send failed
-        console.log('Failed:', event.data.transactionId);
-        break;
-    }
-
-    res.sendStatus(200);
-  } catch (err) {
-    res.status(400).send('Invalid signature');
+  } catch {
+    return res.status(400).send('Invalid signature');
   }
+
+  if (event.type === 'checkout.session.completed') {
+    // Give access to event.data.metadata.userId
+  }
+  res.sendStatus(200);
 });
 ```
 
-**Signature format:** `t=<unix_timestamp>,v1=<hmac_hex>`
+`verify` rejects a signature that is older than 300 seconds. Every event has a `type`, a `data` object and the `business` it belongs to.
 
-**Webhook events:**
+| Event | When it is sent |
+|---|---|
+| `checkout.session.completed` | A buyer paid a checkout |
+| `subscription.created` | A subscription started |
+| `subscription.renewed` | A renewal was paid |
+| `subscription.payment_failed` | A payment on a subscription failed |
+| `subscription.updated` | The plan changed, or a cancellation was scheduled or undone |
+| `subscription.canceled` | The subscription ended |
+| `dispute.created` | A buyer's bank opened a dispute on a sale |
+| `dispute.closed` | The dispute closed |
+| `account.updated` | The verification of a business you manage changed |
+| `webhook.test` | You sent a test event |
 
-| Event | When |
-|-------|------|
-| `checkout.session.completed` | Payment confirmed on-chain |
-| `send.completed` | Outbound send broadcast succeeded |
-| `send.failed` | Outbound send broadcast failed |
+## Errors
 
-### `checkout.session.completed` data
+Every error extends `AgentaOSError`, which has `status` and `message`.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `linkId` | `string` | Payment link secure ID |
-| `sessionId` | `string` | Session ID |
-| `amount` | `string` | Amount paid |
-| `currency` | `string` | Settlement currency |
-| `txHash` | `string` | On-chain transaction hash |
-| `payer` | `string` | Payer wallet address |
-| `payerType` | `'human' \| 'agent'` | Who paid |
-| `network` | `string` | CAIP-2 network |
-| `metadata` | `object` | Custom metadata from session |
-
----
-
-## Error Handling
-
-```typescript
-import {
-  AgentaOSError,
-  AuthenticationError,
-  NotFoundError,
-  RateLimitError,
-  ValidationError,
-} from '@agentaos/pay';
-
-try {
-  await agentaos.checkouts.create({ amount: -1 });
-} catch (err) {
-  if (err instanceof ValidationError) {
-    console.log('Invalid params:', err.message);
-  } else if (err instanceof AuthenticationError) {
-    console.log('Bad API key:', err.message);
-  } else if (err instanceof RateLimitError) {
-    console.log('Rate limited, retry after:', err.retryAfter, 'ms');
-  } else if (err instanceof NotFoundError) {
-    console.log('Not found:', err.message);
-  } else if (err instanceof AgentaOSError) {
-    console.log('API error:', err.status, err.message);
-  }
-}
-```
-
-| Error | HTTP Status | When |
-|-------|-------------|------|
-| `AuthenticationError` | 401 | Invalid or expired API key |
-| `PermissionError` | 403 | Key can't access this resource |
-| `NotFoundError` | 404 | Resource doesn't exist |
-| `ValidationError` | 400 | Invalid request params |
-| `RateLimitError` | 429 | Too many requests |
-| `IdempotencyError` | 409 | Duplicate idempotency key |
-| `TimeoutError` | — | Request timed out |
-| `ApiError` | 5xx | Server error (auto-retried) |
-| `WebhookVerificationError` | — | Invalid webhook signature |
-
----
-
-## Checkout Flow (Web Shop)
-
-```
-Your Server                    AgentaOS                     Customer
-──────────                     ────────                     ────────
-1. POST checkouts.create()  →
-   { amount, successUrl,
-     cancelUrl, webhookUrl }
-                            ←  { checkoutUrl, sessionId }
-2. Redirect customer       →                            →  Opens checkoutUrl
-                                                           Connects wallet
-                                                           Pays on-chain
-                            ←  Webhook: checkout.session.completed
-3. Verify webhook
-4. Fulfill order
-                                                        ←  Redirects to successUrl
-```
-
-## Requirements
-
-- Node.js 20+
-- ESM only (`"type": "module"`)
+| Error | HTTP status | When |
+|---|---|---|
+| `ValidationError` | 400 | The request parameters are not valid |
+| `AuthenticationError` | 401 | The API key is not valid or has expired |
+| `PermissionError` | 403 | The key cannot access this resource |
+| `NotFoundError` | 404 | The resource does not exist |
+| `IdempotencyError` | 409 | The idempotency key was already used |
+| `RateLimitError` | 429 | Too many requests; read `retryAfter` |
+| `ApiError` | 5xx | A server error, retried up to `maxRetries` times |
+| `TimeoutError` | none | The request timed out |
+| `WebhookVerificationError` | none | The webhook signature does not match |
 
 ## License
 
