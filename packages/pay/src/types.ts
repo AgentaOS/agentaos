@@ -743,6 +743,8 @@ export interface SiteChecklist {
  *  this object literally (request bodies are never transformed). The five
  *  required acknowledgements must all be true or the server rejects the submit. */
 export interface SubmitAccountReviewChecklist {
+	/** The business sells none of the categories AgentaOS does not support.
+	 *  `false` is refused: the business cannot be verified. */
 	prohibited_ok: boolean;
 	checklist_ack: boolean;
 	cooldown_ack: boolean;
