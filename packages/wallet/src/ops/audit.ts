@@ -56,7 +56,7 @@ export const auditRequest = operation({
 	},
 	describe({ audit }) {
 		return lines(
-			`Your free Revenue & Pricing Audit of ${audit.productUrl} is being written by a person.`,
+			`Your free Revenue & Pricing Audit of ${audit.productUrl} is being written by our pricing agent.`,
 			'Nothing to do until it is ready; audit show tells you when it is and saves the report.',
 		);
 	},
@@ -107,7 +107,7 @@ export const auditShow = operation({
 			return 'You have not asked for the free Revenue & Pricing Audit yet. Ask with audit request; it costs nothing and gates nothing.';
 		}
 		if (!audit.reportUrl) {
-			return 'Your audit is being written by a person. Nothing to do until it is ready.';
+			return 'Your audit is being written by our pricing agent. Nothing to do until it is ready.';
 		}
 		return lines(
 			audit.grade ? `Your audit is ready, graded ${audit.grade}.` : 'Your audit is ready.',

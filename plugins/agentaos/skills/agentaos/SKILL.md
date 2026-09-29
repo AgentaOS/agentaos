@@ -212,14 +212,14 @@ Rules: `subscription: true` needs `interval` `month` or `year`; `trialDays` (1�
 
 ## Onboarding: audit and verification
 
-`agenta_status_get` → `goLive` says where the account is. Two steps are done from the tools; both are reviewed by a person.
+`agenta_status_get` → `goLive` says where the account is. Two steps are done from the tools: the audit is written by our pricing agent, the verification is reviewed by a person.
 
 **Free Revenue & Pricing Audit** (no identity needed, do this first):
 
 - `agenta_audit_request` `{"url":"https://example.com/pricing","description":"One sentence on what it does","category":"saas","delivery":"instant_digital"}`
 - `agenta_audit_show` `{}` — the state, and the report link once it exists.
 
-**Tell the user:** the audit is being written by a person, it costs nothing and gates nothing, and there is nothing to do until it is ready. When `agenta_audit_show` returns `reportUrl`, give them the link (and the grade if there is one).
+**Tell the user:** the audit is being written by our pricing agent, it costs nothing and gates nothing, and there is nothing to do until it is ready. When `agenta_audit_show` returns `reportUrl`, give them the link (and the grade if there is one).
 
 **Business verification** (unlocks live payments). Ask the user for every value before calling; never invent legal details.
 
