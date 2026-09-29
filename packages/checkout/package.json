@@ -1,6 +1,6 @@
 {
 	"name": "@agentaos/checkout",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "AgentaOS embedded checkout for the browser: inline or overlay on your own page, with React support",
 	"license": "Apache-2.0",
 	"keywords": [

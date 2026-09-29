@@ -1,5 +1,19 @@
 # @agentaos/pay
 
+## 2.4.0
+
+### Minor Changes
+
+- [#48](https://github.com/AgentaOS/agentaos/pull/48) [`32afd60`](https://github.com/AgentaOS/agentaos/commit/32afd601a85d2b26927784883450c366ee8fa7f9) Thanks [@PancheI](https://github.com/PancheI)! - Connect — manage your clients' businesses and act for them, the way Stripe Connect does.
+  Add `businesses.list/retrieve/create/resendInvitation/revokeInvitation/createVerificationLink()`. `create` invites your client as admin and returns `inviteUrl`; pass `sendInvitationEmail: false` to send it yourself (white-label). `createVerificationLink` is the identity check link only your client can complete (Stripe's Account Links).
+  Act for a business with `new AgentaOS(key, { business })` or `{ business }` as the last argument of any call — sent as `AgentaOS-Account` (Stripe's `Stripe-Account`).
+  `WebhookEvent` now lists every event we send — adds `dispute.created`, `dispute.closed`, `account.updated` and `webhook.test` — and each carries `business`: the business it happened in.
+  Fix: a call answered with 204 No Content resolves instead of failing.
+
+- [#48](https://github.com/AgentaOS/agentaos/pull/48) [`32afd60`](https://github.com/AgentaOS/agentaos/commit/32afd601a85d2b26927784883450c366ee8fa7f9) Thanks [@PancheI](https://github.com/PancheI)! - Add `discountCodes.create/list/get/archive()`: codes a buyer types at checkout on a subscription plan, including tracking-only codes that change no price and exist to record who a referral brought in. `subscriptions.list({ discountCode })` filters by one, and every `Subscription` now carries the `discount` it was bought with.
+  Add `subscriptions.credit(id, params)` and `subscriptions.credits(id)`: credit against a subscriber's next invoice. `idempotencyKey` is a required parameter, not an optional one — there is no local record of a credit for the server to recognise a repeat by, so a retry without the caller's own key credits twice.
+  Add `trialAmount` to `paymentLinks.create()` and to `PaymentLink`, so a plan can sell a paid trial ("9 for the first 30 days, then 29 a month") instead of only a free one.
+
 ## 2.3.0
 
 ### Minor Changes

@@ -1,5 +1,15 @@
 # @agentaos/mcp-remote
 
+## 0.1.2
+
+### Patch Changes
+
+- [#48](https://github.com/AgentaOS/agentaos/pull/48) [`32afd60`](https://github.com/AgentaOS/agentaos/commit/32afd601a85d2b26927784883450c366ee8fa7f9) Thanks [@PancheI](https://github.com/PancheI)! - The hosted connector answers GET with 405 and replies with plain JSON (a stateless server has nothing to stream), and every tool passes `business` on, so a platform acting for a managed business never runs as itself.
+
+- Updated dependencies [[`32afd60`](https://github.com/AgentaOS/agentaos/commit/32afd601a85d2b26927784883450c366ee8fa7f9), [`32afd60`](https://github.com/AgentaOS/agentaos/commit/32afd601a85d2b26927784883450c366ee8fa7f9), [`32afd60`](https://github.com/AgentaOS/agentaos/commit/32afd601a85d2b26927784883450c366ee8fa7f9), [`32afd60`](https://github.com/AgentaOS/agentaos/commit/32afd601a85d2b26927784883450c366ee8fa7f9)]:
+  - agentaos@3.2.0
+  - @agentaos/pay@2.4.0
+
 ## 0.1.1
 
 ### Patch Changes
