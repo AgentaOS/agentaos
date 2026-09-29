@@ -229,7 +229,7 @@ Rules: `subscription: true` needs `interval` `month` or `year`; `trialDays` (1â€
 4. `agenta_verify_resubmit` `{}` â€” after the user has made the changes we asked for; nothing is retyped.
 
 - `category`: `saas | digital | services | marketplace | physical | other`. `delivery`: `instant_digital | email_delivery | subscription_access | manual | scheduled_service | physical_shipped | other`. `volume`: `under_1k | 1k_10k | 10k_50k | over_50k`.
-- `entity: "individual"` needs no `registrationNumber`. `displayName` is what buyers see on their statement (defaults to the legal name). `restricted: true` declares a regulated activity: still reviewed, higher chance of a decline.
+- `entity: "individual"` needs no `registrationNumber`. `displayName` is what buyers see on their statement (defaults to the legal name). AgentaOS does not sell the categories `agenta_verify_declaration` lists as not supported; an application for one of them is refused, not reviewed.
 - Pass `acceptDeclaration: true` only after the user has confirmed the five statements themselves.
 - A submitted application cannot be edited; `agenta_verify_submit` on an already-submitted account sends nothing and says so.
 

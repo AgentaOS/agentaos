@@ -41,9 +41,9 @@ const DECLARATION = [
 	"My product isn't built for spam, fraud or harassment.",
 ];
 
-/** Regulated and restricted activities. Answering `--restricted` does not block
- *  the application: it means extra checks and a higher chance of a decline. */
-const RESTRICTED_ACTIVITIES = [
+/** The categories we do not sell. A business that sells one cannot be
+ *  verified: the server refuses the application, it does not review it. */
+const NOT_SUPPORTED = [
 	'Adult content',
 	'Gambling',
 	'Weapons',
@@ -57,8 +57,7 @@ const RESTRICTED_ACTIVITIES = [
 const CONSEQUENCE =
 	'If one turns out not to be true, we stop payouts and may close the account. A review rejected for a prohibited product or fraud cannot be resubmitted for three months.';
 
-const RESTRICTED_WARNING =
-	'A regulated or restricted activity was declared. The application still goes to review, but our payment partner runs extra checks and there is a higher chance it comes back declined.';
+const NOT_SUPPORTED_RULE = 'An application for one of these is refused, not reviewed.';
 
 export const verifyDeclaration = operation({
 	name: 'verify.declaration',
@@ -67,7 +66,7 @@ export const verifyDeclaration = operation({
 	async run() {
 		return {
 			declaration: DECLARATION,
-			restrictedActivities: RESTRICTED_ACTIVITIES,
+			notSupported: NOT_SUPPORTED,
 			consequence: CONSEQUENCE,
 		};
 	},
@@ -76,7 +75,8 @@ export const verifyDeclaration = operation({
 			'Submitting verification attests that:',
 			...result.declaration.map((statement) => `  - ${statement}`),
 			'',
-			`Regulated or restricted activities (declare with --restricted): ${result.restrictedActivities.join(', ')}.`,
+			`Not supported (we do not sell these): ${result.notSupported.join(', ')}.`,
+			NOT_SUPPORTED_RULE,
 			result.consequence,
 		);
 	},
@@ -110,15 +110,13 @@ const submitInput = z.object({
 	delivery: oneOf(DELIVERY, '--delivery').optional().describe(DELIVERY.join(' | ')),
 	volume: oneOf(VOLUME_BANDS, '--volume').optional().describe(VOLUME_BANDS.join(' | ')),
 	customers: z.boolean().optional().describe('The merchant already has paying customers'),
-	restricted: z
-		.boolean()
-		.optional()
-		.describe('The merchant sells a regulated or restricted activity'),
 	usageClaims: z.boolean().optional().describe('The site shows reviews or user counts'),
 	acceptDeclaration: z
 		.boolean()
 		.optional()
-		.describe('Attest to the five statements (agenta verify declaration)'),
+		.describe(
+			'Attest to the five statements and that the merchant sells none of the not-supported categories (agenta verify declaration)',
+		),
 });
 
 type SubmitInput = z.infer<typeof submitInput>;
@@ -163,7 +161,7 @@ export function submitBody(input: SubmitInput): SubmitAccountReview {
 		...(input.description ? { productDescription: input.description } : {}),
 		displayName: input.displayName || legalName,
 		checklist: {
-			prohibited_ok: input.restricted !== true,
+			prohibited_ok: true,
 			checklist_ack: true,
 			cooldown_ack: true,
 			privacy_ok: true,
@@ -188,7 +186,6 @@ export interface VerifySubmitView {
 		submitted: boolean;
 		reason?: 'already_submitted';
 		reviewedBy?: string;
-		warning?: string;
 	};
 }
 
@@ -216,7 +213,6 @@ export const verifySubmit = operation({
 				label: 'In review',
 				submitted: true,
 				reviewedBy: 'a person, usually within 24 to 48 hours',
-				...(input.restricted ? { warning: RESTRICTED_WARNING } : {}),
 			},
 		};
 	},
@@ -232,7 +228,6 @@ export const verifySubmit = operation({
 		return lines(
 			'Your business verification is with us; a person reviews it, usually within 24 to 48 hours.',
 			'Nothing to do until we write back. verify status tells you where it has got to.',
-			verification.warning,
 		);
 	},
 });
