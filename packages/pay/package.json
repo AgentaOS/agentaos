@@ -1,8 +1,21 @@
 {
 	"name": "@agentaos/pay",
 	"version": "2.3.0",
-	"description": "AgentaOS Payment SDK — accept regulated stablecoin payments programmatically",
+	"description": "AgentaOS TypeScript SDK: sell digital products with a merchant of record that takes the payment, charges the VAT, issues the invoice and pays you out",
 	"license": "Apache-2.0",
+	"keywords": [
+		"payments",
+		"merchant-of-record",
+		"billing",
+		"subscriptions",
+		"invoices",
+		"checkout",
+		"vat",
+		"discount-codes",
+		"webhooks",
+		"sdk",
+		"typescript"
+	],
 	"author": "AgentaOS <hello@agentaos.ai>",
 	"repository": {
 		"type": "git",

@@ -2,7 +2,7 @@
 	"name": "agentaos",
 	"private": true,
 	"version": "0.1.0",
-	"description": "The financial OS for autonomous agents — 2-of-3 threshold ECDSA signing",
+	"description": "AgentaOS: the merchant of record for founders selling digital products. SDK, CLI, MCP server and embedded checkout.",
 	"author": "AgentaOS <hello@agentaos.ai>",
 	"license": "Apache-2.0",
 	"homepage": "https://github.com/AgentaOS/agentaos",

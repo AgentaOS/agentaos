@@ -2,404 +2,121 @@
 
 # AgentaOS
 
-### The Financial OS for the Agent Economy
+### Turn your users into paying customers
 
-Accept payments. Automate spending. Enforce guardrails on every transaction.
+The growth merchant of record for founders who sell digital products.
 
-[![npm](https://img.shields.io/npm/v/@agentaos/sdk?label=%40agentaos%2Fsdk)](https://www.npmjs.com/package/@agentaos/sdk)
+[![npm](https://img.shields.io/npm/v/@agentaos/pay?label=%40agentaos%2Fpay)](https://www.npmjs.com/package/@agentaos/pay)
 [![npm](https://img.shields.io/npm/v/agentaos?label=agenta%20CLI)](https://www.npmjs.com/package/agentaos)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](LICENSE)
-[![MPC](https://img.shields.io/badge/MPC-CGGMP24-8B5CF6.svg)](https://eprint.iacr.org/2021/060)
-[![Paper](https://img.shields.io/badge/Paper-Zenodo-blue.svg)](https://doi.org/10.5281/zenodo.18684027)
 
-[Quick Start](#quick-start) · [SDK](#sdk) · [CLI](#cli) · [MCP Server](#mcp-server) · [Paper](https://doi.org/10.5281/zenodo.18684027) · [Website](https://agentaos.ai)
+[Website](https://agentaos.ai) · [Docs](https://docs.agentaos.ai) · [Quickstart](https://docs.agentaos.ai/getting-started/quickstart) · [SDK](packages/pay) · [CLI](packages/wallet)
 
 </div>
 
----
+## What AgentaOS does
 
-## What is AgentaOS
+AgentaOS sells your product in its own name, as the merchant of record. For each sale, AgentaOS:
 
-The financial infrastructure for agents and the businesses they transact with.
+- takes the payment by card, or by bank transfer on EUR sales.
+- charges the VAT that applies to the buyer.
+- issues the invoice and sends the receipt.
+- pays you out to your bank account. Stablecoin payouts are in public preview.
 
-- **Agents get wallets.** Your AI agents spend autonomously — pay for APIs, settle invoices, execute trades.
-- **You set the rules.** Spending caps, approved vendors, daily budgets, business hours — enforced on every transaction. Agents cannot bypass them.
-- **Businesses accept agent payments.** One checkout for humans and AI agents. Instant settlement. No integration headaches.
-- **No single point of failure.** Private keys are split across three independent parties. No one — not even you — ever holds the full key.
+The same account also gives you:
 
----
+- subscriptions with trials, plan changes and credits.
+- discount codes, including codes that only track who a referral brought in.
+- invoices, receipts and a customer list.
+- a checkout you can embed on your own page.
+- platforms, to run billing for your clients' businesses (private preview).
 
-## Get Started in 30 Seconds
+Your account starts in test mode. Verify your business to take live payments.
 
-### From the browser
+## Start selling
 
-Go to [app.agentaos.ai](https://app.agentaos.ai), create a wallet, set your guardrails, and start transacting.
-
-### From the terminal
+Sign up at [app.agentaos.ai](https://app.agentaos.ai), or start from the terminal:
 
 ```bash
 npm install -g agentaos
-agenta login                                    # opens browser — sign in + activate wallet
-agenta status                                   # account overview
-agenta pay checkout -a 50 -c EUR                # create a payment checkout
-agenta sub create --name trading-bot     # create an agent sub-account
-agenta sub send 0xRecipient 0.01                # send ETH from sub-account
+agenta login
+agenta products create --name "Pro" -a 29 -c EUR --subscription --interval month
 ```
 
-### From code
+The last command prints the product's buyer link. Share the link anywhere: every buyer who opens it gets a checkout.
+
+To start a checkout from your own server, use the SDK:
 
 ```bash
-npm install @agentaos/sdk
+npm install @agentaos/pay
 ```
 
 ```typescript
-import { Agenta } from '@agentaos/sdk';
-import { createWalletClient, http, parseEther } from 'viem';
-import { baseSepolia } from 'viem/chains';
+import { AgentaOS } from '@agentaos/pay';
 
-const agent = await Agenta.connect({
-  apiSecret: process.env.AGENTA_API_SECRET!,
-  apiKey: process.env.AGENTA_API_KEY!,
+const agentaos = new AgentaOS(process.env.AGENTAOS_API_KEY!);
+
+const checkout = await agentaos.checkouts.create({
+  amount: 49,
+  currency: 'EUR',
+  description: 'Pro plan',
+  successUrl: 'https://example.com/welcome',
 });
 
-const client = createWalletClient({
-  account: agent.toViemAccount(),
-  chain: baseSepolia,
-  transport: http(),
-});
-
-const hash = await client.sendTransaction({
-  to: '0xRecipient...',
-  value: parseEther('0.01'),
-});
-
-agent.destroy();
+// Send the buyer to checkout.checkoutUrl
 ```
 
----
+The [quickstart](https://docs.agentaos.ai/getting-started/quickstart) takes you from sign-up to the first paid sale.
+
+## Set up billing with your AI coding agent
+
+The Claude Code plugin gives your coding agent the AgentaOS tools and a guide to the integration patterns:
+
+```bash
+claude plugin marketplace add AgentaOS/agentaos
+claude plugin install agentaos@agentaos
+```
+
+In Claude Code, type `/mcp`, choose `agentaos`, then **Authenticate**. You approve the connection in your browser, so there is no key to paste.
+
+Other MCP clients can run the MCP server from the `agentaos` package. It has 31 tools, the same operations as the CLI. See [MCP setup](https://docs.agentaos.ai/mcp/setup).
+
+## Embed the checkout on your page
+
+The embedded checkout shows your product's checkout inline, or as an overlay. Card, bank transfer, trials, discount codes and VAT work the same as on the hosted checkout.
+
+```html
+<script src="https://app.agentaos.ai/v1/agentaos.js"></script>
+<div id="checkout"></div>
+<script>
+  AgentaOS.checkout.open({
+    link: 'https://app.agentaos.ai/pay/<your-product-link>',
+    target: '#checkout',
+  });
+</script>
+```
+
+Add your site under **Settings → Developers → Approved sites** first. See [Embedded checkout](https://docs.agentaos.ai/payments/embedded-checkout).
 
 ## Packages
 
-| Package | npm | What it does |
-|---------|-----|--------------|
-| [`@agentaos/sdk`](packages/signer) | [![npm](https://img.shields.io/npm/v/@agentaos/sdk)](https://www.npmjs.com/package/@agentaos/sdk) | Threshold signing SDK — load shares, sign transactions, viem integration |
-| [`agentaos`](packages/wallet) | [![npm](https://img.shields.io/npm/v/agentaos)](https://www.npmjs.com/package/agentaos) | CLI + MCP server for AI assistants |
-| [`@agentaos/pay`](packages/pay) | [![npm](https://img.shields.io/npm/v/@agentaos/pay)](https://www.npmjs.com/package/@agentaos/pay) | Payment SDK — create checkouts, track payments |
-| [`@agentaos/core`](packages/core) | [![npm](https://img.shields.io/npm/v/@agentaos/core)](https://www.npmjs.com/package/@agentaos/core) | Interfaces and types (zero deps) |
-| [`@agentaos/engine`](packages/schemes) | [![npm](https://img.shields.io/npm/v/@agentaos/engine)](https://www.npmjs.com/package/@agentaos/engine) | CGGMP24 threshold ECDSA scheme |
-| [`@agentaos/chains`](packages/chains) | [![npm](https://img.shields.io/npm/v/@agentaos/chains)](https://www.npmjs.com/package/@agentaos/chains) | Ethereum chain adapter (viem) |
-| [`@agentaos/crypto`](packages/mpc-wasm) | [![npm](https://img.shields.io/npm/v/@agentaos/crypto)](https://www.npmjs.com/package/@agentaos/crypto) | CGGMP24 Rust WASM bindings |
+| Package | What it is | Docs |
+|---|---|---|
+| [`@agentaos/pay`](packages/pay) | TypeScript SDK for your server: checkouts, products, subscriptions, discount codes, customers, invoices, webhooks | [SDK overview](https://docs.agentaos.ai/sdk/pay-overview) |
+| [`agentaos`](packages/wallet) | The `agenta` CLI and the MCP server, one command per operation | [CLI install](https://docs.agentaos.ai/cli/install) |
+| [`@agentaos/checkout`](packages/checkout) | The embedded checkout for the browser, with React support. Not on npm yet: use the script tag above | [Embedded checkout](https://docs.agentaos.ai/payments/embedded-checkout) |
+| [`plugins/agentaos`](plugins/agentaos) | The Claude Code plugin | [MCP setup](https://docs.agentaos.ai/mcp/setup) |
+| [`packages/mcp-remote`](packages/mcp-remote) | The hosted MCP server at `mcp.agentaos.ai`, for assistants that connect over the web | [MCP setup](https://docs.agentaos.ai/mcp/setup) |
 
----
+To run billing for other businesses from one account, see [Build a platform](https://docs.agentaos.ai/guides/build-a-platform).
 
-## SDK
+## Example
 
-### Connect
+[`examples/paywall-demo`](examples/paywall-demo) is a small Express app with a paid Pro plan behind a login. It creates the checkout, confirms the payment, verifies the webhook and checks access.
 
-```typescript
-import { Agenta } from '@agentaos/sdk';
+## Also in this repository
 
-// Credentials from app.agentaos.ai → Create Wallet → copy credentials
-const agent = await Agenta.connect({
-  apiSecret: process.env.AGENTA_API_SECRET!,
-  apiKey: process.env.AGENTA_API_KEY!,
-});
-```
-
-### Send ETH
-
-```typescript
-const { txHash } = await agent.signTransaction({
-  to: '0xRecipient...',
-  value: parseEther('0.01'),
-});
-```
-
-### Call a Contract
-
-```typescript
-const { txHash } = await agent.signTransaction({
-  to: '0xContract...',
-  data: '0xa9059cbb...', // ERC-20 transfer
-  value: 0n,
-});
-```
-
-### Sign a Message
-
-```typescript
-const { signature, r, s, v } = await agent.signMessage('Hello from AgentaOS');
-```
-
-### viem Drop-in
-
-```typescript
-import { createWalletClient, http } from 'viem';
-import { baseSepolia } from 'viem/chains';
-
-const client = createWalletClient({
-  account: agent.toViemAccount(), // LocalAccount — works everywhere viem does
-  chain: baseSepolia,
-  transport: http(),
-});
-
-const hash = await client.sendTransaction({ to, value });
-const sig = await client.signMessage({ message: 'hello' });
-const sig = await client.signTypedData({ domain, types, primaryType, message });
-```
-
-### Cleanup
-
-```typescript
-agent.destroy(); // Wipes share material from memory
-```
-
----
-
-## CLI
-
-```bash
-npm install -g agentaos
-```
-
-**Account**
-
-| Command | What it does |
-|---------|--------------|
-| `agenta login` | Sign in via browser (device-code flow) |
-| `agenta status` | Account, wallet, and readiness overview |
-| `agenta logout` | Clear session |
-
-**Payments** — accept payments from humans and AI agents
-
-| Command | What it does |
-|---------|--------------|
-| `agenta pay checkout -a 50` | Create a checkout session |
-| `agenta pay get <sessionId>` | Get checkout details |
-| `agenta pay list` | List your checkouts |
-| `agenta subscriptions list` | List subscriptions |
-| `agenta subscriptions cancel <id>` | Cancel a subscription (at period end; `--now` for immediate) |
-| `agenta customers list` | List customers |
-| `agenta invoices list` | List invoices |
-| `agenta invoices receipt <id>` | Download the receipt PDF |
-| `agenta invoices send-receipt <id>` | Re-send the receipt email |
-
-**Agent Sub-accounts** — autonomous wallets with guardrails
-
-| Command | What it does |
-|---------|--------------|
-| `agenta sub create --name bot1` | Create a sub-account |
-| `agenta sub import --name bot1 --api-key ... --api-secret ...` | Import existing |
-| `agenta sub send <to> <amount>` | Send ETH — threshold-signed, policy-checked |
-| `agenta sub balance` | ETH + token balances |
-| `agenta sub policies get` | View signing policies |
-| `agenta sub policies set --file p.json` | Set policies from JSON |
-| `agenta sub pause` / `resume` | Pause or resume signing |
-| `agenta sub proxy` | JSON-RPC signing proxy for Foundry/Hardhat |
-
-All commands support `--json` for machine-readable output (AI agents, CI/CD).
-
-```bash
-agenta login
-agenta pay checkout -a 50 -c EUR -d "Invoice #42"
-agenta sub create --name trading-bot
-agenta sub send 0xRecipient 0.01 --network base-sepolia
-agenta sub proxy --port 8545  # then: forge script Deploy.s.sol --rpc-url http://localhost:8545 --broadcast
-```
-
----
-
-## MCP Server
-
-Connect any AI assistant to AgentaOS. Claude, Cursor, Windsurf — they sign transactions through the MCP protocol.
-
-### Claude Desktop
-
-```json
-{
-  "mcpServers": {
-    "agenta": {
-      "command": "npx",
-      "args": ["-y", "agentaos"],
-      "env": {
-        "AGENTA_API_KEY": "your-api-key",
-        "AGENTA_API_SECRET": "your-api-secret",
-        "AGENTAOS_GATEWAY_KEY": "sk_live_your-gateway-key"
-      }
-    }
-  }
-}
-```
-
-- **API Key** + **API Secret** — for wallet tools. Generated when you create a sub-account.
-- **Gateway Key** — for payment tools. Generated at [app.agentaos.ai](https://app.agentaos.ai) → API Keys.
-
-### Tools (37 total)
-
-**Payments** (19; each one is also a CLI command, `agenta_products_create` = `agenta products create`)
-
-| Tool | What it does |
-|------|--------------|
-| `agenta_status_get` | Account and go-live overview |
-| `agenta_audit_request` | Ask for the free Revenue & Pricing Audit |
-| `agenta_audit_show` | The audit state, and the report PDF once it exists |
-| `agenta_verify_declaration` | The five statements verification attests to |
-| `agenta_verify_submit` | Submit business verification so the merchant can accept live payments |
-| `agenta_verify_status` | Where the verification has got to |
-| `agenta_verify_resubmit` | Send back for review after making the changes we asked for |
-| `agenta_products_create` | Create a product (one-time) or a subscription plan |
-| `agenta_products_list` | List products and plans |
-| `agenta_pay_checkout` | Create a checkout session |
-| `agenta_pay_get` | Get checkout session status |
-| `agenta_pay_list` | List checkout sessions |
-| `agenta_subscriptions_list` | List subscriptions |
-| `agenta_subscriptions_cancel` | Cancel a subscription (at period end by default) |
-| `agenta_subscriptions_change_plan` | Move a subscription to another plan (upgrade charges now, downgrade at period end) |
-| `agenta_customers_list` | List customers |
-| `agenta_invoices_list` | List invoices |
-| `agenta_invoices_receipt` | The receipt PDF for a paid invoice |
-| `agenta_invoices_send_receipt` | Re-send the receipt email to the buyer on file |
-
-**Wallet**
-
-| Tool | What it does |
-|------|--------------|
-| `agenta_wallet_overview` | Address, balance, network |
-| `agenta_get_balances` | ETH + ERC-20 balances |
-| `agenta_send_eth` | Send ETH |
-| `agenta_send_token` | Send ERC-20 tokens |
-| `agenta_sign_message` | Sign a message |
-| `agenta_sign_typed_data` | Sign EIP-712 typed data |
-| `agenta_call_contract` | Write to a contract |
-| `agenta_read_contract` | Read contract state |
-| `agenta_simulate` | Simulate a transaction |
-
-**x402 (agent-to-agent payments)**
-
-| Tool | What it does |
-|------|--------------|
-| `agenta_x402_check` | Check if a URL requires payment |
-| `agenta_x402_discover` | Discover x402 payment requirements |
-| `agenta_x402_fetch` | Fetch a resource with x402 payment |
-
----
-
-## Framework Integrations
-
-### Vercel AI SDK
-
-```typescript
-import { Agenta } from '@agentaos/sdk';
-import { tool } from 'ai';
-import { parseEther } from 'viem';
-import { z } from 'zod';
-
-const agent = await Agenta.connect({
-  apiSecret: process.env.AGENTA_API_SECRET!,
-  apiKey: process.env.AGENTA_API_KEY!,
-});
-
-const sendETH = tool({
-  description: 'Send ETH using threshold signing',
-  parameters: z.object({
-    to: z.string().describe('Recipient address'),
-    amount: z.string().describe('Amount in ETH'),
-  }),
-  execute: async ({ to, amount }) => {
-    const result = await agent.signTransaction({
-      to,
-      value: parseEther(amount).toString(),
-    });
-    return { txHash: result.txHash };
-  },
-});
-```
-
-### LangChain
-
-```typescript
-import { Agenta } from '@agentaos/sdk';
-import { DynamicStructuredTool } from '@langchain/core/tools';
-import { parseEther } from 'viem';
-import { z } from 'zod';
-
-const agent = await Agenta.connect({
-  apiSecret: process.env.AGENTA_API_SECRET!,
-  apiKey: process.env.AGENTA_API_KEY!,
-});
-
-const sendETH = new DynamicStructuredTool({
-  name: 'agenta_send_eth',
-  description: 'Send ETH using threshold signing',
-  schema: z.object({ to: z.string(), amount: z.string() }),
-  func: async ({ to, amount }) => {
-    const result = await agent.signTransaction({
-      to,
-      value: parseEther(amount).toString(),
-    });
-    return JSON.stringify({ txHash: result.txHash });
-  },
-});
-```
-
-### Foundry / Hardhat
-
-```bash
-agenta sub proxy --port 8545
-forge script Deploy.s.sol --rpc-url http://localhost:8545 --broadcast
-```
-
----
-
-## Examples
-
-See [`examples/`](examples/) for complete working code:
-
-- **[viem-client](examples/viem-client/)** — Send ETH with the SDK
-- **[vercel-ai-sdk](examples/vercel-ai-sdk/)** — AI agent with signing tools
-- **[langchain](examples/langchain/)** — LangChain agent integration
-- **[claude-agent-sdk](examples/claude-agent-sdk/)** — Claude agent with signing
-- **[mcp](examples/mcp/)** — MCP server usage and testing
-- **[forge-proxy](examples/forge-proxy/)** — Foundry deployment through signing proxy
-
----
-
-## How It Works
-
-### Three Signing Paths
-
-| Path | Shares | When |
-|------|--------|------|
-| **Signer + Server** | Agent share + Server share | Normal autonomous operation |
-| **User + Server** | Passkey-encrypted share + Server share | Browser manual signing |
-| **Signer + User** | Agent share + User share | Server down or bypass |
-
-### Security Model
-
-- The full private key is **never reconstructed** — signing is a distributed computation between two share holders
-- Server shares are wiped from memory (`buffer.fill(0)`) after every operation
-- API keys stored as SHA-256 hashes — plaintext exists only on your machine
-- Based on the audited [LFDT-Lockness/cggmp21](https://github.com/LFDT-Lockness/cggmp21) Rust crate
-- Peer-reviewed cryptographic foundation: [ePrint 2021/060](https://eprint.iacr.org/2021/060)
-
-**Read the research:** [AgentaOS: Threshold Custody for the Agent Economy](https://doi.org/10.5281/zenodo.18684027) — our published paper on the security model, signing architecture, and trust guarantees behind AgentaOS.
-
-### Supported Networks
-
-Ethereum, Base, Arbitrum, Optimism, Polygon — mainnet and testnet. All EVM chains supported.
-
----
-
-## Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| `AGENTA_API_KEY` | API key — generated when you create a sub-account |
-| `AGENTA_API_SECRET` | API secret — your signing credential, shown once at creation |
-| `AGENTAOS_GATEWAY_KEY` | Gateway key for payment tools (`sk_live_...` or `sk_test_...`) |
-| `AGENTA_SERVER` | Optional — defaults to `https://api.agentaos.ai` |
-
----
+The agent wallet packages (`core`, `signer`, `schemes`, `chains` and `mpc-wasm`) are an on-chain wallet that an AI agent operates, with threshold signing so that no single party holds the full key. The agent wallet is in private preview. See [Agent wallet](https://docs.agentaos.ai/experimental/agent-wallet) and the [paper](https://doi.org/10.5281/zenodo.18684027).
 
 ## Contributing
 
@@ -408,20 +125,10 @@ git clone https://github.com/AgentaOS/agentaos.git && cd agentaos
 pnpm install && pnpm build && pnpm test
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
----
+See [CONTRIBUTING.md](CONTRIBUTING.md). Report security issues to [security@agentaos.ai](mailto:security@agentaos.ai), as [SECURITY.md](SECURITY.md) describes.
 
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
 
-Copyright 2025-2026 Aristokrates OU
-
----
-
-<div align="center">
-
-**[agentaos.ai](https://agentaos.ai)** · **[npm](https://www.npmjs.com/package/@agentaos/sdk)** · **[Security](mailto:security@agentaos.ai)** · **[Issues](https://github.com/AgentaOS/agentaos/issues)**
-
-</div>
+Copyright 2025-2026 Aristokrates OÜ

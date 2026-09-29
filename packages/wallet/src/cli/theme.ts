@@ -76,7 +76,7 @@ export const BRAND_BANNER = [
 	`   ${bold('██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   ██║  ██║╚██████╔╝███████║')}`,
 	`   ${bold('╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚══════╝')}`,
 	'',
-	`   ${bold('AgentaOS')}  ${dim('The financial OS for autonomous agents.')}`,
+	`   ${bold('AgentaOS')}  ${dim('The merchant of record for founders selling digital products.')}`,
 	'',
 ].join('\n');
 
