@@ -96,7 +96,7 @@ describe('businesses', () => {
 		const created = await platform().businesses.create({
 			name: 'ClientCo',
 			country: 'EE',
-			clientEmail: 'ana@clientco.com',
+			clientEmail: 'ana@example.com',
 			sendInvitationEmail: false,
 		});
 
@@ -104,7 +104,7 @@ describe('businesses', () => {
 		expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual({
 			name: 'ClientCo',
 			country: 'EE',
-			clientEmail: 'ana@clientco.com',
+			clientEmail: 'ana@example.com',
 			sendInvitationEmail: false,
 		});
 		expect(created.inviteUrl).toBe('https://app/invite/t');

@@ -43,12 +43,12 @@ async function render(node: React.ReactNode) {
 describe('<AgentaOSCheckout>', () => {
 	it('opens the checkout inline, into its own element, with the prefill', async () => {
 		await render(
-			<AgentaOSCheckout link={MONTHLY} email="ann@acme.com" country="DE" className="pay" />,
+			<AgentaOSCheckout link={MONTHLY} email="ann@example.com" country="DE" className="pay" />,
 		);
 
 		expect(open).toHaveBeenCalledTimes(1);
 		const options = open.mock.calls[0]?.[0] as OpenOptions;
-		expect(options).toMatchObject({ link: MONTHLY, email: 'ann@acme.com', country: 'DE' });
+		expect(options).toMatchObject({ link: MONTHLY, email: 'ann@example.com', country: 'DE' });
 		expect(options.target).toBe(host.querySelector('div.pay'));
 	});
 
@@ -132,7 +132,7 @@ describe('useAgentaOSCheckout', () => {
 	it('requires exactly one of link or session (checked by the type)', () => {
 		const typeCheckOnly = (openOverlay: ReturnType<typeof useAgentaOSCheckout>['open']) => {
 			// @ts-expect-error — neither link nor session
-			void openOverlay({ email: 'ann@acme.com' });
+			void openOverlay({ email: 'ann@example.com' });
 			// @ts-expect-error — both
 			void openOverlay({ link: MONTHLY, session: 'cs_1' });
 			void openOverlay({ session: 'cs_1' });

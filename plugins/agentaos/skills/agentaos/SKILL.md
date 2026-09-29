@@ -252,7 +252,7 @@ Rules: `subscription: true` needs `interval` `month` or `year`; `trialDays` (1�
 
 For a user who runs other people's businesses (an agency, a marketplace, a SaaS) or several apps of one company. It works like Stripe Connect: each client is a **business** you manage, and you act as it by naming it.
 
-- `agenta_businesses_create` `{"name":"ClientCo","country":"EE","clientEmail":"ana@clientco.com","inviteEmail":false}` — adds the business in test mode and invites the client as its admin. With `inviteEmail:false` we send no email: give the user the returned `inviteUrl` to send themselves. `sameCompany:true` = another app of their own company (verified and priced with them, no share).
+- `agenta_businesses_create` `{"name":"ClientCo","country":"EE","clientEmail":"ana@example.com","inviteEmail":false}` — adds the business in test mode and invites the client as its admin. With `inviteEmail:false` we send no email: give the user the returned `inviteUrl` to send themselves. `sameCompany:true` = another app of their own company (verified and priced with them, no share).
 - To act **as** a business, pass `business: "<id>"` to any tool (CLI: `--business <id>` on any command), e.g. `agenta_products_create` with `business`, or `agenta_verify_submit` with `business` to file the client's verification for them (recorded as filed by the platform).
 - `agenta_businesses_id_link` `{"id":"…"}` — the identity check link. **Only the client can complete it**; give the link to the user to send. Needs a live key. A null link means already verified.
 - `agenta_businesses_list` / `agenta_businesses_get` — status, `identityVerified`, open invitation. `agenta_businesses_invite` sends the invitation again (new link); `agenta_businesses_revoke_invite` withdraws it.

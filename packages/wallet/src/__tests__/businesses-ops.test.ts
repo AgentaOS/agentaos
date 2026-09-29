@@ -14,7 +14,7 @@ const business = {
 	platformFee: { bps: 1000, fixedMinor: 50 },
 	sameLegalEntity: false,
 	feesThisMonth: [],
-	invitedEmail: 'ana@clientco.com',
+	invitedEmail: 'ana@example.com',
 	identityVerified: false,
 };
 
@@ -30,7 +30,7 @@ describe('agenta businesses', () => {
 		const input = businessesCreate.input.parse({
 			name: 'ClientCo',
 			country: 'ee',
-			clientEmail: 'ana@clientco.com',
+			clientEmail: 'ana@example.com',
 			inviteEmail: false,
 		});
 
@@ -39,7 +39,7 @@ describe('agenta businesses', () => {
 		expect(sdk.businesses.create).toHaveBeenCalledWith({
 			name: 'ClientCo',
 			country: 'EE',
-			clientEmail: 'ana@clientco.com',
+			clientEmail: 'ana@example.com',
 			sendInvitationEmail: false,
 		});
 		expect(businessesCreate.describe(result)).toContain(
@@ -58,19 +58,19 @@ describe('agenta businesses', () => {
 		const input = businessesCreate.input.parse({
 			name: 'ClientCo',
 			country: 'EE',
-			clientEmail: 'ana@clientco.com',
+			clientEmail: 'ana@example.com',
 		});
 
 		const result = await businessesCreate.run(sdk as never, input);
 
 		expect(businessesCreate.describe(result)).toContain(
-			'We emailed the invitation to ana@clientco.com.',
+			'We emailed the invitation to ana@example.com.',
 		);
 	});
 
 	it('list names each business with its state', () => {
 		expect(businessesList.describe({ items: [business] })).toContain(
-			'ClientCo (test mode, invitation open for ana@clientco.com) — biz_1',
+			'ClientCo (test mode, invitation open for ana@example.com) — biz_1',
 		);
 	});
 
