@@ -1,4 +1,5 @@
 import { AccountReviewResource } from './resources/account-review.js';
+import { BankAccountsResource } from './resources/bank-accounts.js';
 import { BusinessesResource } from './resources/businesses.js';
 import { CheckoutsResource } from './resources/checkouts.js';
 import { CustomersResource } from './resources/customers.js';
@@ -26,6 +27,8 @@ export class AgentaOS {
 	readonly goLive: GoLiveResource;
 	readonly accountReview: AccountReviewResource;
 	readonly businesses: BusinessesResource;
+	/** Where payouts go: the bank accounts of a business, or of the businesses you manage. */
+	readonly bankAccounts: BankAccountsResource;
 	readonly webhooks: WebhooksResource;
 
 	constructor(apiKey: string, options?: AgentaOSOptions) {
@@ -72,6 +75,7 @@ export class AgentaOS {
 		this.goLive = new GoLiveResource(baseUrl, apiKey, resourceOptions);
 		this.accountReview = new AccountReviewResource(baseUrl, apiKey, resourceOptions);
 		this.businesses = new BusinessesResource(baseUrl, apiKey, resourceOptions);
+		this.bankAccounts = new BankAccountsResource(baseUrl, apiKey, resourceOptions);
 		this.webhooks = new WebhooksResource();
 	}
 }

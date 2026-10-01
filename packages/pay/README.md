@@ -213,6 +213,25 @@ await forClient.paymentLinks.list();
 
 The other methods are `businesses.list()`, `retrieve(id)`, `resendInvitation(id)`, `revokeInvitation(id)` and `createVerificationLink(id)`. See [Build a platform](https://docs.agentaos.ai/guides/build-a-platform).
 
+### Bank accounts for the businesses you manage
+
+A marketplace can save a seller's bank account from its own app, once we have opened bank accounts by API for the platform. Ask for the fields the currency needs, then send the answers. The holder name must match the seller's verified legal name, or the account is saved but never paid. We keep the last four digits and a hash, never the number.
+
+```typescript
+const { requirements } = await forClient.bankAccounts.requirements('EUR');
+
+const account = await forClient.bankAccounts.create({
+  currency: 'EUR',
+  type: 'iban',
+  accountHolderName: 'Seller GmbH',
+  legalType: 'BUSINESS',
+  details: { IBAN: 'DE89370400440532013000' },
+});
+// account.accountIdentifierLast4 === '3000', account.payable once the name matches
+```
+
+Every account added this way is emailed to you and to the seller's owner. `bankAccounts.list()` and `deactivate(id)` complete the set. Needs a live key.
+
 ## Webhooks
 
 Set `webhookUrl` on a product or a checkout. AgentaOS signs each event with HMAC-SHA256. Verify the signature against the raw request body, before any JSON parser runs:
