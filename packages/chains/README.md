@@ -1,9 +1,11 @@
 # @agentaos/chains
 
-**Ethereum chain adapter for AgentaOS.**
+**Ethereum chain adapter for the AgentaOS agent wallet.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE)
 [![npm](https://img.shields.io/npm/v/@agentaos/chains)](https://www.npmjs.com/package/@agentaos/chains)
+
+> **Selling with AgentaOS?** This package is part of the AgentaOS agent wallet, which is in private preview. To sell digital products with AgentaOS as your merchant of record, use [`@agentaos/pay`](https://www.npmjs.com/package/@agentaos/pay) (the server SDK) or the [`agenta` CLI](https://www.npmjs.com/package/agentaos). Guides: [docs.agentaos.ai](https://docs.agentaos.ai).
 
 Implements the `IChain` interface from `@agentaos/core` for Ethereum-compatible chains. Handles transaction building, decoding, serialization, and signature assembly using [viem](https://viem.sh/).
 

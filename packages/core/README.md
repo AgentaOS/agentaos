@@ -1,9 +1,11 @@
 # @agentaos/core
 
-**Type definitions and interfaces for AgentaOS.**
+**Type definitions and interfaces for the AgentaOS agent wallet.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE)
 [![npm](https://img.shields.io/npm/v/@agentaos/core)](https://www.npmjs.com/package/@agentaos/core)
+
+> **Selling with AgentaOS?** This package is part of the AgentaOS agent wallet, which is in private preview. To sell digital products with AgentaOS as your merchant of record, use [`@agentaos/pay`](https://www.npmjs.com/package/@agentaos/pay) (the server SDK) or the [`agenta` CLI](https://www.npmjs.com/package/agentaos). Guides: [docs.agentaos.ai](https://docs.agentaos.ai).
 
 Zero-dependency package that defines the contracts all Agenta packages implement. Contains TypeScript interfaces, type definitions, and enums -- no runtime code.
 

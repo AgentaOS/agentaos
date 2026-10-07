@@ -1,7 +1,7 @@
 {
 	"name": "@agentaos/sdk",
 	"version": "3.2.1",
-	"description": "SDK for threshold signing — the key never exists",
+	"description": "AgentaOS agent wallet signer (private preview): threshold signing where the full key never exists. To sell with AgentaOS, use @agentaos/pay.",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",
 	"repository": {

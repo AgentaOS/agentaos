@@ -1,9 +1,11 @@
 # @agentaos/engine
 
-**CGGMP24 threshold ECDSA signing scheme for AgentaOS.**
+**CGGMP24 threshold ECDSA signing scheme for the AgentaOS agent wallet.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE)
 [![npm](https://img.shields.io/npm/v/@agentaos/engine)](https://www.npmjs.com/package/@agentaos/engine)
+
+> **Selling with AgentaOS?** This package is part of the AgentaOS agent wallet, which is in private preview. To sell digital products with AgentaOS as your merchant of record, use [`@agentaos/pay`](https://www.npmjs.com/package/@agentaos/pay) (the server SDK) or the [`agenta` CLI](https://www.npmjs.com/package/agentaos). Guides: [docs.agentaos.ai](https://docs.agentaos.ai).
 
 Implements the `IThresholdScheme` interface from `@agentaos/core` using CGGMP24 (Canetti-Gennaro-Goldfeder-Makriyannis-Peled 2024) threshold ECDSA over secp256k1. Wraps a Rust WASM module for the cryptographic operations.
 
