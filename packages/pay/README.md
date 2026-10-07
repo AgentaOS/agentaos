@@ -215,7 +215,7 @@ The other methods are `businesses.list()`, `retrieve(id)`, `resendInvitation(id)
 
 ### Bank accounts for the businesses you manage
 
-A marketplace can save a seller's bank account from its own app, once we have opened bank accounts by API for the platform. Ask for the fields the currency needs, then send the answers. The holder name must match the seller's verified legal name, or the account is saved but never paid. We keep the last four digits and a hash, never the number.
+A marketplace can save a seller's bank account from its own app, once we have opened bank accounts by API for the platform. Ask for the fields the currency needs, then send the answers. The bank confirms the holder name; a clear mismatch is saved but never paid, and `payableReason` says so. We keep the last four digits and a hash, never the number.
 
 ```typescript
 const { requirements } = await forClient.bankAccounts.requirements('EUR');

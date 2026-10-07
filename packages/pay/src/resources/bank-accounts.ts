@@ -34,8 +34,8 @@ export class BankAccountsResource extends BaseResource {
 	}
 
 	/**
-	 * Save a bank account. The holder name is checked against the business's verified legal name
-	 * at once: an account in another name is saved but never paid. The account number is never
+	 * Save a bank account. The bank confirms the holder name at once: a clear mismatch is saved
+	 * but never paid, and `payableReason` says so. The account number is never
 	 * stored; we keep the last four characters and a hash.
 	 */
 	async create(params: CreateBankAccountParams, req?: RequestOptions): Promise<BankAccount> {

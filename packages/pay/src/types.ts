@@ -1025,7 +1025,7 @@ export interface CreateBankAccountParams {
 	currency: string;
 	/** The account type from the requirements: `iban`, `sort_code`, `aba`. */
 	type: string;
-	/** Must match the business's verified legal name, or the account is saved but not paid. */
+	/** The name on the bank account, as the bank holds it. A clear mismatch is saved but not paid. */
 	accountHolderName: string;
 	legalType: 'PRIVATE' | 'BUSINESS';
 	/** The fields the requirements asked for, for example `{ IBAN: 'DE89…' }`. Never stored. */
