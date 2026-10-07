@@ -53,11 +53,12 @@ describe('bankAccounts', () => {
 
 	it('refreshRequirements → POST /gateway/bank-accounts/requirements/refresh', async () => {
 		const calls = stub([]);
-		await platform().bankAccounts.refreshRequirements({
-			quoteId: 'q1',
-			details: { legalType: 'BUSINESS' },
-		});
+		await platform().bankAccounts.refreshRequirements(
+			{ quoteId: 'q1', details: { legalType: 'BUSINESS' } },
+			{ business: 'biz_1' },
+		);
 		expect(calls[0]?.method).toBe('POST');
+		expect(calls[0]?.account).toBe('biz_1');
 		expect(url(calls[0]).pathname).toBe('/api/v1/gateway/bank-accounts/requirements/refresh');
 		expect(JSON.parse(calls[0]?.body ?? '{}')).toEqual({
 			quoteId: 'q1',
@@ -107,5 +108,31 @@ describe('bankAccounts', () => {
 			'DELETE',
 			'/api/v1/gateway/bank-accounts/acc_1',
 		]);
+		expect(calls[0]?.account).toBe('biz_1');
+	});
+
+	// Before we open bank accounts by API for the platform, adding one is refused with the
+	// server's reason, surfaced the way every other refusal is.
+	it('surfaces the closed gate as a PermissionError with the server\'s code', async () => {
+		stub(
+			{
+				statusCode: 403,
+				message: 'Bank accounts by API are not enabled for your platform.',
+				code: 'bank_accounts_by_api_closed',
+			},
+			403,
+		);
+		await expect(
+			platform().bankAccounts.create(
+				{
+					currency: 'EUR',
+					type: 'iban',
+					accountHolderName: 'Nordvik Studio OÜ',
+					legalType: 'BUSINESS',
+					details: { IBAN: 'EE00' },
+				},
+				{ business: 'biz_1' },
+			),
+		).rejects.toMatchObject({ name: 'PermissionError', status: 403 });
 	});
 });
