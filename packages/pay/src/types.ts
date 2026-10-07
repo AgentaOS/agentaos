@@ -988,7 +988,7 @@ export interface VerificationLink {
 
 // ── Bank accounts ───────────────────────────────────────────────────────────
 
-/** A bank account as we keep it: a thin reference. The account number stays with our bank partner. */
+/** A bank account as we keep it: a thin reference. We never store the account number. */
 export interface BankAccount {
 	id: string;
 	/** Upper-case: `EUR`, `USD`. */
