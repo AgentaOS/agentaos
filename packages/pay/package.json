@@ -1,6 +1,6 @@
 {
 	"name": "@agentaos/pay",
-	"version": "2.4.0",
+	"version": "2.5.0",
 	"description": "AgentaOS TypeScript SDK: sell digital products with a merchant of record that takes the payment, charges the VAT, issues the invoice and pays you out",
 	"license": "Apache-2.0",
 	"keywords": [
