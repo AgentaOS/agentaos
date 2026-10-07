@@ -1,7 +1,7 @@
 {
 	"name": "@agentaos/core",
 	"version": "3.2.1",
-	"description": "Type definitions and interfaces for AgentaOS threshold wallet",
+	"description": "Types and interfaces for the AgentaOS agent wallet (private preview). To sell with AgentaOS, use @agentaos/pay.",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",
 	"repository": {

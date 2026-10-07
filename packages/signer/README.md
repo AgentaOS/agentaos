@@ -1,12 +1,14 @@
 # @agentaos/sdk
 
-**AgentaOS SDK -- threshold signing where the key never exists.**
+**The agent wallet signer: threshold signing where the full key never exists.**
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](../../LICENSE)
 [![npm](https://img.shields.io/npm/v/@agentaos/sdk)](https://www.npmjs.com/package/@agentaos/sdk)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](https://nodejs.org)
 
-The TypeScript SDK for [AgentaOS](https://github.com/AgentaOS/agentaos). Sign Ethereum transactions and messages using 2-of-3 threshold ECDSA -- the full private key is never constructed.
+> **Selling with AgentaOS?** This package is part of the AgentaOS agent wallet, which is in private preview. To sell digital products with AgentaOS as your merchant of record, use [`@agentaos/pay`](https://www.npmjs.com/package/@agentaos/pay) (the server SDK) or the [`agenta` CLI](https://www.npmjs.com/package/agentaos). Guides: [docs.agentaos.ai](https://docs.agentaos.ai).
+
+The TypeScript signer for the [AgentaOS](https://github.com/AgentaOS/agentaos) agent wallet. Sign Ethereum transactions and messages using 2-of-3 threshold ECDSA: the full private key is never constructed.
 
 ## Install
 

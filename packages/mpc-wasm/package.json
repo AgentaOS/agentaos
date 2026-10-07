@@ -1,7 +1,7 @@
 {
 	"name": "@agentaos/crypto",
 	"version": "3.2.1",
-	"description": "CGGMP24 threshold ECDSA WASM module for AgentaOS",
+	"description": "CGGMP24 threshold ECDSA WASM module for the AgentaOS agent wallet (private preview).",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",
 	"repository": {
