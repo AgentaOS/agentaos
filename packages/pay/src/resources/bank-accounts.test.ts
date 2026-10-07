@@ -103,7 +103,8 @@ describe('bankAccounts', () => {
 
 	it('deactivate → DELETE /gateway/bank-accounts/:id', async () => {
 		const calls = stub({ success: true });
-		await platform().bankAccounts.deactivate('acc_1', { business: 'biz_1' });
+		const result = await platform().bankAccounts.deactivate('acc_1', { business: 'biz_1' });
+		expect(result).toEqual({ success: true });
 		expect([calls[0]?.method, url(calls[0]).pathname]).toEqual([
 			'DELETE',
 			'/api/v1/gateway/bank-accounts/acc_1',
@@ -111,9 +112,9 @@ describe('bankAccounts', () => {
 		expect(calls[0]?.account).toBe('biz_1');
 	});
 
-	// Before we open bank accounts by API for the platform, adding one is refused with the
-	// server's reason, surfaced the way every other refusal is.
-	it('surfaces the closed gate as a PermissionError with the server\'s code', async () => {
+	// Before we open bank accounts by API for the platform, adding one is refused, surfaced the
+	// way every other refusal is.
+	it('surfaces the closed switch as a PermissionError (403)', async () => {
 		stub(
 			{
 				statusCode: 403,
@@ -134,5 +135,34 @@ describe('bankAccounts', () => {
 				{ business: 'biz_1' },
 			),
 		).rejects.toMatchObject({ name: 'PermissionError', status: 403 });
+	});
+
+	// A form the bank partner rejects comes back as fieldErrors (path, message); the SDK hands
+	// them to the caller as the usual errors (field, message).
+	it("maps the server's fieldErrors into ValidationError.errors", async () => {
+		stub(
+			{
+				statusCode: 400,
+				code: 'RECIPIENT_INVALID',
+				message: 'Check the account details.',
+				fieldErrors: [{ path: 'details.IBAN', message: 'Not a valid IBAN.' }],
+			},
+			400,
+		);
+		await expect(
+			platform().bankAccounts.create(
+				{
+					currency: 'EUR',
+					type: 'iban',
+					accountHolderName: 'Nordvik Studio OÜ',
+					legalType: 'BUSINESS',
+					details: { IBAN: 'nope' },
+				},
+				{ business: 'biz_1' },
+			),
+		).rejects.toMatchObject({
+			name: 'ValidationError',
+			errors: [{ field: 'details.IBAN', message: 'Not a valid IBAN.' }],
+		});
 	});
 });

@@ -12,8 +12,8 @@ const BASE_PATH = '/api/v1/gateway/bank-accounts';
 /**
  * Where payouts go: the bank accounts of a business, as thin references (holder, last four digits,
  * the name-check result), never the account number. A platform saves them for the businesses it
- * manages with `{ business: id }`, once we have opened bank accounts by API for it; a merchant for
- * itself. Adding one needs a live key.
+ * manages with `{ business: id }`; a merchant for itself. Adding and retiring one need a live key
+ * and, for a platform, bank accounts by API opened by us; the requirements and the list do not.
  */
 export class BankAccountsResource extends BaseResource {
 	/** The fields a bank account in this currency needs, as a form schema. */
@@ -47,8 +47,8 @@ export class BankAccountsResource extends BaseResource {
 		return this.getJson<BankAccount[]>(BASE_PATH, undefined, req);
 	}
 
-	/** Retire an account: it stops being paid to. */
-	async deactivate(id: string, req?: RequestOptions): Promise<void> {
-		await this.del(`${BASE_PATH}/${id}`, req);
+	/** Retire an account: it stops being paid to. Needs a live key and, for a platform, the switch. */
+	async deactivate(id: string, req?: RequestOptions): Promise<{ success: boolean }> {
+		return this.del<{ success: boolean }>(`${BASE_PATH}/${id}`, req);
 	}
 }

@@ -227,10 +227,10 @@ const account = await forClient.bankAccounts.create({
   legalType: 'BUSINESS',
   details: { IBAN: 'DE89370400440532013000' },
 });
-// account.accountIdentifierLast4 === '3000', account.payable once the name matches
+// account.accountIdentifierLast4 === '3000'; account.payable unless the bank clearly rejected the name
 ```
 
-Every account added this way is emailed to you and to the seller's owner. `bankAccounts.list()` and `deactivate(id)` complete the set. Needs a live key.
+Every account added this way is emailed to you and to the seller's owner. `bankAccounts.list()` and `deactivate(id)` complete the set. Adding and retiring need a live key and the switch; the requirements and the list do not.
 
 ## Webhooks
 
