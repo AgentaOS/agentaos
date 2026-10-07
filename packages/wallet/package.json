@@ -1,6 +1,6 @@
 {
 	"name": "agentaos",
-	"version": "3.2.0",
+	"version": "3.2.1",
 	"description": "AgentaOS CLI (agenta) and MCP server: set up billing, subscriptions, discount codes and invoices with a merchant of record, from your terminal or your AI coding agent",
 	"license": "Apache-2.0",
 	"author": "AgentaOS <hello@agentaos.ai>",

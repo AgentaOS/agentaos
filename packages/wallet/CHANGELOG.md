@@ -1,5 +1,14 @@
 # agentaos
 
+## 3.2.1
+
+### Patch Changes
+
+- [#53](https://github.com/AgentaOS/agentaos/pull/53) [`3d0e102`](https://github.com/AgentaOS/agentaos/commit/3d0e102164c9f90086dc7e0a421401b5f057dacd) Thanks [@PancheI](https://github.com/PancheI)! - `agenta status` no longer says live money waits on a payout account. A verified business can take live payments; the bank account we pay into is needed before the first payout. The next step now reads "add a bank account in the dashboard (Balances → Payout accounts) before your first payout".
+
+- Updated dependencies [[`3d0e102`](https://github.com/AgentaOS/agentaos/commit/3d0e102164c9f90086dc7e0a421401b5f057dacd), [`3d0e102`](https://github.com/AgentaOS/agentaos/commit/3d0e102164c9f90086dc7e0a421401b5f057dacd)]:
+  - @agentaos/pay@2.5.0
+
 ## 3.2.0
 
 ### Minor Changes

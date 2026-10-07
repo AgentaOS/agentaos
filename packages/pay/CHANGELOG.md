@@ -1,5 +1,17 @@
 # @agentaos/pay
 
+## 2.5.0
+
+### Minor Changes
+
+- [#53](https://github.com/AgentaOS/agentaos/pull/53) [`3d0e102`](https://github.com/AgentaOS/agentaos/commit/3d0e102164c9f90086dc7e0a421401b5f057dacd) Thanks [@PancheI](https://github.com/PancheI)! - `bankAccounts`: a platform saves bank accounts for the businesses it manages, from its own app, once we have opened bank accounts by API for it. `requirements(currency)`, `refreshRequirements(params)`, `create(params)`, `list()`, `deactivate(id)`, each taking `{ business }`. Adding and retiring need the switch and a live key; the other calls do not.
+
+  `platformFee.fixedDisplay` on a business's share: the fixed part of the platform fee, printed as money.
+
+### Patch Changes
+
+- [#53](https://github.com/AgentaOS/agentaos/pull/53) [`3d0e102`](https://github.com/AgentaOS/agentaos/commit/3d0e102164c9f90086dc7e0a421401b5f057dacd) Thanks [@PancheI](https://github.com/PancheI)! - `agenta status` no longer says live money waits on a payout account. A verified business can take live payments; the bank account we pay into is needed before the first payout. The next step now reads "add a bank account in the dashboard (Balances → Payout accounts) before your first payout".
+
 ## 2.4.0
 
 ### Minor Changes
