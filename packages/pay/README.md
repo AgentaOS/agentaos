@@ -190,7 +190,7 @@ Your account starts in test mode. Verify your business to take live payments.
 
 | Method | What it does |
 |---|---|
-| `goLive.get()` | Where the account is on the way to live payments: verification, payout account, open change requests |
+| `goLive.get()` | Where the account is on the way to live payments: verification and open change requests, plus whether a payout account exists (needed before the first payout) |
 | `accountReview.submit(details)` | Submit business verification |
 | `accountReview.get()` | The verification on file, or `null` |
 | `accountReview.resubmit()` | Send the verification back for review after you make the requested changes |
@@ -212,6 +212,25 @@ await forClient.paymentLinks.list();
 ```
 
 The other methods are `businesses.list()`, `retrieve(id)`, `resendInvitation(id)`, `revokeInvitation(id)` and `createVerificationLink(id)`. See [Build a platform](https://docs.agentaos.ai/guides/build-a-platform).
+
+### Bank accounts for the businesses you manage
+
+A marketplace can save a seller's bank account from its own app, once we have opened bank accounts by API for the platform. Ask for the fields the currency needs, then send the answers. The bank confirms the holder name; a clear mismatch is saved but never paid, and `payableReason` says so. We keep the last four digits and a hash, never the number.
+
+```typescript
+const { requirements } = await forClient.bankAccounts.requirements('EUR');
+
+const account = await forClient.bankAccounts.create({
+  currency: 'EUR',
+  type: 'iban',
+  accountHolderName: 'Seller GmbH',
+  legalType: 'BUSINESS',
+  details: { IBAN: 'DE89370400440532013000' },
+});
+// account.accountIdentifierLast4 === '3000'; account.payable unless the bank clearly rejected the name
+```
+
+Every account added this way is emailed to you and to the seller's owner. `bankAccounts.list()` and `deactivate(id)` complete the set. Adding and retiring need a live key and the switch; the requirements and the list do not.
 
 ## Webhooks
 

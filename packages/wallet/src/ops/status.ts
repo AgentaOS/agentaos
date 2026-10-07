@@ -8,8 +8,9 @@ import { lines } from './words.js';
  * `status.get` — how far along going live the merchant is.
  *
  * Test mode is usable the moment you are authenticated; only LIVE money waits
- * on verification and a payout account. Who you are (email, organization)
- * lives in the CLI session, so the CLI adds it to `account` when it prints.
+ * on verification. The bank account we pay into is needed before the first
+ * payout, not before the first sale. Who you are (email, organization) lives
+ * in the CLI session, so the CLI adds it to `account` when it prints.
  */
 
 export interface StatusView {
@@ -49,12 +50,16 @@ export function statusView(readiness: GoLiveReadiness): StatusView {
 	};
 }
 
-function headline(goLive: StatusView['goLive']): string {
-	if (goLive.canGoLive) return 'You can take live payments.';
-	if (goLive.verification.state === 'verified') {
-		return 'Test payments work now. Live money waits on a payout account.';
+/**
+ * A verified business can take live payments. `canGoLive` says so on a current
+ * server; the verification state says so on one that still counted the payout
+ * account as a go-live step. Live checkout never needed that account.
+ */
+export function headline(goLive: Pick<StatusView['goLive'], 'canGoLive' | 'verification'>): string {
+	if (goLive.canGoLive || goLive.verification.state === 'verified') {
+		return 'You can take live payments.';
 	}
-	return 'Test payments work now. Live money waits on verification and a payout account.';
+	return 'Test payments work now. Live money waits on verification.';
 }
 
 export function describeNext(next: NextStep | null): string | null {
@@ -81,7 +86,9 @@ export const statusGet = operation({
 			verification.heldReason ? `On hold because: ${verification.heldReason}` : null,
 			verification.rejectReason ? `Rejected because: ${verification.rejectReason}` : null,
 			`Free Revenue & Pricing Audit: ${audit.label}.`,
-			`Payout account: ${payouts.connected ? 'connected' : 'not yet added'}.`,
+			`Payout account: ${
+				payouts.connected ? 'connected' : 'not yet added, needed before your first payout'
+			}.`,
 			describeNext(goLive.next),
 		);
 	},

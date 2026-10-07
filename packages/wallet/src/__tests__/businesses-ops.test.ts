@@ -11,7 +11,7 @@ const business = {
 	status: 'test_only' as const,
 	platformOrgId: 'plat',
 	createdAt: '2026-09-28T00:00:00Z',
-	platformFee: { bps: 1000, fixedMinor: 50 },
+	platformFee: { bps: 1000, fixedMinor: 50, fixedDisplay: '€0.50' },
 	sameLegalEntity: false,
 	feesThisMonth: [],
 	invitedEmail: 'ana@example.com',

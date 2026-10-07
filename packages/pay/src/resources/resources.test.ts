@@ -506,14 +506,14 @@ describe('goLive', () => {
 			verifyState: 'unverified',
 			hasPayoutAccount: false,
 			canGoLive: false,
-			progress: { done: 1, total: 3 },
+			progress: { done: 1, total: 2 },
 			rfi: null,
 			audit: null,
 		});
 		const readiness = await client().goLive.get();
 		expect(calls[0]?.method).toBe('GET');
 		expect(pathOf(calls[0])).toBe('/api/v1/gateway/go-live');
-		expect(readiness).toMatchObject({ verifyState: 'unverified', progress: { done: 1, total: 3 } });
+		expect(readiness).toMatchObject({ verifyState: 'unverified', progress: { done: 1, total: 2 } });
 	});
 });
 

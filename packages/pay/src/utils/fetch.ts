@@ -77,9 +77,16 @@ async function handleErrorResponse(
 
 	switch (response.status) {
 		case 400: {
+			// Field errors come as `errors` (field, message) or, from a form the bank partner
+			// validates, as `fieldErrors` (path, message); both reach the caller as `errors`.
 			const errors = Array.isArray(body.errors)
 				? (body.errors as Array<{ field: string; message: string }>)
-				: [];
+				: Array.isArray(body.fieldErrors)
+					? (body.fieldErrors as Array<{ path: string; message: string }>).map((e) => ({
+							field: e.path,
+							message: e.message,
+						}))
+					: [];
 			throw new ValidationError(message, errors, requestId);
 		}
 		case 401:

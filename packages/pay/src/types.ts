@@ -941,8 +941,9 @@ export interface Business {
 	/** You — the platform that manages it. */
 	platformOrgId: string;
 	createdAt: string;
-	/** Your share of its sales: basis points of the price before VAT, plus a fixed amount. */
-	platformFee: { bps: number; fixedMinor: number };
+	/** Your share of its sales: basis points of the price before VAT, plus a fixed amount, with
+	 *  the fixed amount printed as money. */
+	platformFee: { bps: number; fixedMinor: number; fixedDisplay: string };
 	/** Another app of your own company: verified and priced with you, carries no share. */
 	sameLegalEntity: boolean;
 	/** Your share of its live sales this month, per currency, ready to show. */
@@ -983,4 +984,50 @@ export interface VerificationLink {
 	/** The identity check your client completes — only they can. Null: already verified. */
 	url: string | null;
 	status: string;
+}
+
+// ── Bank accounts ───────────────────────────────────────────────────────────
+
+/** A bank account as we keep it: a thin reference. We never store the account number. */
+export interface BankAccount {
+	id: string;
+	/** Upper-case: `EUR`, `USD`. */
+	currency: string;
+	/** The corridor: `iban`, `sort_code`, `aba`. */
+	accountType: string;
+	accountIdentifierLast4: string;
+	accountHolderName: string;
+	legalType: 'PRIVATE' | 'BUSINESS';
+	/** How the holder name compared with the name the bank holds. `failed` is never paid. */
+	nameMatchStatus: 'success' | 'partial' | 'failed' | 'unknown';
+	active: boolean;
+	/** Can the next payout go to this account right now. */
+	payable: boolean;
+	/** When `payable` is false: why, in a sentence for the merchant. */
+	payableReason: string | null;
+}
+
+/** The fields a bank account in a currency needs, as a form schema: one entry per account type. */
+export interface BankAccountRequirements {
+	/** Pass back to `refreshRequirements` when a field marked `refreshRequirementsOnChange` changes. */
+	quoteId: string;
+	requirements: Array<Record<string, unknown>>;
+}
+
+export interface RefreshBankAccountRequirementsParams {
+	quoteId: string;
+	/** The answers so far. */
+	details: Record<string, unknown>;
+}
+
+export interface CreateBankAccountParams {
+	/** `EUR` or `USD`. */
+	currency: string;
+	/** The account type from the requirements: `iban`, `sort_code`, `aba`. */
+	type: string;
+	/** The name on the bank account, as the bank holds it. A clear mismatch is saved but not paid. */
+	accountHolderName: string;
+	legalType: 'PRIVATE' | 'BUSINESS';
+	/** The fields the requirements asked for, for example `{ IBAN: 'DE89…' }`. Never stored. */
+	details: Record<string, unknown>;
 }

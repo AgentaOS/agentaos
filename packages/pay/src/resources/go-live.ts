@@ -10,7 +10,8 @@ const BASE_PATH = '/api/v1/gateway/go-live';
  */
 export class GoLiveResource extends BaseResource {
 	/** Where the merchant is on the road to live payments: verification state,
-	 *  payout account, open change requests, the free audit, milestones. */
+	 *  open change requests, the free audit, milestones. Also whether a payout
+	 *  account exists: it is needed before the first payout, not to go live. */
 	async get(req?: RequestOptions): Promise<GoLiveReadiness> {
 		return this.getJson<GoLiveReadiness>(BASE_PATH, undefined, req);
 	}
