@@ -1,5 +1,11 @@
 # agentaos
 
+## 3.4.0
+
+### Minor Changes
+
+- [#60](https://github.com/AgentaOS/agentaos/pull/60) [`9ead57d`](https://github.com/AgentaOS/agentaos/commit/9ead57d6c10777de31a2d758830c9dbbb66edc18) Thanks [@PancheI](https://github.com/PancheI)! - Every MCP tool description now tells agents when to use the tool, what it returns and what it changes (a required `guidance` on each operation). The CLI help line is unchanged.
+
 ## 3.3.0
 
 ### Minor Changes
