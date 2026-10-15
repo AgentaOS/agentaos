@@ -120,15 +120,9 @@ export async function handleCallback({ request, env, api }: HandlerInput): Promi
 	const approval = await waitForApproval(api, handoff.deviceCode);
 	if ('failure' in approval) return text(approval.failure, 400);
 
-	const wantTestnet = mode === 'test';
-	const networks = (await api.listNetworks())
-		.filter((n) => n.isTestnet === wantTestnet)
-		.map((n) => n.name);
-	if (networks.length === 0) return text(`No ${mode} networks are available right now.`, 400);
-
 	// Named after the client so the merchant sees "ChatGPT" on Developers,
 	// not one more anonymous sk_ row, and knows which key to revoke.
-	const key = await api.createSecretKey(approval.token, networks, handoff.clientName);
+	const key = await api.createSecretKey(approval.token, mode, handoff.clientName);
 	const props: ConnectionProps = { apiKey: key.rawKey, keyPrefix: key.key_prefix, mode };
 	const { redirectTo } = await env.OAUTH_PROVIDER.completeAuthorization({
 		request: handoff.authRequest,

@@ -48,13 +48,6 @@ function fakeFetch(scenario: Scenario, calls: { url: string; init?: RequestInit 
 				? json({ status: 'completed', token: 'session-jwt', email: 'm@example.com' })
 				: json({ status: scenario.pollStatus });
 		}
-		if (url.endsWith('/networks')) {
-			return json([
-				{ name: 'base', isTestnet: false },
-				{ name: 'base-sepolia', isTestnet: true },
-				{ name: 'arbitrum', isTestnet: false },
-			]);
-		}
 		if (url.endsWith('/gateway/secret-keys')) {
 			return json({ id: 'key-1', key_prefix: 'sk_test_raws', rawKey: RAW_KEY });
 		}
@@ -147,7 +140,7 @@ describe('remote MCP authorization', () => {
 		});
 	});
 
-	it('mints a test key from testnet networks only and completes authorization', async () => {
+	it('mints a test-environment key and completes authorization', async () => {
 		const api = setup();
 		const state = await authorize(api);
 		const response = await callback(api, state, 'test');
@@ -156,7 +149,7 @@ describe('remote MCP authorization', () => {
 
 		const keyCall = calls.find((c) => c.url.endsWith('/gateway/secret-keys'));
 		expect(JSON.parse(String(keyCall?.init?.body))).toEqual({
-			supportedNetworks: ['base-sepolia'],
+			environment: 'test',
 			label: 'ChatGPT',
 		});
 		expect(new Headers(keyCall?.init?.headers).get('authorization')).toBe('Bearer session-jwt');
@@ -171,13 +164,13 @@ describe('remote MCP authorization', () => {
 		});
 	});
 
-	it('picks mainnet networks for a live connection', async () => {
+	it('mints a live-environment key for a live connection', async () => {
 		const api = setup();
 		const state = await authorize(api);
 		await callback(api, state, 'live');
 		const keyCall = calls.find((c) => c.url.endsWith('/gateway/secret-keys'));
 		expect(JSON.parse(String(keyCall?.init?.body))).toEqual({
-			supportedNetworks: ['base', 'arbitrum'],
+			environment: 'live',
 			label: 'ChatGPT',
 		});
 		expect(completed[0]?.props).toMatchObject({ mode: 'live' });
