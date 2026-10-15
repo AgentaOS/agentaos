@@ -61,6 +61,8 @@ const NOT_SUPPORTED_RULE = 'An application for one of these is refused, not revi
 
 export const verifyDeclaration = operation({
 	name: 'verify.declaration',
+	guidance:
+		'Read-only. Returns the five statements a merchant attests to when submitting business verification, the product categories AgentaOS does not support, and what happens if a statement is false. Show these to the merchant before calling agenta_verify_submit with acceptDeclaration true.',
 	title: 'Show verification declaration',
 	effect: 'read',
 	description: 'The five statements --accept-declaration attests to',
@@ -193,6 +195,8 @@ export interface VerifySubmitView {
 
 export const verifySubmit = operation({
 	name: 'verify.submit',
+	guidance:
+		'Sends the business or individual details for review so the account can take live payments. Required: legalName, country, street, city, url, acceptDeclaration true, and registrationNumber when entity is business. Only set acceptDeclaration after the merchant has read agenta_verify_declaration. Returns the new verification state.',
 	title: 'Submit verification',
 	effect: 'write',
 	description: 'Submit business verification so the merchant can accept live payments',
@@ -238,6 +242,8 @@ export const verifySubmit = operation({
 
 export const verifyStatus = operation({
 	name: 'verify.status',
+	guidance:
+		'Returns the business verification state (not started, in review, changes requested, on hold, rejected or verified), with any changes requested and the reason for a hold or rejection. Changes nothing. For the whole go-live picture use agenta_status_get.',
 	title: 'Verification status',
 	effect: 'read',
 	description: 'Where the verification has got to',
@@ -285,6 +291,8 @@ function describeVerification(v: VerificationView): string {
 
 export const verifyResubmit = operation({
 	name: 'verify.resubmit',
+	guidance:
+		'Use only when verification is in the changes-requested state and the merchant has made the changes; sends it back for review. Returns the new state.',
 	title: 'Resubmit verification',
 	effect: 'write',
 	description: 'Send back for review after making the changes we asked for',

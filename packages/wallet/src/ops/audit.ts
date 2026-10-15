@@ -29,6 +29,8 @@ const AUDIT_DELIVERY = [
 
 export const auditRequest = operation({
 	name: 'audit.request',
+	guidance:
+		'Use when the merchant wants the free Revenue & Pricing Audit of a page where they sell; url is required. Starts a written review of their pricing and checkout; it costs nothing and does not block going live. Check progress with agenta_audit_show.',
 	title: 'Request pricing audit',
 	effect: 'write',
 	description: 'Ask for the free Revenue & Pricing Audit',
@@ -78,6 +80,8 @@ export interface AuditShowView {
 
 export const auditShow = operation({
 	name: 'audit.show',
+	guidance:
+		'Returns whether an audit was requested, its state, its grade and the report PDF link once it is written. Changes nothing. If none was requested, use agenta_audit_request.',
 	title: 'Show pricing audit',
 	effect: 'read',
 	description: 'The audit state, and download the report PDF once it exists',

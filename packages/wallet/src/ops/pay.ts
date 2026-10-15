@@ -69,6 +69,8 @@ function statusSentence(view: CheckoutView): string {
 
 export const payCheckout = operation({
 	name: 'pay.checkout',
+	guidance:
+		'Creates a one-off checkout for an amount and returns its checkoutUrl to send to the buyer, its sessionId and when it expires. The buyer pays by card; tax is added by AgentaOS. Follow up with agenta_pay_get.',
 	title: 'Create checkout',
 	effect: 'write',
 	description: 'Create a checkout session',
@@ -101,6 +103,8 @@ export const payCheckout = operation({
 
 export const payGet = operation({
 	name: 'pay.get',
+	guidance:
+		'Returns one checkout by sessionId: open, completed (paid), expired or cancelled, with amount, currency and link. Changes nothing.',
 	title: 'Get checkout',
 	effect: 'read',
 	description: 'Get checkout session status',
@@ -119,6 +123,8 @@ export const payGet = operation({
 
 export const payList = operation({
 	name: 'pay.list',
+	guidance:
+		'Returns checkouts with their status, amount and sessionId, optionally only one status (open, completed, expired, cancelled), up to limit (1 to 100). Changes nothing.',
 	title: 'List checkouts',
 	effect: 'read',
 	description: 'List checkout sessions',

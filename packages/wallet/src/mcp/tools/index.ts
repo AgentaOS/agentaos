@@ -41,7 +41,7 @@ function registerOperation(server: McpServer, op: Operation, getClient: PayClien
 		mcpToolName(op),
 		{
 			title: op.title,
-			description: op.description,
+			description: `${op.description}. ${op.guidance}`,
 			inputSchema: { ...op.input.shape, business: businessInput },
 			annotations: toolAnnotations(op),
 		},
