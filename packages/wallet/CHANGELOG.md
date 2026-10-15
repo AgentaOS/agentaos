@@ -1,5 +1,11 @@
 # agentaos
 
+## 3.3.0
+
+### Minor Changes
+
+- [#57](https://github.com/AgentaOS/agentaos/pull/57) [`e2312ee`](https://github.com/AgentaOS/agentaos/commit/e2312ee8639aed780e3d296cda6cb28ac289b345) Thanks [@PancheI](https://github.com/PancheI)! - Every MCP tool now has a title and annotations (readOnlyHint, destructiveHint, openWorldHint), derived from a required `title` and `effect` on each operation. Clients such as Claude can tell reads from writes and ask before destructive calls.
+
 ## 3.2.1
 
 ### Patch Changes
