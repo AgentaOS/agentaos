@@ -36,4 +36,4 @@ export function groups(): readonly OperationGroup[] {
 }
 
 export { cliCommand, groupOf, kebab, mcpToolName, opOf } from './naming.js';
-export type { Operation, OperationGroup, OperationInput } from './types.js';
+export type { Operation, OperationEffect, OperationGroup, OperationInput } from './types.js';

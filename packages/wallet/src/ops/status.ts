@@ -69,6 +69,8 @@ export function describeNext(next: NextStep | null): string | null {
 
 export const statusGet = operation({
 	name: 'status.get',
+	title: 'Account status',
+	effect: 'read',
 	description: 'Account and go-live overview',
 	input: z.object({}),
 	async run(sdk) {

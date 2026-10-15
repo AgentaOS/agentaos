@@ -1,5 +1,6 @@
 import type { AgentaOS } from '@agentaos/pay';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { OPERATIONS } from '../../ops/index.js';
 import { cliCommand, mcpToolName } from '../../ops/naming.js';
@@ -38,7 +39,12 @@ export const registerPayTools = registerAgentaTools;
 function registerOperation(server: McpServer, op: Operation, getClient: PayClientFactory): void {
 	server.registerTool(
 		mcpToolName(op),
-		{ description: op.description, inputSchema: { ...op.input.shape, business: businessInput } },
+		{
+			title: op.title,
+			description: op.description,
+			inputSchema: { ...op.input.shape, business: businessInput },
+			annotations: toolAnnotations(op),
+		},
 		async (input) => {
 			try {
 				const { business, ...opInput } = input as Record<string, unknown> & { business?: string };
@@ -52,4 +58,14 @@ function registerOperation(server: McpServer, op: Operation, getClient: PayClien
 			}
 		},
 	);
+}
+
+/** MCP tool hints from the operation's effect. Every tool calls the AgentaOS API, so none is closed-world. */
+function toolAnnotations(op: Operation): ToolAnnotations {
+	return {
+		title: op.title,
+		readOnlyHint: op.effect === 'read',
+		destructiveHint: op.effect === 'destructive',
+		openWorldHint: true,
+	};
 }

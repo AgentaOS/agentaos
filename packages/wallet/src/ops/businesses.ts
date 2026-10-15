@@ -33,6 +33,8 @@ const id = z.string().min(1).describe('The business id');
 
 export const businessesList = operation({
 	name: 'businesses.list',
+	title: 'List managed businesses',
+	effect: 'read',
 	description: 'List the businesses you manage',
 	input: z.object({}),
 	async run(sdk) {
@@ -48,6 +50,8 @@ export const businessesList = operation({
 
 export const businessesGet = operation({
 	name: 'businesses.get',
+	title: 'Get managed business',
+	effect: 'read',
 	description: 'Show one business you manage',
 	input: z.object({ id }),
 	positional: 'id',
@@ -64,6 +68,8 @@ export const businessesGet = operation({
 
 export const businessesCreate = operation({
 	name: 'businesses.create',
+	title: 'Create managed business',
+	effect: 'write',
 	description: "Add a business you manage — a client's business, or another app of your company",
 	input: z.object({
 		name: z.string().min(1).describe('Name buyers see'),
@@ -113,6 +119,8 @@ export const businessesCreate = operation({
 
 export const businessesInvite = operation({
 	name: 'businesses.invite',
+	title: 'Invite business owner',
+	effect: 'write',
 	description: "Send your client's invitation again (a new link; the old one stops working)",
 	input: z.object({
 		id,
@@ -134,6 +142,8 @@ export const businessesInvite = operation({
 
 export const businessesRevokeInvite = operation({
 	name: 'businesses.revokeInvite',
+	title: 'Revoke business invite',
+	effect: 'destructive',
 	description: "Withdraw your client's open invitation",
 	input: z.object({ id }),
 	positional: 'id',
@@ -148,6 +158,8 @@ export const businessesRevokeInvite = operation({
 
 export const businessesIdLink = operation({
 	name: 'businesses.idLink',
+	title: 'Create identity check link',
+	effect: 'write',
 	description: 'Get the identity check link for your client (only they can complete it)',
 	input: z.object({ id }),
 	positional: 'id',

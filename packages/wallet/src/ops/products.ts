@@ -141,6 +141,8 @@ function trialLine(product: ProductView): string | null {
 
 export const productsCreate = operation({
 	name: 'products.create',
+	title: 'Create product',
+	effect: 'write',
 	description: 'Create a product (one-time) or a subscription plan',
 	input: createInput,
 	async run(sdk, input): Promise<ProductView> {
@@ -161,6 +163,8 @@ export const productsCreate = operation({
 
 export const productsList = operation({
 	name: 'products.list',
+	title: 'List products',
+	effect: 'read',
 	description: 'List products and plans',
 	input: z.object({ limit: pageLimit }),
 	async run(sdk, input) {

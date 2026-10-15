@@ -23,6 +23,8 @@ function planPrice(s: Subscription): string {
 
 export const subscriptionsList = operation({
 	name: 'subscriptions.list',
+	title: 'List subscriptions',
+	effect: 'read',
 	description: 'List subscriptions',
 	input: z.object({
 		limit: pageLimit,
@@ -52,6 +54,8 @@ function codeNote(s: Subscription): string {
 
 export const subscriptionsCredit = operation({
 	name: 'subscriptions.credit',
+	title: 'Credit subscription',
+	effect: 'write',
 	description: 'Put credit on a subscriber’s account, taken off their next invoice',
 	input: z.object({
 		id: z.string().min(1).describe('The subscription id'),
@@ -84,6 +88,8 @@ type CreditGiven = Credit & { idempotencyKey: string };
 
 export const subscriptionsCredits = operation({
 	name: 'subscriptions.credits',
+	title: 'List subscription credits',
+	effect: 'read',
 	description: 'Credits given on a subscription, and what is still unspent',
 	input: z.object({ id: z.string().min(1).describe('The subscription id') }),
 	positional: 'id',
@@ -110,6 +116,8 @@ export const subscriptionsCredits = operation({
 
 export const subscriptionsCancel = operation({
 	name: 'subscriptions.cancel',
+	title: 'Cancel subscription',
+	effect: 'destructive',
 	description: 'Cancel a subscription (at period end by default)',
 	input: z.object({
 		id: z.string().min(1).describe('The subscription id'),
@@ -147,6 +155,8 @@ export const subscriptionsCancel = operation({
  */
 export const subscriptionsChangePlan = operation({
 	name: 'subscriptions.changePlan',
+	title: 'Change subscription plan',
+	effect: 'write',
 	description: 'Move a subscription to another plan (upgrade charges now, downgrade at period end)',
 	input: z.object({
 		id: z.string().min(1).describe('The subscription id'),

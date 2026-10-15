@@ -29,6 +29,8 @@ const AUDIT_DELIVERY = [
 
 export const auditRequest = operation({
 	name: 'audit.request',
+	title: 'Request pricing audit',
+	effect: 'write',
 	description: 'Ask for the free Revenue & Pricing Audit',
 	input: z.object({
 		url: liveUrl('--url').describe('The page on the merchant website where they sell it'),
@@ -76,6 +78,8 @@ export interface AuditShowView {
 
 export const auditShow = operation({
 	name: 'audit.show',
+	title: 'Show pricing audit',
+	effect: 'read',
 	description: 'The audit state, and download the report PDF once it exists',
 	input: z.object({
 		output: z

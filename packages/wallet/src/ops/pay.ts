@@ -69,6 +69,8 @@ function statusSentence(view: CheckoutView): string {
 
 export const payCheckout = operation({
 	name: 'pay.checkout',
+	title: 'Create checkout',
+	effect: 'write',
 	description: 'Create a checkout session',
 	input: z.object({
 		amount: positiveAmount.describe('Payment amount (e.g. 50.00)'),
@@ -99,6 +101,8 @@ export const payCheckout = operation({
 
 export const payGet = operation({
 	name: 'pay.get',
+	title: 'Get checkout',
+	effect: 'read',
 	description: 'Get checkout session status',
 	input: z.object({ sessionId: z.string().min(1).describe('The checkout session id') }),
 	positional: 'sessionId',
@@ -115,6 +119,8 @@ export const payGet = operation({
 
 export const payList = operation({
 	name: 'pay.list',
+	title: 'List checkouts',
+	effect: 'read',
 	description: 'List checkout sessions',
 	input: z.object({
 		status: oneOf(STATUSES, '--status')
