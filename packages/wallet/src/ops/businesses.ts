@@ -33,6 +33,8 @@ const id = z.string().min(1).describe('The business id');
 
 export const businessesList = operation({
 	name: 'businesses.list',
+	guidance:
+		'Returns the businesses this account manages (its clients or its other apps), with id, name and status. Changes nothing. Pass a business id as business on any other tool to act for it.',
 	title: 'List managed businesses',
 	effect: 'read',
 	description: 'List the businesses you manage',
@@ -50,6 +52,8 @@ export const businessesList = operation({
 
 export const businessesGet = operation({
 	name: 'businesses.get',
+	guidance:
+		'Returns one managed business by id: its name, status, whether its identity is verified and any open invitation. Changes nothing.',
 	title: 'Get managed business',
 	effect: 'read',
 	description: 'Show one business you manage',
@@ -68,6 +72,8 @@ export const businessesGet = operation({
 
 export const businessesCreate = operation({
 	name: 'businesses.create',
+	guidance:
+		'Adds a business this account manages, for a client or another app. Optionally invites the client as its admin by email. Returns the business id; pass it as business on other tools to act for it.',
 	title: 'Create managed business',
 	effect: 'write',
 	description: "Add a business you manage — a client's business, or another app of your company",
@@ -119,6 +125,8 @@ export const businessesCreate = operation({
 
 export const businessesInvite = operation({
 	name: 'businesses.invite',
+	guidance:
+		'Sends a new invitation link to the client admin of one managed business; the previous link stops working. Sends an email unless email is false.',
 	title: 'Invite business owner',
 	effect: 'write',
 	description: "Send your client's invitation again (a new link; the old one stops working)",
@@ -142,6 +150,8 @@ export const businessesInvite = operation({
 
 export const businessesRevokeInvite = operation({
 	name: 'businesses.revokeInvite',
+	guidance:
+		'Withdraws the open invitation of one managed business so its link stops working. Ask the merchant before calling this.',
 	title: 'Revoke business invite',
 	effect: 'destructive',
 	description: "Withdraw your client's open invitation",
@@ -158,6 +168,8 @@ export const businessesRevokeInvite = operation({
 
 export const businessesIdLink = operation({
 	name: 'businesses.idLink',
+	guidance:
+		'Returns the identity check link for one managed business. Only the client can complete it, so send them the link. Changes nothing if they are already verified.',
 	title: 'Create identity check link',
 	effect: 'write',
 	description: 'Get the identity check link for your client (only they can complete it)',

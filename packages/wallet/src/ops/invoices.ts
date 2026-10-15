@@ -7,6 +7,8 @@ import { count, day, lines, money, moreLine } from './words.js';
 
 export const invoicesList = operation({
 	name: 'invoices.list',
+	guidance:
+		"Returns the merchant's invoices with their id, amount, currency, status and buyer, up to limit (1 to 100). Changes nothing. Use an id with agenta_invoices_receipt or agenta_invoices_send_receipt.",
 	title: 'List invoices',
 	effect: 'read',
 	description: 'List invoices',
@@ -40,6 +42,8 @@ export interface ReceiptView {
  *  bytes themselves are the result; the CLI writes them to a file. */
 export const invoicesReceipt = operation({
 	name: 'invoices.receipt',
+	guidance:
+		'Returns the receipt PDF for one paid invoice; a tool call gets the link, the CLI saves the file. Changes nothing.',
 	title: 'Download receipt',
 	effect: 'read',
 	description: 'Download the receipt PDF for a paid invoice',
@@ -67,6 +71,8 @@ export const invoicesReceipt = operation({
 
 export const invoicesSendReceipt = operation({
 	name: 'invoices.sendReceipt',
+	guidance:
+		"Emails the receipt for one paid invoice again to the buyer's address on file. Sends an email to the buyer.",
 	title: 'Re-send receipt email',
 	effect: 'write',
 	description: 'Re-send the receipt email to the buyer on file',

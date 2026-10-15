@@ -7,6 +7,8 @@ import { count, lines, moreLine } from './words.js';
 
 export const customersList = operation({
 	name: 'customers.list',
+	guidance:
+		'Returns the people who bought from the merchant, with their email, name, country and customer id, up to limit (1 to 100). Changes nothing.',
 	title: 'List customers',
 	effect: 'read',
 	description: 'List customers',

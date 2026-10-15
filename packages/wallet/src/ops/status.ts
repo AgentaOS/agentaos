@@ -69,6 +69,8 @@ export function describeNext(next: NextStep | null): string | null {
 
 export const statusGet = operation({
 	name: 'status.get',
+	guidance:
+		'Start here: returns whether the account can take live payments, go-live progress, business verification state, the pricing audit state, whether a payout account is connected, and the single next step to take. Changes nothing.',
 	title: 'Account status',
 	effect: 'read',
 	description: 'Account and go-live overview',

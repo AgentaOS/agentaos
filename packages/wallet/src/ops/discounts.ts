@@ -42,6 +42,8 @@ const createInput = z.object({
 
 export const discountsCreate = operation({
 	name: 'discounts.create',
+	guidance:
+		'Creates a code buyers type at checkout to get money off, or a tracking-only code that records who a referral brought in. Returns the code and its id.',
 	title: 'Create discount code',
 	effect: 'write',
 	description: 'Create a discount code buyers type at checkout',
@@ -73,6 +75,8 @@ export const discountsCreate = operation({
 
 export const discountsList = operation({
 	name: 'discounts.list',
+	guidance:
+		"Returns the merchant's discount codes with their id, whether each is a discount or tracking only, the plan it applies to and whether it is active, up to limit (1 to 100). Changes nothing.",
 	title: 'List discount codes',
 	effect: 'read',
 	description: 'List discount codes',
@@ -96,6 +100,8 @@ export const discountsList = operation({
 
 export const discountsShow = operation({
 	name: 'discounts.show',
+	guidance:
+		'Returns one discount code by id: what it takes off, its limits, and how many buyers used it. Changes nothing.',
 	title: 'Show discount code',
 	effect: 'read',
 	description: 'Show one discount code: what it takes off and how many people used it',
@@ -114,6 +120,8 @@ export const discountsShow = operation({
 
 export const discountsArchive = operation({
 	name: 'discounts.archive',
+	guidance:
+		'Stops one discount code working for new purchases; subscribers who already used it keep their discount. Ask the merchant before calling this.',
 	title: 'Archive discount code',
 	effect: 'destructive',
 	description: 'Stop a discount code working',

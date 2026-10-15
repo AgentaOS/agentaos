@@ -141,6 +141,8 @@ function trialLine(product: ProductView): string | null {
 
 export const productsCreate = operation({
 	name: 'products.create',
+	guidance:
+		'Creates something buyers can pay for: a one-time product, or a subscription plan with an interval. Returns the product id and its buyer link, which can be shared as is. Use the id with agenta_pay_checkout or as a plan for agenta_subscriptions_change_plan.',
 	title: 'Create product',
 	effect: 'write',
 	description: 'Create a product (one-time) or a subscription plan',
@@ -163,6 +165,8 @@ export const productsCreate = operation({
 
 export const productsList = operation({
 	name: 'products.list',
+	guidance:
+		"Returns the merchant's products and subscription plans with their ids, prices, currencies and buyer links, up to limit (1 to 100). Changes nothing.",
 	title: 'List products',
 	effect: 'read',
 	description: 'List products and plans',

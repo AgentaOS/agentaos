@@ -21,6 +21,9 @@ export interface Operation<I extends OperationInput = OperationInput, O = unknow
 	effect: OperationEffect;
 	/** One sentence; the CLI help line and the MCP tool description. */
 	description: string;
+	/** For AI agents, after the description in the MCP tool: when to use it, what it returns and what it
+	 *  changes. Not shown in the CLI help, which stays one line. */
+	guidance: string;
 	/** Every key carries `.describe()`: that text is the CLI option help and the MCP schema description. */
 	input: I;
 	/** The one required id the CLI takes as an argument (`<id>`) instead of a flag. */

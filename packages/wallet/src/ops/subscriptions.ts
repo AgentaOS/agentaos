@@ -23,6 +23,8 @@ function planPrice(s: Subscription): string {
 
 export const subscriptionsList = operation({
 	name: 'subscriptions.list',
+	guidance:
+		"Returns the merchant's subscriptions with their id, plan, status and subscriber; pass code to see only subscribers who used that discount code. Changes nothing. Use an id with agenta_subscriptions_cancel, agenta_subscriptions_change_plan or agenta_subscriptions_credit.",
 	title: 'List subscriptions',
 	effect: 'read',
 	description: 'List subscriptions',
@@ -54,6 +56,8 @@ function codeNote(s: Subscription): string {
 
 export const subscriptionsCredit = operation({
 	name: 'subscriptions.credit',
+	guidance:
+		"Adds credit to one subscription, in the plan's currency; it is taken off the subscriber's next invoices. The reason is stored for the merchant only. Returns the credit given.",
 	title: 'Credit subscription',
 	effect: 'write',
 	description: 'Put credit on a subscriber’s account, taken off their next invoice',
@@ -88,6 +92,8 @@ type CreditGiven = Credit & { idempotencyKey: string };
 
 export const subscriptionsCredits = operation({
 	name: 'subscriptions.credits',
+	guidance:
+		'Returns the credits given on one subscription and how much is still unspent. Changes nothing.',
 	title: 'List subscription credits',
 	effect: 'read',
 	description: 'Credits given on a subscription, and what is still unspent',
@@ -116,6 +122,8 @@ export const subscriptionsCredits = operation({
 
 export const subscriptionsCancel = operation({
 	name: 'subscriptions.cancel',
+	guidance:
+		'Cancels one subscription. By default it stays active until the end of the paid period; set immediately to end it now. Ask the merchant before calling this.',
 	title: 'Cancel subscription',
 	effect: 'destructive',
 	description: 'Cancel a subscription (at period end by default)',
@@ -155,6 +163,8 @@ export const subscriptionsCancel = operation({
  */
 export const subscriptionsChangePlan = operation({
 	name: 'subscriptions.changePlan',
+	guidance:
+		'Moves one subscription to another plan with the same currency and interval: an upgrade is charged now (prorated), a downgrade applies at period end. Set dryRun to get the price quote without changing anything.',
 	title: 'Change subscription plan',
 	effect: 'write',
 	description: 'Move a subscription to another plan (upgrade charges now, downgrade at period end)',
