@@ -7,6 +7,8 @@ import { count, lines, moreLine } from './words.js';
 
 export const customersList = operation({
 	name: 'customers.list',
+	title: 'List customers',
+	effect: 'read',
 	description: 'List customers',
 	input: z.object({ limit: pageLimit }),
 	async run(sdk, input) {

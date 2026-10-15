@@ -61,6 +61,8 @@ const NOT_SUPPORTED_RULE = 'An application for one of these is refused, not revi
 
 export const verifyDeclaration = operation({
 	name: 'verify.declaration',
+	title: 'Show verification declaration',
+	effect: 'read',
 	description: 'The five statements --accept-declaration attests to',
 	input: z.object({}),
 	async run() {
@@ -191,6 +193,8 @@ export interface VerifySubmitView {
 
 export const verifySubmit = operation({
 	name: 'verify.submit',
+	title: 'Submit verification',
+	effect: 'write',
 	description: 'Submit business verification so the merchant can accept live payments',
 	input: submitInput,
 	async run(sdk, input): Promise<VerifySubmitView> {
@@ -234,6 +238,8 @@ export const verifySubmit = operation({
 
 export const verifyStatus = operation({
 	name: 'verify.status',
+	title: 'Verification status',
+	effect: 'read',
 	description: 'Where the verification has got to',
 	input: z.object({}),
 	async run(sdk) {
@@ -279,6 +285,8 @@ function describeVerification(v: VerificationView): string {
 
 export const verifyResubmit = operation({
 	name: 'verify.resubmit',
+	title: 'Resubmit verification',
+	effect: 'write',
 	description: 'Send back for review after making the changes we asked for',
 	input: z.object({}),
 	async run(sdk) {

@@ -42,6 +42,8 @@ const createInput = z.object({
 
 export const discountsCreate = operation({
 	name: 'discounts.create',
+	title: 'Create discount code',
+	effect: 'write',
 	description: 'Create a discount code buyers type at checkout',
 	input: createInput,
 	async run(sdk, input): Promise<DiscountCode> {
@@ -71,6 +73,8 @@ export const discountsCreate = operation({
 
 export const discountsList = operation({
 	name: 'discounts.list',
+	title: 'List discount codes',
+	effect: 'read',
 	description: 'List discount codes',
 	input: z.object({ limit: pageLimit }),
 	async run(sdk, input) {
@@ -92,6 +96,8 @@ export const discountsList = operation({
 
 export const discountsShow = operation({
 	name: 'discounts.show',
+	title: 'Show discount code',
+	effect: 'read',
 	description: 'Show one discount code: what it takes off and how many people used it',
 	input: z.object({ id: z.string().min(1).describe('The discount code id') }),
 	positional: 'id',
@@ -108,6 +114,8 @@ export const discountsShow = operation({
 
 export const discountsArchive = operation({
 	name: 'discounts.archive',
+	title: 'Archive discount code',
+	effect: 'destructive',
 	description: 'Stop a discount code working',
 	input: z.object({ id: z.string().min(1).describe('The discount code id') }),
 	positional: 'id',

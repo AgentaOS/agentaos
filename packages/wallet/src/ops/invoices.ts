@@ -7,6 +7,8 @@ import { count, day, lines, money, moreLine } from './words.js';
 
 export const invoicesList = operation({
 	name: 'invoices.list',
+	title: 'List invoices',
+	effect: 'read',
 	description: 'List invoices',
 	input: z.object({ limit: pageLimit }),
 	async run(sdk, input) {
@@ -38,6 +40,8 @@ export interface ReceiptView {
  *  bytes themselves are the result; the CLI writes them to a file. */
 export const invoicesReceipt = operation({
 	name: 'invoices.receipt',
+	title: 'Download receipt',
+	effect: 'read',
 	description: 'Download the receipt PDF for a paid invoice',
 	input: z.object({
 		id: z.string().min(1).describe('The invoice id'),
@@ -63,6 +67,8 @@ export const invoicesReceipt = operation({
 
 export const invoicesSendReceipt = operation({
 	name: 'invoices.sendReceipt',
+	title: 'Re-send receipt email',
+	effect: 'write',
 	description: 'Re-send the receipt email to the buyer on file',
 	input: z.object({ id: z.string().min(1).describe('The invoice id') }),
 	positional: 'id',
