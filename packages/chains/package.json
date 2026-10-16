@@ -9,7 +9,7 @@
 		"url": "https://github.com/AgentaOS/agentaos.git",
 		"directory": "packages/chains"
 	},
-	"homepage": "https://github.com/AgentaOS/agentaos",
+	"homepage": "https://agentaos.ai",
 	"bugs": "https://github.com/AgentaOS/agentaos/issues",
 	"keywords": ["threshold", "wallet", "ethereum", "chain", "viem", "agent"],
 	"type": "module",
