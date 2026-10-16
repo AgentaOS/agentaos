@@ -26,6 +26,9 @@ export interface Operation<I extends OperationInput = OperationInput, O = unknow
 	guidance: string;
 	/** Every key carries `.describe()`: that text is the CLI option help and the MCP schema description. */
 	input: I;
+	/** Answers from the catalogue itself, with no API call, so it works before the merchant has a key.
+	 *  `run` then gets {@link NO_CLIENT} instead of a connected SDK. */
+	offline?: boolean;
 	/** The one required id the CLI takes as an argument (`<id>`) instead of a flag. */
 	positional?: string;
 	/** SDK only: no fetch, no process.env, no console. Returns the render-ready JSON. */
@@ -33,6 +36,16 @@ export interface Operation<I extends OperationInput = OperationInput, O = unknow
 	/** Merchant-facing text: what happened and what they can do next. */
 	describe(result: O): string;
 }
+
+/** The client an offline operation gets: any use of it is a bug in that operation, so it throws. */
+export const NO_CLIENT = new Proxy(
+	{},
+	{
+		get() {
+			throw new Error('This operation is offline and cannot call the AgentaOS API.');
+		},
+	},
+) as AgentaOS;
 
 export interface OperationGroup {
 	name: string;

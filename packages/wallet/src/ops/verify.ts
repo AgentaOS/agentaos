@@ -65,6 +65,7 @@ export const verifyDeclaration = operation({
 		'Read-only. Returns the five statements a merchant attests to when submitting business verification, the product categories AgentaOS does not support, and what happens if a statement is false. Show these to the merchant before calling agenta_verify_submit with acceptDeclaration true.',
 	title: 'Show verification declaration',
 	effect: 'read',
+	offline: true,
 	description: 'The five statements --accept-declaration attests to',
 	input: z.object({}),
 	async run() {

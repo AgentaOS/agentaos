@@ -2,7 +2,7 @@ import { Command, Option } from 'commander';
 import { z } from 'zod';
 import { kebab, opOf } from '../ops/naming.js';
 import { issuesText } from '../ops/schema.js';
-import type { Operation, OperationGroup } from '../ops/types.js';
+import { NO_CLIENT, type Operation, type OperationGroup } from '../ops/types.js';
 import type { CliContext } from './connect.js';
 import { flagSpec } from './flags.js';
 import { isJsonMode, outputError } from './output.js';
@@ -112,7 +112,9 @@ export async function runOperation(
 		return;
 	}
 	try {
-		const { sdk } = await ctx.connect(business ? { business } : undefined);
+		const sdk = op.offline
+			? NO_CLIENT
+			: (await ctx.connect(business ? { business } : undefined)).sdk;
 		const result = await applySideEffect(op, parsed.data, await op.run(sdk, parsed.data));
 		print(op, result);
 	} catch (error: unknown) {
