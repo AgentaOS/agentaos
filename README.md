@@ -4,7 +4,7 @@
 
 ### Turn your users into paying customers
 
-The growth merchant of record for founders who sell digital products.
+AgentaOS is a merchant of record for AI agents: your agent (Claude, ChatGPT, Cursor) sets up products, checkout links and subscriptions, and AgentaOS is the legal seller, so VAT, sales tax, invoices and chargebacks are ours. [What that means](https://agentaos.ai/merchant-of-record-for-ai-agents).
 
 [![npm](https://img.shields.io/npm/v/@agentaos/pay?label=%40agentaos%2Fpay)](https://www.npmjs.com/package/@agentaos/pay)
 [![npm](https://img.shields.io/npm/v/agentaos?label=agenta%20CLI)](https://www.npmjs.com/package/agentaos)
