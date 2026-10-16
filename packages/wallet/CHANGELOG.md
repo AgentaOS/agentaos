@@ -1,5 +1,11 @@
 # agentaos
 
+## 3.4.1
+
+### Patch Changes
+
+- [#62](https://github.com/AgentaOS/agentaos/pull/62) [`c5fa11a`](https://github.com/AgentaOS/agentaos/commit/c5fa11a22007caf81a2c7f599b9743d92e7ccfa6) Thanks [@PancheI](https://github.com/PancheI)! - `agenta_verify_declaration` (and `agenta verify declaration`) now answers without an API key. It only returns the verification statements, so it no longer fails with "Not authenticated" for merchants who have not created a key yet, or for directories that test the server.
+
 ## 3.4.0
 
 ### Minor Changes
