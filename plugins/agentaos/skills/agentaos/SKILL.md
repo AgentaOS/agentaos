@@ -325,10 +325,10 @@ Same 31 operations on both surfaces. Every one also takes `business` (CLI `--bus
 
 ## No MCP where you run? Use the CLI
 
-Terminals, headless agents and CI get the same 19 operations from the `agenta` CLI:
+Terminals, headless agents and CI get the same operations from the `agenta` CLI:
 
 ```bash
-curl -fsSL https://agentaos.ai/install | bash   # or: npm install -g agentaos (Node.js 20+)
+npm install -g agentaos                         # Node.js 20+
 agenta login                                    # browser approval; creates the account if the email is new
 agenta status --json
 ```
