@@ -1,5 +1,11 @@
 # @agentaos/pay
 
+## 2.5.1
+
+### Patch Changes
+
+- [#64](https://github.com/AgentaOS/agentaos/pull/64) [`94de2d2`](https://github.com/AgentaOS/agentaos/commit/94de2d21d48377e1e1828527f21e276ea929f95b) Thanks [@PancheI](https://github.com/PancheI)! - The npm pages now link to agentaos.ai (the CLI to the Claude Code setup page, the SDK to the docs, the checkout to the embedded checkout guide) instead of the GitHub repo.
+
 ## 2.5.0
 
 ### Minor Changes

@@ -1,5 +1,13 @@
 # @agentaos/engine
 
+## 3.4.2
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @agentaos/core@3.4.2
+  - @agentaos/crypto@3.4.2
+
 ## 3.4.1
 
 ### Patch Changes
