@@ -9,7 +9,7 @@
 		"url": "https://github.com/AgentaOS/agentaos.git",
 		"directory": "packages/wallet"
 	},
-	"homepage": "https://github.com/AgentaOS/agentaos",
+	"homepage": "https://agentaos.ai/add-payments-with-claude-code",
 	"bugs": "https://github.com/AgentaOS/agentaos/issues",
 	"keywords": [
 		"payments",

@@ -9,7 +9,7 @@
 		"url": "https://github.com/AgentaOS/agentaos.git",
 		"directory": "packages/signer"
 	},
-	"homepage": "https://github.com/AgentaOS/agentaos",
+	"homepage": "https://agentaos.ai",
 	"bugs": "https://github.com/AgentaOS/agentaos/issues",
 	"keywords": ["threshold", "wallet", "mpc", "ecdsa", "sdk", "signer", "agent", "viem"],
 	"type": "module",

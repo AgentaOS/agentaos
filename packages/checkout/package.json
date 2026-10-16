@@ -2,6 +2,7 @@
 	"name": "@agentaos/checkout",
 	"version": "0.1.0",
 	"description": "AgentaOS embedded checkout for the browser: inline or overlay on your own page, with React support",
+	"homepage": "https://agentaos.ai/answers/embedded-checkout",
 	"license": "Apache-2.0",
 	"keywords": [
 		"payments",
