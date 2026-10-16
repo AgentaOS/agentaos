@@ -56,6 +56,8 @@ describe('AgentaOS Terminal MCP Server', () => {
 				AGENTA_API_SECRET: 'dGVzdA==',
 				AGENTA_API_KEY: 'gw_test_dummy',
 				AGENTA_SERVER: 'http://localhost:8080',
+				// No key: the server must still start, and offline tools must still answer.
+				AGENTAOS_GATEWAY_KEY: '',
 			},
 		});
 
@@ -108,6 +110,14 @@ describe('AgentaOS Terminal MCP Server', () => {
 		]) {
 			expect(names).not.toContain(gone);
 		}
+	});
+
+	// Directories (Glama) and first-time merchants call it before they have a key.
+	it('answers agenta_verify_declaration without a key', async () => {
+		const result = await client.callTool({ name: 'agenta_verify_declaration', arguments: {} });
+		expect(result.isError).toBeFalsy();
+		const [first] = result.content as { type: string; text: string }[];
+		expect(first?.text).toContain('Submitting verification attests that:');
 	});
 
 	it('every tool is named agenta_<group>_<op>', async () => {

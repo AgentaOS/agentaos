@@ -4,7 +4,7 @@ import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { OPERATIONS } from '../../ops/index.js';
 import { cliCommand, mcpToolName } from '../../ops/naming.js';
-import type { Operation } from '../../ops/types.js';
+import { NO_CLIENT, type Operation } from '../../ops/types.js';
 import { formatPayError } from './pay-utils.js';
 
 export { formatPayError } from './pay-utils.js';
@@ -48,7 +48,8 @@ function registerOperation(server: McpServer, op: Operation, getClient: PayClien
 		async (input) => {
 			try {
 				const { business, ...opInput } = input as Record<string, unknown> & { business?: string };
-				const result = await op.run(getClient(business ? { business } : undefined), opInput);
+				const client = op.offline ? NO_CLIENT : getClient(business ? { business } : undefined);
+				const result = await op.run(client, opInput);
 				return {
 					content: [{ type: 'text' as const, text: op.describe(result) }],
 					structuredContent: result as Record<string, unknown>,
