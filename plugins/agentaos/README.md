@@ -85,5 +85,6 @@ on app.agentaos.ai → Developers.
 ## Docs
 
 - Skill reference: `skills/agentaos/SKILL.md`
+- Moving from Paddle, Lemon Squeezy, Creem or Gumroad: `skills/agentaos-migrate/SKILL.md` (runs `npx @agentaos/migrate`)
 - Full API reference: https://docs.agentaos.ai/llms-full.txt
 - Dashboard: https://app.agentaos.ai

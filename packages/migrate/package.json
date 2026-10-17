@@ -1,0 +1,56 @@
+{
+	"name": "@agentaos/migrate",
+	"version": "0.1.0",
+	"description": "Move your products, plans and discount codes from Paddle, Lemon Squeezy, Creem or Gumroad to AgentaOS. Reads your old account, never changes it.",
+	"homepage": "https://docs.agentaos.ai",
+	"license": "Apache-2.0",
+	"keywords": [
+		"migration",
+		"merchant-of-record",
+		"paddle",
+		"lemon-squeezy",
+		"creem",
+		"gumroad",
+		"subscriptions",
+		"payments",
+		"agentaos"
+	],
+	"author": "AgentaOS <hello@agentaos.ai>",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/AgentaOS/agentaos.git",
+		"directory": "packages/migrate"
+	},
+	"type": "module",
+	"bin": {
+		"agentaos-migrate": "./dist/cli.js"
+	},
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"files": ["dist"],
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"dependencies": {
+		"@agentaos/pay": "workspace:^"
+	},
+	"devDependencies": {
+		"@types/node": "^20.0.0"
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.build.json",
+		"lint": "biome check src/",
+		"test": "vitest run --passWithNoTests",
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf dist"
+	}
+}
