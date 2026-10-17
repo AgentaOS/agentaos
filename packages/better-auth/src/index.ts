@@ -71,7 +71,16 @@ export const agentaos = (options: AgentaOSPluginOptions) => {
 				'/agentaos/subscriptions',
 				{ method: 'GET', use: [sessionMiddleware] },
 				async (ctx) => {
-					const email = ctx.context.session.user.email.toLowerCase();
+					const { user } = ctx.context.session;
+					// Subscriptions are matched by email, so only a verified owner of that
+					// email may read them. Otherwise anyone could sign up with someone
+					// else's address and see their plans.
+					if (!user.emailVerified) {
+						throw new APIError('FORBIDDEN', {
+							message: 'Verify your email to see your subscriptions',
+						});
+					}
+					const email = user.email.toLowerCase();
 					const mine: Subscription[] = [];
 					let offset = 0;
 					for (;;) {

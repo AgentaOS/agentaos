@@ -62,6 +62,20 @@ In test mode, pay with the card `4242 4242 4242 4242`, any future date and any C
 
 `onEvent` receives every verified event: `checkout.session.completed`, `subscription.created`, `subscription.renewed`, `subscription.updated`, `subscription.payment_failed`, `subscription.canceled`, `dispute.created`, `dispute.closed` and more. See [Webhooks](https://docs.agentaos.ai/payments/webhooks).
 
+## Security
+
+What the plugin does for you:
+
+- **Checkout** needs a signed-in session, and Better Auth's origin check rejects requests from other sites. The buyer can only pick a product by its  from your  list; the product id, price and redirect URLs are set on your server.
+- **Subscriptions** are matched by email, so they are only shown to a user whose email is verified.
+- **Webhooks** are verified with HMAC-SHA256 over the raw body; a wrong secret, a changed body, or a signature older than 5 minutes is rejected.
+
+What your  should do:
+
+- Grant the product in , not just "a purchase". The user id comes from checkout metadata your server set.
+- Ignore test events in production: check .
+- Make granting idempotent (for example, keyed on ), because a valid webhook can be delivered more than once.
+
 ## License
 
 Apache-2.0
