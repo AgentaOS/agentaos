@@ -11,5 +11,9 @@
 	"license": "Apache-2.0",
 	"keywords": ["payments", "billing", "merchant-of-record"],
 	"icon": ".claude-plugin/icon.png",
-	"privacyPolicyUrl": "https://agentaos.ai/privacy"
+	"privacyPolicyUrl": "https://agentaos.ai/privacy",
+	"displayName": "AgentaOS",
+	"documentationUrl": "https://docs.agentaos.ai/mcp/setup",
+	"supportUrl": "https://agentaos.ai/contact",
+	"termsOfServiceUrl": "https://agentaos.ai/terms"
 }
