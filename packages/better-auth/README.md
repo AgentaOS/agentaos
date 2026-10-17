@@ -66,15 +66,15 @@ In test mode, pay with the card `4242 4242 4242 4242`, any future date and any C
 
 What the plugin does for you:
 
-- **Checkout** needs a signed-in session, and Better Auth's origin check rejects requests from other sites. The buyer can only pick a product by its  from your  list; the product id, price and redirect URLs are set on your server.
+- **Checkout** needs a signed-in session, and Better Auth's origin check rejects requests from other sites. The buyer can only pick a product by its `slug` from your `products` list; the product id, price and redirect URLs are set on your server.
 - **Subscriptions** are matched by email, so they are only shown to a user whose email is verified.
 - **Webhooks** are verified with HMAC-SHA256 over the raw body; a wrong secret, a changed body, or a signature older than 5 minutes is rejected.
 
-What your  should do:
+What your `onEvent` should do:
 
-- Grant the product in , not just "a purchase". The user id comes from checkout metadata your server set.
-- Ignore test events in production: check .
-- Make granting idempotent (for example, keyed on ), because a valid webhook can be delivered more than once.
+- Grant the product in `event.data.linkId`, not just "a purchase". The user id comes from checkout metadata your server set.
+- Ignore test events in production: check `event.data.livemode`.
+- Make granting idempotent (for example, keyed on `event.data.sessionId`), because a valid webhook can be delivered more than once.
 
 ## License
 
