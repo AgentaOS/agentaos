@@ -1,5 +1,11 @@
 # agentaos
 
+## 3.4.3
+
+### Patch Changes
+
+- [#68](https://github.com/AgentaOS/agentaos/pull/68) [`bd0671a`](https://github.com/AgentaOS/agentaos/commit/bd0671a0000e67973504e4fab01c931be6d8e153) Thanks [@PancheI](https://github.com/PancheI)! - MCP tool descriptions now say only what each tool does and returns. Sentences that name another tool or tell the model when to call it are left out of the MCP listing (the CLI help keeps them), so the connector meets the Claude and ChatGPT directory rules.
+
 ## 3.4.2
 
 ### Patch Changes
