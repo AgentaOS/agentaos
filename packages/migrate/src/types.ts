@@ -38,6 +38,8 @@ export interface SourceDiscount {
 	percentOff?: number;
 	/** Fixed amount off, in minor units (cents). */
 	amountOffMinor?: number;
+	/** Currency of a fixed amount off, when the provider says. */
+	currency?: string;
 	maxRedemptions?: number;
 	/** ISO 8601 */
 	expiresAt?: string;

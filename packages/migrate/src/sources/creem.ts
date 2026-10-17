@@ -36,6 +36,7 @@ export interface CreemDiscount {
 	type: 'percentage' | 'fixed';
 	amount?: number | null;
 	percentage?: number | null;
+	currency?: string | null;
 	expiry_date?: string | null;
 	max_redemptions?: number | null;
 	applies_to_products?: string[] | null;
@@ -120,6 +121,7 @@ export function mapCreemDiscount(d: CreemDiscount): SourceDiscount[] {
 			name: d.name,
 			percentOff: d.type === 'percentage' ? (d.percentage ?? undefined) : undefined,
 			amountOffMinor: d.type === 'fixed' ? (d.amount ?? undefined) : undefined,
+			currency: d.type === 'fixed' ? (d.currency?.toUpperCase() ?? undefined) : undefined,
 			maxRedemptions: d.max_redemptions ?? undefined,
 			expiresAt: d.expiry_date ?? undefined,
 			planSourceIds: d.applies_to_products ?? [],

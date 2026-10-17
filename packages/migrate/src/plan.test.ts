@@ -85,8 +85,37 @@ describe('buildPlan', () => {
 	});
 });
 
+describe('fixed-amount codes', () => {
+	it('leaves behind a fixed code in a different currency than its plan', () => {
+		const result = buildPlan(
+			catalog({
+				plans: [plan({ currency: 'USD' })],
+				discounts: [
+					{
+						sourceId: 'd1',
+						code: 'FIVE',
+						amountOffMinor: 500,
+						currency: 'EUR',
+						planSourceIds: ['p1'],
+					},
+					{
+						sourceId: 'd2',
+						code: 'FIVEUSD',
+						amountOffMinor: 500,
+						currency: 'USD',
+						planSourceIds: ['p1'],
+					},
+				],
+			}),
+		);
+		expect(result.discounts.map((d) => d.code)).toEqual(['FIVEUSD']);
+		expect(result.skipped[0]?.reason).toContain('EUR');
+	});
+});
+
 describe('csv', () => {
 	it('quotes commas and neutralises spreadsheet formulas', () => {
 		expect(csv(['a', 'b'], [['x,y', '=SUM(A1)']])).toBe('a,b\n"x,y",\'=SUM(A1)\n');
+		expect(csv(['a'], [['\t=1']])).toBe("a\n'\t=1\n");
 	});
 });

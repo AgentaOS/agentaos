@@ -1,3 +1,5 @@
+const REQUEST_TIMEOUT_MS = 30_000;
+
 /** A read-only GET against the old provider. Retries rate limits and server errors. */
 export async function getJson<T>(
 	url: string,
@@ -7,6 +9,7 @@ export async function getJson<T>(
 	for (let attempt = 1; ; attempt++) {
 		const res = await fetch(url, {
 			method: 'GET',
+			signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
 			headers: { Accept: 'application/json', ...headers },
 		});
 		if (res.ok) return (await res.json()) as T;

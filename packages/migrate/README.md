@@ -22,7 +22,7 @@ Prefer to ask your agent? With the AgentaOS plugin in Claude Code, say "move me 
 | Subscribers | Listed | `subscribers.csv`: plan, renewal date and new link for each |
 | Saved cards | No | See below |
 
-Anything that cannot move as-is (quarterly or weekly billing, currencies other than EUR or USD, free or pay-what-you-want products) is left behind and listed in `skipped.csv` with the reason, so you can recreate it by hand.
+Anything that cannot move as-is (quarterly or weekly billing, currencies other than EUR or USD, free or pay-what-you-want products, fixed-amount codes in another currency) is left behind and listed in `skipped.csv` with the reason, so you can recreate it by hand. Country-specific price overrides (Paddle) are not moved: each plan keeps its base price.
 
 ## Your subscribers
 
@@ -30,7 +30,7 @@ Saved cards stay with your old provider: Paddle, Lemon Squeezy, Creem and Gumroa
 
 1. `subscribers.csv` lists everyone with their renewal date and new link.
 2. `email-to-subscribers.md` is a short email to send a week or two before each renewal.
-3. `--apply --switch-code` makes one code that makes their first invoice on AgentaOS free, because they already paid for the current period. It is random, capped at your number of subscribers, and expires in 60 days.
+3. `--apply --switch-code` makes one code that makes their first invoice on AgentaOS free, because they already paid for the current period. It is random, capped at your number of subscribers, and expires in 60 days. If a plan has a trial, moved subscribers get that trial too; remove it from the plan in the dashboard before you email them if you do not want that.
 4. When someone subscribes on AgentaOS, cancel their old subscription at the end of the period they paid for.
 
 ## Output
@@ -46,7 +46,7 @@ Everything goes to `./agentaos-migration` (change it with `--out`):
 | `email-to-subscribers.md` | The email to send them |
 | `skipped.csv` | What stayed behind, and why |
 
-`subscribers.csv` holds your customers' emails. It stays on your machine; keep it out of git.
+`subscribers.csv` holds your customers' emails. It stays on your machine, and the folder gets its own `.gitignore` so it is never committed.
 
 ## Options
 

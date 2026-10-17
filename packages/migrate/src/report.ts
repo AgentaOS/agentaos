@@ -21,6 +21,8 @@ export async function writeReport(
 ): Promise<string[]> {
 	await mkdir(outDir, { recursive: true });
 	const files: Record<string, string> = {
+		// Holds customer emails: keep the whole folder out of git.
+		'.gitignore': '*\n',
 		'summary.md': summary(plan, result),
 		'products.csv': productsCsv(plan, result),
 		'skipped.csv': csv(
@@ -37,7 +39,9 @@ export async function writeReport(
 	await Promise.all(
 		Object.entries(files).map(([name, body]) => writeFile(join(outDir, name), body)),
 	);
-	return Object.keys(files).map((name) => join(outDir, name));
+	return Object.keys(files)
+		.filter((name) => name !== '.gitignore')
+		.map((name) => join(outDir, name));
 }
 
 export function summary(plan: MigrationPlan, result?: ApplyResult): string {
@@ -178,6 +182,6 @@ export function csv(header: string[], rows: string[][]): string {
 }
 
 function csvCell(value: string): string {
-	const safe = /^[=+\-@]/.test(value) ? `'${value}` : value;
+	const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
 	return /[",\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }

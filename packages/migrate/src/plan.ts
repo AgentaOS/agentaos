@@ -85,6 +85,18 @@ function planDiscount(
 	if (discount.planSourceIds.length > 0 && targets.length === 0) {
 		return { reason: 'limited to products that were not moved' };
 	}
+	if (discount.amountOffMinor && discount.currency) {
+		const currencies = new Set(
+			targets.length
+				? targets.map((id) => planById.get(id)?.currency)
+				: [...planById.values()].map((p) => p.currency),
+		);
+		if (currencies.size !== 1 || !currencies.has(discount.currency as PlannedPlan['currency'])) {
+			return {
+				reason: `fixed amount in ${discount.currency} does not match the plan currency; recreate it by hand`,
+			};
+		}
+	}
 	const onlySubscriptions = targets.every((id) => planById.get(id)?.type === 'subscription');
 	if (!onlySubscriptions) {
 		return { reason: 'limited to a one-time product; AgentaOS codes apply to subscription plans' };

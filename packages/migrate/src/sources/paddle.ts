@@ -32,6 +32,7 @@ export interface PaddleDiscount {
 	description: string;
 	type: 'percentage' | 'flat' | 'flat_per_seat';
 	amount: string;
+	currency_code?: string | null;
 	usage_limit: number | null;
 	expires_at: string | null;
 	restrict_to: string[] | null;
@@ -141,6 +142,10 @@ export function mapPaddleDiscount(
 			name: discount.description,
 			percentOff: discount.type === 'percentage' ? Number(discount.amount) : undefined,
 			amountOffMinor: discount.type === 'percentage' ? undefined : Number(discount.amount),
+			currency:
+				discount.type === 'percentage'
+					? undefined
+					: (discount.currency_code?.toUpperCase() ?? undefined),
 			maxRedemptions: discount.usage_limit ?? undefined,
 			expiresAt: discount.expires_at ?? undefined,
 			planSourceIds,

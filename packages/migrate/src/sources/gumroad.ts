@@ -156,6 +156,7 @@ export function mapGumroadOfferCode(
 		code: code.name,
 		percentOff: code.percent_off ?? undefined,
 		amountOffMinor: code.percent_off ? undefined : (code.amount_cents ?? undefined),
+		currency: code.percent_off ? undefined : product.currency.toUpperCase(),
 		maxRedemptions: code.max_purchase_count ?? undefined,
 		planSourceIds: code.universal ? [] : plansOf(product, plans).map((p) => p.sourceId),
 	};
