@@ -88,6 +88,17 @@ describe('AgentaOS Terminal MCP Server', () => {
 		}
 	});
 
+	// Connector directories reject descriptions that name other tools or tell the model what to do.
+	it('no tool description names another tool or steers the model', async () => {
+		const { tools } = await client.listTools();
+		for (const tool of tools) {
+			expect(tool.description).not.toMatch(/agenta_[a-z_]+/);
+			expect(tool.description).not.toMatch(
+				/ask the merchant|start here|use (only )?when|follow up with/i,
+			);
+		}
+	});
+
 	// The removal is the point, so assert it directly: anything needing key
 	// material must not come back, because this server no longer holds any.
 	it('exposes no wallet, signing or x402 tools', async () => {

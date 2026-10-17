@@ -41,7 +41,7 @@ function registerOperation(server: McpServer, op: Operation, getClient: PayClien
 		mcpToolName(op),
 		{
 			title: op.title,
-			description: `${op.description}. ${op.guidance}`,
+			description: toolDescription(op),
 			inputSchema: { ...op.input.shape, business: businessInput },
 			annotations: toolAnnotations(op),
 		},
@@ -59,6 +59,25 @@ function registerOperation(server: McpServer, op: Operation, getClient: PayClien
 			}
 		},
 	);
+}
+
+/**
+ * The description an MCP client shows the model: what the tool does and returns, nothing else.
+ * Connector directories reject descriptions that steer the model or point at other tools, so
+ * sentences that name another `agenta_*` tool or tell the model when to call (or ask before
+ * calling) are dropped here. The CLI keeps the full guidance, the skill file teaches the
+ * workflow, and destructive tools are flagged by their annotations.
+ */
+const STEERING =
+	/\bagenta_[a-z_]+\b|^(use (only )?when|ask the merchant|show these|only set|for the whole|follow up|pass a business id|if none was requested|check progress)\b/i;
+
+export function toolDescription(op: Pick<Operation, 'description' | 'guidance'>): string {
+	const sentences = `${op.description}. ${op.guidance}`
+		.split(/(?<=\.)\s+/)
+		.map((sentence) => sentence.trim().replace(/^Start here:\s*/i, ''))
+		.map((sentence) => sentence.charAt(0).toUpperCase() + sentence.slice(1))
+		.filter((sentence) => sentence && !STEERING.test(sentence));
+	return sentences.join(' ');
 }
 
 /** MCP tool hints from the operation's effect. Every tool calls the AgentaOS API, so none is closed-world. */
