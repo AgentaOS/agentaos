@@ -195,6 +195,8 @@ importers:
 
   packages/core: {}
 
+  packages/is-stripe-available: {}
+
   packages/mcp-remote:
     dependencies:
       '@agentaos/pay':

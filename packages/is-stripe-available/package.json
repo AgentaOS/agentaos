@@ -1,0 +1,42 @@
+{
+	"name": "is-stripe-available",
+	"version": "0.0.0",
+	"description": "Is Stripe available in your country? And if not, which payment providers pay out there. Open data for 85 countries and 9 providers.",
+	"type": "module",
+	"main": "./src/index.js",
+	"types": "./src/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./src/index.d.ts",
+			"default": "./src/index.js"
+		},
+		"./data.json": "./src/data.json"
+	},
+	"bin": {
+		"is-stripe-available": "./src/cli.js"
+	},
+	"files": ["src/*.js", "src/*.d.ts", "src/data.json", "README.md"],
+	"scripts": {
+		"test": "node --test src/index.test.js"
+	},
+	"keywords": [
+		"stripe",
+		"stripe-alternative",
+		"payments",
+		"merchant-of-record",
+		"paddle",
+		"lemon-squeezy",
+		"polar",
+		"paypal",
+		"countries",
+		"payouts"
+	],
+	"homepage": "https://agentaos.ai/countries?src=npm-isa",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/AgentaOS/agentaos.git",
+		"directory": "packages/is-stripe-available"
+	},
+	"license": "Apache-2.0",
+	"engines": { "node": ">=18" }
+}
