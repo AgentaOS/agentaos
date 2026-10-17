@@ -41,7 +41,7 @@ async function signUp(auth: ReturnType<typeof setup>['auth']) {
 	});
 	const cookie = res.headers.get('set-cookie') ?? '';
 	const body = (await res.json()) as { user: { id: string } };
-	return { cookie: cookie.split(';')[0], userId: body.user.id };
+	return { cookie: cookie.split(';')[0] ?? '', userId: body.user.id };
 }
 
 function sign(payload: string) {
