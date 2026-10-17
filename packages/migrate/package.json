@@ -1,6 +1,6 @@
 {
 	"name": "@agentaos/migrate",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Move your products, plans and discount codes from Paddle, Lemon Squeezy, Creem or Gumroad to AgentaOS. Reads your old account, never changes it.",
 	"homepage": "https://docs.agentaos.ai",
 	"license": "Apache-2.0",
