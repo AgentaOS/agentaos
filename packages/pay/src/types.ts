@@ -191,7 +191,7 @@ export interface CreateCheckoutParams {
 	webhookUrl?: string;
 	successUrl?: string;
 	cancelUrl?: string;
-	/** Seconds, 300-86400. Default 1800, or 48 hours for an EUR checkout that offers bank transfer. */
+	/** Seconds, 300-86400. Default: 24 hours for a card checkout, 48 hours for EUR with bank transfer, 30 minutes for stablecoin. */
 	expiresIn?: number;
 	/** What the checkout offers. `['card']` makes it card-only. Default: card, plus bank transfer on EUR. */
 	paymentMethods?: ('card' | 'bank_transfer')[];
