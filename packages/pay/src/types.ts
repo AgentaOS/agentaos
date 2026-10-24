@@ -191,8 +191,10 @@ export interface CreateCheckoutParams {
 	webhookUrl?: string;
 	successUrl?: string;
 	cancelUrl?: string;
-	/** seconds, 300-86400, default 1800 */
+	/** Seconds, 300-86400. Default 1800, or 48 hours for an EUR checkout that offers bank transfer. */
 	expiresIn?: number;
+	/** What the checkout offers. `['card']` makes it card-only. Default: card, plus bank transfer on EUR. */
+	paymentMethods?: ('card' | 'bank_transfer')[];
 	/** CAIP-2 network IDs (e.g. ['eip155:8453']). Defaults to Base mainnet. */
 	supportedNetworks?: string[];
 	/** Invoice due date (YYYY-MM-DD). Presentation only — stamped on the issued invoice. */
@@ -894,6 +896,20 @@ export interface AccountUpdatedData {
 	livemode: boolean;
 }
 
+/** `checkout.session.bank_transfer_pending`: the buyer chose bank transfer and has the details.
+ *  Sent once per checkout; `checkout.session.completed` follows when the money arrives. */
+export interface CheckoutBankTransferPendingData {
+	session_id: string;
+	link_id: string | null;
+	/** Total to pay, VAT included, in the same form as `checkout.session.completed`. */
+	amount: string;
+	currency: string;
+	rail: 'sepa';
+	buyer_email: string | null;
+	livemode: boolean;
+	metadata: Record<string, unknown>;
+}
+
 /** `webhook.test`: the sample event the dashboard sends so you can check your endpoint. */
 export interface WebhookTestData {
 	message: string;
@@ -906,6 +922,7 @@ export interface WebhookTestData {
  */
 export type WebhookEvent = (
 	| { type: 'checkout.session.completed'; data: CheckoutCompletedData }
+	| { type: 'checkout.session.bank_transfer_pending'; data: CheckoutBankTransferPendingData }
 	| { type: 'send.completed'; data: SendCompletedData }
 	| { type: 'send.failed'; data: SendFailedData }
 	| { type: 'subscription.created'; data: SubscriptionData }

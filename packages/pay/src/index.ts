@@ -51,6 +51,7 @@ export type {
 	AuditDeliveryMethod,
 	VolumeBand,
 	WebhookEvent,
+	CheckoutBankTransferPendingData,
 	CheckoutCompletedData,
 	SendCompletedData,
 	SendFailedData,
