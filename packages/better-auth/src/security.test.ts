@@ -23,13 +23,7 @@ function setup() {
 	const auth = betterAuth({
 		baseURL: BASE,
 		secret: 'a-test-secret-that-is-long-enough-123',
-		database: memoryAdapter({
-			user: [],
-			session: [],
-			account: [],
-			verification: [],
-			agentaosSubscription: [],
-		}),
+		database: memoryAdapter({ user: [], session: [], account: [], verification: [] }),
 		emailAndPassword: { enabled: true },
 		// Better Auth turns the origin check off in test environments; turn it on to test production.
 		advanced: { disableOriginCheck: false },
@@ -92,38 +86,37 @@ describe('security', () => {
 		);
 	});
 
-	it('gives no access to a subscription by matching email alone', async () => {
+	it('does not show subscriptions to a user whose email is not verified', async () => {
 		const { auth, list } = setup();
-		// Someone signs up with the buyer's address; no checkout of theirs created the subscription.
+		// Someone signs up with the victim's address but never verifies it.
 		const cookie = await signUp(auth, 'victim@example.com');
-		const listed = await auth.handler(
+		const res = await auth.handler(
 			new Request(`${BASE}/api/auth/agentaos/subscriptions`, { headers: { cookie } }),
 		);
-		expect(await listed.json()).toEqual({ subscriptions: [] });
+		expect(res.status).toBe(403);
 		expect(list).not.toHaveBeenCalled();
-		const cancel = await auth.handler(
-			post(
-				'/agentaos/cancel-subscription',
-				{ 'content-type': 'application/json', cookie, origin: BASE },
-				JSON.stringify({ subscriptionId: 'sub_victim' }),
-			),
-		);
-		expect(cancel.status).toBe(404);
 	});
 
-	it('rejects a cancel or plan change started from another site (CSRF)', async () => {
-		const { auth } = setup();
+	it('shows only the verified user their own subscriptions', async () => {
+		const { auth, list } = setup();
+		list.mockResolvedValue({
+			items: [
+				{ id: 'sub_mine', customerEmail: 'Ana@Example.com', planName: 'Pro' },
+				{ id: 'sub_other', customerEmail: 'other@example.com', planName: 'Pro' },
+			],
+			total: 2,
+			hasMore: false,
+		} as never);
 		const cookie = await signUp(auth, 'ana@example.com');
-		for (const path of ['/agentaos/cancel-subscription', '/agentaos/change-plan']) {
-			const res = await auth.handler(
-				post(
-					path,
-					{ 'content-type': 'application/json', cookie, origin: 'https://evil.example' },
-					JSON.stringify({ subscriptionId: 'sub_victim', slug: 'pro' }),
-				),
-			);
-			expect(res.status).toBe(403);
-		}
+		const ctx = await auth.$context;
+		const user = await ctx.internalAdapter.findUserByEmail('ana@example.com');
+		await ctx.internalAdapter.updateUser(user!.user.id, { emailVerified: true });
+		const res = await auth.handler(
+			new Request(`${BASE}/api/auth/agentaos/subscriptions`, { headers: { cookie } }),
+		);
+		expect(res.status).toBe(200);
+		const body = (await res.json()) as { subscriptions: { id: string }[] };
+		expect(body.subscriptions.map((s) => s.id)).toEqual(['sub_mine']);
 	});
 
 	it('rejects a replayed webhook older than 5 minutes', async () => {
