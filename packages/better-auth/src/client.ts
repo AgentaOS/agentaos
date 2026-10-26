@@ -3,7 +3,7 @@ import type { agentaos } from './index.js';
 
 /**
  * Adds `authClient.agentaos.checkout()`, `.subscriptions()`, `.cancelSubscription()`,
- * `.changePlan()` and `.invoices()`.
+ * `.previewPlanChange()`, `.changePlan()` and `.invoices()`.
  */
 export const agentaosClient = () =>
 	({

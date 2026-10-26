@@ -41,7 +41,7 @@ describe('Checkout', () => {
 			linkId: 'link_pro',
 			buyerEmail: 'ana@example.com',
 			buyerName: undefined,
-			metadata: { userId: 'u_1' },
+			metadata: { userId: 'u_1', product: 'pro' },
 			successUrl: 'https://example.com/thanks',
 			cancelUrl: 'https://example.com/thanks',
 		});
@@ -54,6 +54,35 @@ describe('Checkout', () => {
 			expect(res.status).toBe(400);
 		}
 		expect(create).not.toHaveBeenCalled();
+	});
+
+	it('opens no checkout for a HEAD request or a router prefetch', async () => {
+		const create = mockCreate();
+		const url = 'https://example.com/checkout?product=pro';
+		const requests = [
+			new Request(url, { method: 'HEAD' }),
+			new Request(url, { headers: { 'next-router-prefetch': '1' } }),
+			new Request(url, { headers: { 'sec-purpose': 'prefetch;prerender' } }),
+		];
+		for (const request of requests) {
+			expect((await route()(request)).status).toBe(204);
+		}
+		expect(create).not.toHaveBeenCalled();
+	});
+
+	it('uses the client it is given', async () => {
+		const client = new AgentaOS('sk_test_other');
+		const create = vi
+			.spyOn(client.checkouts, 'create')
+			.mockResolvedValue({ checkoutUrl: 'https://app.agentaos.ai/pay/cs_2' } as never);
+		const GET = Checkout({
+			client,
+			products: { pro: 'link_pro' },
+			successUrl: 'https://example.com/t',
+		});
+		const res = await GET(new Request('https://example.com/checkout?product=pro'));
+		expect(res.headers.get('location')).toBe('https://app.agentaos.ai/pay/cs_2');
+		expect(create).toHaveBeenCalledTimes(1);
 	});
 });
 
@@ -99,6 +128,28 @@ describe('Webhooks', () => {
 		expect(res.status).toBe(200);
 		expect(h.onEvent).toHaveBeenCalledTimes(1);
 		vi.unstubAllEnvs();
+	});
+
+	it('refuses to start without a secret', () => {
+		for (const webhookSecret of ['', '  ', undefined]) {
+			expect(() => Webhooks({ webhookSecret: webhookSecret as unknown as string })).toThrow(
+				/webhookSecret/,
+			);
+		}
+	});
+
+	it('calls a handler written as a method with its options as `this`', async () => {
+		const seen: string[] = [];
+		const route = Webhooks({
+			webhookSecret: SECRET,
+			log: seen,
+			onSubscriptionRenewed() {
+				(this as unknown as { log: string[] }).log.push('renewed');
+			},
+		} as Parameters<typeof Webhooks>[0]);
+		const body = JSON.stringify({ type: 'subscription.renewed', business: 'b', data: { id: 's' } });
+		expect((await deliver(route, body)).status).toBe(200);
+		expect(seen).toEqual(['renewed']);
 	});
 
 	it('rejects a wrong secret or a changed body, and calls nothing', async () => {

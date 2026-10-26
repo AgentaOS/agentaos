@@ -30,7 +30,9 @@ export const GET = Checkout({
 });
 ```
 
-Link to `/checkout?product=pro`. Only the slugs in `products` can be bought. The buyer, the metadata and the redirect URLs come from your server, never from the query string. AgentaOS appends `?sessionId=...` to `successUrl`.
+Link to `/checkout?product=pro` with a plain `<a>`, or `<Link prefetch={false}>`. The route ignores HEAD requests and router prefetches, so a link scrolling into view does not open a checkout. Only the slugs in `products` can be bought. The buyer, the metadata and the redirect URLs come from your server, never from the query string. The route adds the slug to the metadata as `product`. AgentaOS appends `?sessionId=...` to `successUrl`.
+
+To set a business (platforms), a base URL or timeouts, pass your own client: `Checkout({ client: new AgentaOS(key, options), ... })`.
 
 In test mode, pay with the card `4242 4242 4242 4242`, any future date and any CVC.
 
@@ -43,7 +45,10 @@ import { Webhooks } from '@agentaos/nextjs';
 export const POST = Webhooks({
   webhookSecret: process.env.AGENTAOS_WEBHOOK_SECRET!,
   onCheckoutCompleted: async (event) => {
-    // event.data.metadata.userId is what your customer() returned
+    const { userId, product } = event.data.metadata;
+    // Renewals and upgrade charges arrive here too, without your metadata.
+    if (typeof userId !== 'string') return;
+    await grantAccess(userId, product);
   },
   onSubscriptionCanceled: async (event) => {
     // event.data.customerEmail identifies the buyer
@@ -53,9 +58,15 @@ export const POST = Webhooks({
 
 Set the webhook URL to `https://your-domain.com/api/webhooks/agentaos` in **Settings → Developers → Webhooks**.
 
-Handlers: `onCheckoutCompleted`, `onSubscriptionCreated`, `onSubscriptionRenewed`, `onSubscriptionUpdated`, `onSubscriptionPaymentFailed`, `onSubscriptionCanceled`, `onDisputeCreated` and `onDisputeClosed`. `onEvent` receives every verified event, after the matching handler. Webhooks need no API key.
+Handlers: `onCheckoutCompleted`, `onSubscriptionCreated`, `onSubscriptionRenewed`, `onSubscriptionUpdated`, `onSubscriptionPaymentFailed`, `onSubscriptionCanceled`, `onDisputeCreated` and `onDisputeClosed`. `onEvent` receives every verified event, after the matching handler. If a handler throws, the delivery answers 500 and AgentaOS retries it; `onEvent` is not called for that attempt. Webhooks need no API key, but `Webhooks()` refuses to start without `webhookSecret`.
 
-Every delivery is verified with HMAC-SHA256 over the raw body; a wrong secret, a changed body, or a signature older than 5 minutes gets a 400 and calls nothing. Make your handlers idempotent (for example, keyed on `event.data.sessionId`), because a valid webhook can be delivered more than once, and ignore test events in production by checking `event.data.livemode`.
+About the event data:
+
+- Your metadata comes back on the first `checkout.session.completed` only. Renewals and upgrade charges are also `checkout.session.completed`, carrying AgentaOS's `subscriptionId` instead; keep the link from `subscriptionId` to your user from that first event.
+- `event.data.linkId` on `checkout.session.completed` is the payment link's public token, not the link id in `products`. Use `event.data.metadata.product`.
+- Every key arrives in camelCase, metadata included: `user_id` arrives as `userId`.
+
+Every delivery is verified with HMAC-SHA256 over the raw body; a wrong secret, a changed body, or a signature older than 5 minutes gets a 400 and calls nothing. Make your handlers idempotent, because a valid webhook can be delivered more than once: key checkouts on `event.data.sessionId`, and subscription events on the subscription id and period. Ignore test events in production by checking `event.data.livemode`.
 
 Using Better Auth? [`@agentaos/better-auth`](https://www.npmjs.com/package/@agentaos/better-auth) adds checkout and subscription management for your signed-in users.
 

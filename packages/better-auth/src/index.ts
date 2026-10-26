@@ -1,6 +1,11 @@
-import type { AgentaOS, Subscription, WebhookEvent } from '@agentaos/pay';
-import type { BetterAuthPlugin, User } from 'better-auth';
-import { APIError, createAuthEndpoint, sessionMiddleware } from 'better-auth/api';
+import { type AgentaOS, AgentaOSError, type Subscription, type WebhookEvent } from '@agentaos/pay';
+import type { BetterAuthPlugin } from 'better-auth';
+import {
+	APIError,
+	createAuthEndpoint,
+	sensitiveSessionMiddleware,
+	sessionMiddleware,
+} from 'better-auth/api';
 import { z } from 'zod';
 
 export interface AgentaOSProduct {
@@ -12,9 +17,15 @@ export interface AgentaOSProduct {
 
 type EventOf<T extends WebhookEvent['type']> = Extract<WebhookEvent, { type: T }>;
 
-/** What every webhook handler receives. `userId` is set on `checkout.session.completed` only. */
+/** What every webhook handler receives. */
 export interface WebhookArgs<E extends WebhookEvent = WebhookEvent> {
 	event: E;
+	/**
+	 * The Better Auth user who owns it. Set on the first `checkout.session.completed`
+	 * of a checkout started through this plugin, and on `subscription.*` events for
+	 * subscriptions bought that way. Null on renewal and upgrade charges
+	 * (`checkout.session.completed` again) and on every other event.
+	 */
 	userId: string | null;
 }
 
@@ -22,7 +33,7 @@ type Handler<T extends WebhookEvent['type']> = (
 	args: WebhookArgs<EventOf<T>>,
 ) => Promise<void> | void;
 
-/** One handler per event you care about. `onEvent` still receives every event. */
+/** One handler per event you care about. `onEvent` receives every event after it. */
 export interface AgentaOSWebhookHandlers {
 	onCheckoutCompleted?: Handler<'checkout.session.completed'>;
 	onSubscriptionCreated?: Handler<'subscription.created'>;
@@ -34,7 +45,7 @@ export interface AgentaOSWebhookHandlers {
 	onDisputeClosed?: Handler<'dispute.closed'>;
 }
 
-const HANDLER_FOR: Partial<Record<WebhookEvent['type'], keyof AgentaOSWebhookHandlers>> = {
+const HANDLER_FOR: { [T in WebhookEvent['type']]?: keyof AgentaOSWebhookHandlers } = {
 	'checkout.session.completed': 'onCheckoutCompleted',
 	'subscription.created': 'onSubscriptionCreated',
 	'subscription.renewed': 'onSubscriptionRenewed',
@@ -54,20 +65,57 @@ export interface AgentaOSPluginOptions extends AgentaOSWebhookHandlers {
 	successUrl: string;
 	/** Where the buyer lands if they leave the checkout. Defaults to `successUrl`. */
 	cancelUrl?: string;
-	/** Signing secret from Settings → Developers → Webhooks (`whsec_...`). Enables the webhook endpoint. */
+	/**
+	 * Signing secret from Settings → Developers → Webhooks (`whsec_...`). Enables the
+	 * webhook endpoint, which also records which user owns which subscription.
+	 */
 	webhookSecret?: string;
-	/** Called for every verified webhook event, after the matching `on...` handler. */
+	/**
+	 * Called for every verified webhook event, after the matching `on...` handler.
+	 * If a handler throws, the delivery answers 500 and AgentaOS retries it; `onEvent`
+	 * is not called for that attempt.
+	 */
 	onEvent?: (args: WebhookArgs) => Promise<void> | void;
+}
+
+/** The table that links a Better Auth user to the subscriptions they bought. */
+const MODEL = 'agentaosSubscription';
+
+interface OwnedSubscription {
+	id: string;
+	userId: string;
+	subscriptionId: string;
+	createdAt: Date;
 }
 
 const checkoutBody = z.object({ slug: z.string().min(1) });
 const subscriptionBody = z.object({ subscriptionId: z.string().min(1) });
-const changePlanBody = subscriptionBody.extend({
-	slug: z.string().min(1),
-	/** From the preview. Without it the endpoint only quotes the change. */
-	prorationDate: z.number().int().positive().optional(),
-});
+const changePlanBody = subscriptionBody.extend({ slug: z.string().min(1) });
 const subscriptionQuery = z.object({ subscriptionId: z.string().min(1) });
+
+const API_STATUS: Record<number, ConstructorParameters<typeof APIError>[0]> = {
+	400: 'BAD_REQUEST',
+	404: 'NOT_FOUND',
+	409: 'CONFLICT',
+	422: 'UNPROCESSABLE_ENTITY',
+	429: 'TOO_MANY_REQUESTS',
+};
+
+/**
+ * Runs an AgentaOS call and turns its errors into answers the client can show.
+ * A request the buyer can fix keeps its message; anything else, such as a wrong
+ * API key, becomes a plain 500 so server details do not leak.
+ */
+async function callAgentaOS<T>(call: () => Promise<T>): Promise<T> {
+	try {
+		return await call();
+	} catch (error) {
+		if (error instanceof AgentaOSError && API_STATUS[error.status]) {
+			throw new APIError(API_STATUS[error.status], { message: error.message });
+		}
+		throw error;
+	}
+}
 
 /**
  * Connects AgentaOS to your Better Auth users.
@@ -75,9 +123,10 @@ const subscriptionQuery = z.object({ subscriptionId: z.string().min(1) });
  * - `POST /agentaos/checkout` starts a checkout for the signed-in user and returns its URL.
  * - `GET /agentaos/subscriptions` lists the signed-in user's subscriptions.
  * - `POST /agentaos/cancel-subscription` cancels one of them at the end of the paid period.
- * - `POST /agentaos/change-plan` quotes, then applies, a move to another of your products.
+ * - `POST /agentaos/preview-plan-change` quotes a move to another of your products.
+ * - `POST /agentaos/change-plan` applies that move at the current price.
  * - `GET /agentaos/invoices` lists the invoices of one of their subscriptions.
- * - `POST /agentaos/webhook` verifies AgentaOS webhooks and calls your handlers.
+ * - `POST /agentaos/webhook` verifies AgentaOS webhooks, records new subscriptions and calls your handlers.
  */
 export const agentaos = (options: AgentaOSPluginOptions) => {
 	const findProduct = (slug: string) => {
@@ -88,52 +137,30 @@ export const agentaos = (options: AgentaOSPluginOptions) => {
 		return product;
 	};
 
-	// Subscriptions are matched by email, so only a verified owner of that email
-	// may read or change them. Otherwise anyone could sign up with someone else's
-	// address and manage their plans.
-	const verifiedEmail = (user: User) => {
-		if (!user.emailVerified) {
-			throw new APIError('FORBIDDEN', {
-				message: 'Verify your email to manage your subscriptions',
-			});
-		}
-		return user.email.toLowerCase();
-	};
-
-	const subscriptionsOf = async (email: string) => {
-		const mine: Subscription[] = [];
-		let offset = 0;
-		for (;;) {
-			const page = await options.client.subscriptions.list({ limit: 100, offset });
-			mine.push(...page.items.filter((s) => s.customerEmail?.toLowerCase() === email));
-			if (!page.hasMore || page.items.length === 0) break;
-			offset += page.items.length;
-		}
-		return mine;
-	};
-
-	const ownSubscription = async (user: User, subscriptionId: string) => {
-		const subscription = (await subscriptionsOf(verifiedEmail(user))).find(
-			(s) => s.id === subscriptionId,
-		);
-		if (!subscription) {
-			// Same answer for "not yours" and "does not exist", so ids cannot be probed.
-			throw new APIError('NOT_FOUND', { message: 'Subscription not found' });
-		}
-		return subscription;
-	};
-
 	const handle = async (event: WebhookEvent, userId: string | null) => {
 		const name = HANDLER_FOR[event.type];
 		const handler = name
 			? (options[name] as ((args: WebhookArgs) => unknown) | undefined)
 			: undefined;
-		await handler?.({ event, userId });
+		await handler?.call(options, { event, userId });
 		await options.onEvent?.({ event, userId });
 	};
 
 	return {
 		id: 'agentaos',
+		schema: {
+			[MODEL]: {
+				fields: {
+					userId: {
+						type: 'string',
+						required: true,
+						references: { model: 'user', field: 'id', onDelete: 'cascade' },
+					},
+					subscriptionId: { type: 'string', required: true, unique: true },
+					createdAt: { type: 'date', required: true },
+				},
+			},
+		},
 		endpoints: {
 			agentaosCheckout: createAuthEndpoint(
 				'/agentaos/checkout',
@@ -141,14 +168,16 @@ export const agentaos = (options: AgentaOSPluginOptions) => {
 				async (ctx) => {
 					const { user } = ctx.context.session;
 					const product = findProduct(ctx.body.slug);
-					const checkout = await options.client.checkouts.create({
-						linkId: product.productId,
-						buyerEmail: user.email,
-						buyerName: user.name || undefined,
-						metadata: { userId: user.id },
-						successUrl: options.successUrl,
-						cancelUrl: options.cancelUrl ?? options.successUrl,
-					});
+					const checkout = await callAgentaOS(() =>
+						options.client.checkouts.create({
+							linkId: product.productId,
+							buyerEmail: user.email,
+							buyerName: user.name || undefined,
+							metadata: { userId: user.id, product: product.slug },
+							successUrl: options.successUrl,
+							cancelUrl: options.cancelUrl ?? options.successUrl,
+						}),
+					);
 					return ctx.json({ url: checkout.checkoutUrl, sessionId: checkout.sessionId });
 				},
 			),
@@ -157,46 +186,67 @@ export const agentaos = (options: AgentaOSPluginOptions) => {
 				'/agentaos/subscriptions',
 				{ method: 'GET', use: [sessionMiddleware] },
 				async (ctx) => {
-					const email = verifiedEmail(ctx.context.session.user);
-					return ctx.json({ subscriptions: await subscriptionsOf(email) });
+					const owned = await ctx.context.adapter.findMany<OwnedSubscription>({
+						model: MODEL,
+						where: [{ field: 'userId', value: ctx.context.session.user.id }],
+					});
+					const wanted = new Set(owned.map((row) => row.subscriptionId));
+					const mine: Subscription[] = [];
+					let offset = 0;
+					// The API has no lookup by id, so page through until every owned one is found.
+					while (mine.length < wanted.size) {
+						const page = await callAgentaOS(() =>
+							options.client.subscriptions.list({ limit: 100, offset }),
+						);
+						mine.push(...page.items.filter((s) => wanted.has(s.id)));
+						if (!page.hasMore || page.items.length === 0) break;
+						offset += page.items.length;
+					}
+					return ctx.json({ subscriptions: mine });
 				},
 			),
 
 			agentaosCancelSubscription: createAuthEndpoint(
 				'/agentaos/cancel-subscription',
-				{ method: 'POST', body: subscriptionBody, use: [sessionMiddleware] },
+				{ method: 'POST', body: subscriptionBody, use: [sensitiveSessionMiddleware] },
 				async (ctx) => {
-					const subscription = await ownSubscription(
-						ctx.context.session.user,
-						ctx.body.subscriptionId,
-					);
+					const id = await ownedSubscriptionId(ctx, ctx.body.subscriptionId);
 					// At period end: the subscriber keeps what they paid for, and nothing is refunded.
-					const result = await options.client.subscriptions.cancel(subscription.id);
-					return ctx.json(result);
+					return ctx.json(await callAgentaOS(() => options.client.subscriptions.cancel(id)));
+				},
+			),
+
+			agentaosPreviewPlanChange: createAuthEndpoint(
+				'/agentaos/preview-plan-change',
+				{ method: 'POST', body: changePlanBody, use: [sensitiveSessionMiddleware] },
+				async (ctx) => {
+					const target = findProduct(ctx.body.slug);
+					const id = await ownedSubscriptionId(ctx, ctx.body.subscriptionId);
+					const preview = await callAgentaOS(() =>
+						options.client.subscriptions.previewPlanChange(id, target.productId),
+					);
+					return ctx.json(preview);
 				},
 			),
 
 			agentaosChangePlan: createAuthEndpoint(
 				'/agentaos/change-plan',
-				{ method: 'POST', body: changePlanBody, use: [sessionMiddleware] },
+				{ method: 'POST', body: changePlanBody, use: [sensitiveSessionMiddleware] },
 				async (ctx) => {
-					const subscription = await ownSubscription(
-						ctx.context.session.user,
-						ctx.body.subscriptionId,
-					);
 					const target = findProduct(ctx.body.slug);
-					if (ctx.body.prorationDate === undefined) {
-						const preview = await options.client.subscriptions.previewPlanChange(
-							subscription.id,
+					const id = await ownedSubscriptionId(ctx, ctx.body.subscriptionId);
+					// Quote again on the server so the buyer cannot choose the proration date.
+					const result = await callAgentaOS(async () => {
+						const { prorationDate } = await options.client.subscriptions.previewPlanChange(
+							id,
 							target.productId,
 						);
-						return ctx.json({ preview });
-					}
-					const result = await options.client.subscriptions.changePlan(subscription.id, {
-						targetLinkId: target.productId,
-						prorationDate: ctx.body.prorationDate,
+						return options.client.subscriptions.changePlan(id, {
+							targetLinkId: target.productId,
+							prorationDate,
+						});
 					});
-					return ctx.json({ result });
+					return ctx.json(result);
 				},
 			),
 
@@ -204,13 +254,9 @@ export const agentaos = (options: AgentaOSPluginOptions) => {
 				'/agentaos/invoices',
 				{ method: 'GET', query: subscriptionQuery, use: [sessionMiddleware] },
 				async (ctx) => {
-					const subscription = await ownSubscription(
-						ctx.context.session.user,
-						ctx.query.subscriptionId,
-					);
-					return ctx.json({
-						invoices: await options.client.subscriptions.invoices(subscription.id),
-					});
+					const id = await ownedSubscriptionId(ctx, ctx.query.subscriptionId);
+					const invoices = await callAgentaOS(() => options.client.subscriptions.invoices(id));
+					return ctx.json({ invoices });
 				},
 			),
 
@@ -239,11 +285,17 @@ export const agentaos = (options: AgentaOSPluginOptions) => {
 						});
 					}
 
-					const userId =
-						event.type === 'checkout.session.completed' &&
-						typeof event.data.metadata.userId === 'string'
-							? event.data.metadata.userId
-							: null;
+					let userId: string | null = null;
+					if (event.type === 'checkout.session.completed') {
+						const { userId: buyer, subscriptionId } = event.data.metadata;
+						userId = typeof buyer === 'string' ? buyer : null;
+						if (userId && typeof subscriptionId === 'string') {
+							await recordOwner(ctx, userId, subscriptionId);
+						}
+					} else if (event.type.startsWith('subscription.')) {
+						const { id } = (event as EventOf<'subscription.updated'>).data;
+						userId = (await findOwner(ctx, id))?.userId ?? null;
+					}
 					await handle(event, userId);
 					return ctx.json({ received: true });
 				},
@@ -251,5 +303,48 @@ export const agentaos = (options: AgentaOSPluginOptions) => {
 		},
 	} satisfies BetterAuthPlugin;
 };
+
+type EndpointContext = {
+	context: {
+		adapter: {
+			findOne: <T>(args: {
+				model: string;
+				where: { field: string; value: string }[];
+			}) => Promise<T | null>;
+			create: <T>(args: { model: string; data: Record<string, unknown> }) => Promise<T>;
+		};
+		session?: { user: { id: string } } | null;
+	};
+};
+
+/**
+ * The subscription id, if the signed-in user bought it through this plugin.
+ * Someone else's subscription answers 404, the same as one that does not exist,
+ * so ids cannot be probed.
+ */
+async function ownedSubscriptionId(ctx: EndpointContext, subscriptionId: string): Promise<string> {
+	const row = await findOwner(ctx, subscriptionId);
+	if (!row || row.userId !== ctx.context.session?.user.id) {
+		throw new APIError('NOT_FOUND', { message: 'Subscription not found' });
+	}
+	return row.subscriptionId;
+}
+
+function findOwner(ctx: EndpointContext, subscriptionId: string) {
+	return ctx.context.adapter.findOne<OwnedSubscription>({
+		model: MODEL,
+		where: [{ field: 'subscriptionId', value: subscriptionId }],
+	});
+}
+
+/** Records the buyer of a new subscription once; a redelivered event changes nothing. */
+async function recordOwner(ctx: EndpointContext, userId: string, subscriptionId: string) {
+	if (!(await findOwner(ctx, subscriptionId))) {
+		await ctx.context.adapter.create({
+			model: MODEL,
+			data: { userId, subscriptionId, createdAt: new Date() },
+		});
+	}
+}
 
 export type { WebhookEvent } from '@agentaos/pay';

@@ -15,7 +15,7 @@ function setup() {
 		checkoutUrl: 'https://app.agentaos.ai/pay/cs_1',
 	} as never);
 	const onEvent = vi.fn();
-	const db = { user: [], session: [], account: [], verification: [] };
+	const db = { user: [], session: [], account: [], verification: [], agentaosSubscription: [] };
 	const auth = betterAuth({
 		baseURL: BASE,
 		secret: 'a-test-secret-that-is-long-enough-123',
@@ -70,7 +70,7 @@ describe('agentaos plugin', () => {
 			expect.objectContaining({
 				linkId: 'link_pro',
 				buyerEmail: 'ana@example.com',
-				metadata: { userId },
+				metadata: { userId, product: 'pro' },
 			}),
 		);
 	});
