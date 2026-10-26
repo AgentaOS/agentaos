@@ -113,6 +113,20 @@ describe('webhook handlers', () => {
 	});
 });
 
+describe('a failing handler', () => {
+	it('answers 500 so AgentaOS retries, and skips onEvent', async () => {
+		const { auth, handlers } = setup();
+		handlers.onSubscriptionRenewed.mockRejectedValue(new Error('database down'));
+		const res = await deliver(auth, {
+			type: 'subscription.renewed',
+			business: 'b',
+			data: { id: 's' },
+		});
+		expect(res.status).toBe(500);
+		expect(handlers.onEvent).not.toHaveBeenCalled();
+	});
+});
+
 describe('errors from AgentaOS', () => {
 	it('keeps the reason when AgentaOS refuses a checkout', async () => {
 		const { auth, client } = setup();

@@ -138,6 +138,8 @@ function isPrefetch(request: Request): boolean {
 	return (
 		headers.has('next-router-prefetch') ||
 		headers.get('purpose') === 'prefetch' ||
+		headers.get('x-purpose') === 'preview' ||
+		headers.get('x-moz') === 'prefetch' ||
 		headers.get('sec-purpose')?.includes('prefetch') === true
 	);
 }

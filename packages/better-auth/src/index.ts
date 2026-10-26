@@ -89,12 +89,22 @@ async function callAgentaOS<T>(call: () => Promise<T>): Promise<T> {
 	try {
 		return await call();
 	} catch (error) {
-		const status = error instanceof AgentaOSError ? API_STATUS[error.status] : undefined;
+		// Duck-typed: the app may build its client from its own copy of @agentaos/pay.
+		const status = isAgentaOSError(error) ? API_STATUS[error.status] : undefined;
 		if (status && error instanceof Error) {
 			throw new APIError(status, { message: error.message });
 		}
 		throw error;
 	}
+}
+
+function isAgentaOSError(error: unknown): error is AgentaOSError {
+	return (
+		error instanceof AgentaOSError ||
+		(error instanceof Error &&
+			typeof (error as { status?: unknown }).status === 'number' &&
+			typeof (error as { code?: unknown }).code === 'string')
+	);
 }
 
 /**
@@ -200,7 +210,7 @@ export const agentaos = (options: AgentaOSPluginOptions) => {
 
 					const userId =
 						event.type === 'checkout.session.completed' &&
-						typeof event.data.metadata.userId === 'string'
+						typeof event.data.metadata?.userId === 'string'
 							? event.data.metadata.userId
 							: null;
 					await handle(event, userId);

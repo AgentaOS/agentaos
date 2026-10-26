@@ -63,6 +63,8 @@ describe('Checkout', () => {
 			new Request(url, { method: 'HEAD' }),
 			new Request(url, { headers: { 'next-router-prefetch': '1' } }),
 			new Request(url, { headers: { 'sec-purpose': 'prefetch;prerender' } }),
+			new Request(url, { headers: { purpose: 'prefetch' } }),
+			new Request(url, { headers: { 'x-moz': 'prefetch' } }),
 		];
 		for (const request of requests) {
 			expect((await route()(request)).status).toBe(204);
@@ -150,6 +152,15 @@ describe('Webhooks', () => {
 		const body = JSON.stringify({ type: 'subscription.renewed', business: 'b', data: { id: 's' } });
 		expect((await deliver(route, body)).status).toBe(200);
 		expect(seen).toEqual(['renewed']);
+	});
+
+	it('answers 500 when a handler throws, so AgentaOS retries, and skips onEvent', async () => {
+		const h = handlers();
+		h.onSubscriptionRenewed.mockRejectedValue(new Error('database down'));
+		const route = Webhooks({ webhookSecret: SECRET, ...h });
+		const body = JSON.stringify({ type: 'subscription.renewed', business: 'b', data: { id: 's' } });
+		await expect(deliver(route, body)).rejects.toThrow('database down');
+		expect(h.onEvent).not.toHaveBeenCalled();
 	});
 
 	it('rejects a wrong secret or a changed body, and calls nothing', async () => {
