@@ -1,6 +1,6 @@
 {
 	"name": "@agentaos/better-auth",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Better Auth plugin for AgentaOS, the merchant of record: checkouts for signed-in users, their subscriptions, and verified webhooks",
 	"homepage": "https://docs.agentaos.ai/sdk/pay-overview",
 	"license": "Apache-2.0",
