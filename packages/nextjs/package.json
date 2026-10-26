@@ -1,0 +1,54 @@
+{
+	"name": "@agentaos/nextjs",
+	"version": "0.1.0",
+	"description": "Next.js route handlers for AgentaOS, the merchant of record: a checkout route for your products and a verified webhook route",
+	"homepage": "https://docs.agentaos.ai",
+	"license": "Apache-2.0",
+	"keywords": [
+		"nextjs",
+		"next",
+		"route-handlers",
+		"payments",
+		"merchant-of-record",
+		"subscriptions",
+		"checkout",
+		"webhooks",
+		"agentaos"
+	],
+	"author": "AgentaOS <hello@agentaos.ai>",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/AgentaOS/agentaos.git",
+		"directory": "packages/nextjs"
+	},
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"files": ["dist"],
+	"sideEffects": false,
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"dependencies": {
+		"@agentaos/pay": "workspace:^"
+	},
+	"devDependencies": {
+		"@types/node": "^20.0.0"
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.build.json",
+		"lint": "biome check src/",
+		"test": "vitest run",
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf dist"
+	}
+}

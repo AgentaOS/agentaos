@@ -1,7 +1,10 @@
 import type { BetterAuthClientPlugin } from 'better-auth';
 import type { agentaos } from './index.js';
 
-/** Adds `authClient.agentaos.checkout()` and `authClient.agentaos.subscriptions()`. */
+/**
+ * Adds `authClient.agentaos.checkout()`, `.subscriptions()`, `.cancelSubscription()`,
+ * `.changePlan()` and `.invoices()`.
+ */
 export const agentaosClient = () =>
 	({
 		id: 'agentaos',
