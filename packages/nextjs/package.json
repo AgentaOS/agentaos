@@ -1,6 +1,6 @@
 {
 	"name": "@agentaos/nextjs",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "Next.js route handlers for AgentaOS, the merchant of record: a checkout route for your products and a verified webhook route",
 	"homepage": "https://docs.agentaos.ai",
 	"license": "Apache-2.0",
