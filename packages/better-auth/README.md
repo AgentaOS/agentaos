@@ -2,9 +2,9 @@
 
 [Better Auth](https://better-auth.com) plugin for [AgentaOS](https://agentaos.ai), the merchant of record. AgentaOS sells your product in its own name, charges VAT and sales tax, issues the invoice and pays you out, including in many countries where Stripe isn't available.
 
-- `POST /agentaos/checkout`: a checkout for the signed-in user, with their user id in the checkout metadata
+- `POST /agentaos/checkout`: a checkout for the signed-in user, with their user id and the product slug in the checkout metadata
 - `GET /agentaos/subscriptions`: the signed-in user's subscriptions
-- `POST /agentaos/webhook`: verifies AgentaOS webhooks and calls your `onEvent`
+- `POST /agentaos/webhook`: verifies AgentaOS webhooks and calls your handlers
 
 ## Install
 
@@ -27,13 +27,14 @@ export const auth = betterAuth({
       products: [{ slug: 'pro', productId: 'your-product-link-id' }],
       successUrl: 'https://example.com/thanks',
       webhookSecret: process.env.AGENTAOS_WEBHOOK_SECRET,
-      onEvent: async ({ event, userId }) => {
-        if (event.type === 'checkout.session.completed' && userId) {
-          // Give userId access to the product with link id event.data.linkId
-        }
-        if (event.type === 'subscription.canceled') {
-          // event.data.customerEmail identifies the buyer
-        }
+      onCheckoutCompleted: async ({ event, userId }) => {
+        // Renewals and upgrade charges arrive here too, with no userId.
+        if (!userId) return;
+        // event.data.metadata.product is the slug the user bought, e.g. 'pro'.
+        await grantAccess(userId, event.data.metadata.product);
+      },
+      onSubscriptionCanceled: async ({ event }) => {
+        // event.data.customerEmail identifies the buyer
       },
     }),
   ],
@@ -56,11 +57,18 @@ window.location.href = data!.url;
 const { data: mine } = await authClient.agentaos.subscriptions();
 ```
 
-In test mode, pay with the card `4242 4242 4242 4242`, any future date and any CVC.
+When AgentaOS refuses a checkout, the error keeps its reason and status. In test mode, pay with the card `4242 4242 4242 4242`, any future date and any CVC.
 
 ## Events
 
-`onEvent` receives every verified event: `checkout.session.completed`, `subscription.created`, `subscription.renewed`, `subscription.updated`, `subscription.payment_failed`, `subscription.canceled`, `dispute.created`, `dispute.closed` and more. See [Webhooks](https://docs.agentaos.ai/payments/webhooks).
+Pass a handler for each event you need: `onCheckoutCompleted`, `onSubscriptionCreated`, `onSubscriptionRenewed`, `onSubscriptionUpdated`, `onSubscriptionPaymentFailed`, `onSubscriptionCanceled`, `onDisputeCreated` and `onDisputeClosed`. Each receives `{ event, userId }`. `userId` is set only on the first `checkout.session.completed` of a checkout started through this plugin; renewals and upgrade charges also arrive as `checkout.session.completed`, with `userId` null. Keep the link from `event.data.metadata.subscriptionId` to your user from that first event if you need it later.
+
+`onEvent` receives every verified event, after the matching handler. If a handler throws, the delivery answers 500 and AgentaOS retries it; `onEvent` is not called for that attempt. See [Webhooks](https://docs.agentaos.ai/payments/webhooks).
+
+Two things about the event data:
+
+- `event.data.linkId` on `checkout.session.completed` is the payment link's public token, not the link id you set as `productId`. Use `event.data.metadata.product` to know what was bought.
+- The SDK delivers every key in camelCase, metadata included: a key sent as `user_id` arrives as `userId`.
 
 ## Security
 
@@ -70,11 +78,10 @@ What the plugin does for you:
 - **Subscriptions** are matched by email, so they are only shown to a user whose email is verified.
 - **Webhooks** are verified with HMAC-SHA256 over the raw body; a wrong secret, a changed body, or a signature older than 5 minutes is rejected.
 
-What your `onEvent` should do:
+What your handlers should do:
 
-- Grant the product in `event.data.linkId`, not just "a purchase". The user id comes from checkout metadata your server set.
 - Ignore test events in production: check `event.data.livemode`.
-- Make granting idempotent (for example, keyed on `event.data.sessionId`), because a valid webhook can be delivered more than once.
+- Make granting idempotent, because a valid webhook can be delivered more than once: key checkouts on `event.data.sessionId`, and subscription events on the subscription id and period.
 
 ## License
 

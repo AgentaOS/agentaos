@@ -70,7 +70,7 @@ describe('agentaos plugin', () => {
 			expect.objectContaining({
 				linkId: 'link_pro',
 				buyerEmail: 'ana@example.com',
-				metadata: { userId },
+				metadata: { userId, product: 'pro' },
 			}),
 		);
 	});

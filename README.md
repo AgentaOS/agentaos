@@ -103,6 +103,8 @@ Add your site under **Settings → Developers → Approved sites** first. See [E
 | Package | What it is | Docs |
 |---|---|---|
 | [`@agentaos/pay`](packages/pay) | TypeScript SDK for your server: checkouts, products, subscriptions, discount codes, customers, invoices, webhooks | [SDK overview](https://docs.agentaos.ai/sdk/pay-overview) |
+| [`@agentaos/nextjs`](packages/nextjs) | Next.js route handlers: a checkout route for your products and a verified webhook route | [README](packages/nextjs/README.md) |
+| [`@agentaos/better-auth`](packages/better-auth) | Better Auth plugin: checkout and subscriptions for signed-in users, and verified webhooks with one handler per event | [README](packages/better-auth/README.md) |
 | [`agentaos`](packages/wallet) | The `agenta` CLI and the MCP server, one command per operation | [CLI install](https://docs.agentaos.ai/cli/install) |
 | [`@agentaos/checkout`](packages/checkout) | The embedded checkout for the browser, with React support. Not on npm yet: use the script tag above | [Embedded checkout](https://docs.agentaos.ai/payments/embedded-checkout) |
 | [`plugins/agentaos`](plugins/agentaos) | The Claude Code plugin | [MCP setup](https://docs.agentaos.ai/mcp/setup) |

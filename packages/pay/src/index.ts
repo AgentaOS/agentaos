@@ -1,4 +1,5 @@
 export { AgentaOS } from './client.js';
+export { WebhooksResource } from './resources/webhooks.js';
 export type { AgentaOSOptions } from './types.js';
 
 // Re-export all types
