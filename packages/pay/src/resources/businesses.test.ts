@@ -144,6 +144,7 @@ describe('WebhookEvent', () => {
 	it('lists every event the server sends, each naming its business', () => {
 		expectTypeOf<WebhookEvent['type']>().toEqualTypeOf<
 			| 'checkout.session.completed'
+			| 'checkout.session.bank_transfer_pending'
 			| 'send.completed'
 			| 'send.failed'
 			| 'subscription.created'
