@@ -1,5 +1,11 @@
 # @agentaos/pay
 
+## 2.7.0
+
+### Minor Changes
+
+- [#78](https://github.com/AgentaOS/agentaos/pull/78) [`e7776d6`](https://github.com/AgentaOS/agentaos/commit/e7776d6da44c2e9f765fbde09ae12969c964e7e9) Thanks [@PancheI](https://github.com/PancheI)! - Checkouts: `paymentMethods` on create (`['card']` makes a checkout card-only), and the `checkout.session.bank_transfer_pending` webhook event type.
+
 ## 2.6.0
 
 ### Minor Changes
