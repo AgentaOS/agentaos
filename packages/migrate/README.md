@@ -12,6 +12,28 @@ npx @agentaos/migrate --from paddle --apply    # creates the products and codes
 
 Prefer to ask your agent? With the AgentaOS plugin in Claude Code, say "move me off Paddle" and the `agentaos-migrate` skill runs these steps with you.
 
+## Lemon Squeezy shuts down on 31 March 2027: export your store
+
+Lemon Squeezy stops processing payments, subscription renewals included, on 31 March 2027.
+
+| Date | What happens |
+|---|---|
+| 16 November 2026 | Lemon Squeezy stops accepting new stores |
+| 2 December 2026 | Lemon Squeezy opens its own migration tool for eligible stores |
+| Mid-January 2027 | The latest date Lemon Squeezy recommends to start a migration |
+| 31 March 2027 | Lemon Squeezy stops processing payments |
+
+The dry run is an export. It needs only your Lemon Squeezy API key:
+
+```bash
+export LEMONSQUEEZY_API_KEY=...
+npx @agentaos/migrate --from lemonsqueezy
+```
+
+No AgentaOS account is needed. Nothing is created, your Lemon Squeezy store is only read, and the files stay on your machine: your products and plans in `products.csv`, your active subscribers in `subscribers.csv`, and what cannot move in `skipped.csv`.
+
+The full walkthrough is in the docs: [Migrate from Lemon Squeezy](https://docs.agentaos.ai/guides/migrate-from-lemon-squeezy).
+
 ## What moves
 
 | | Moves | Notes |
@@ -26,7 +48,7 @@ Anything that cannot move as-is (quarterly or weekly billing, currencies other t
 
 ## Your subscribers
 
-Saved cards stay with your old provider: Paddle, Lemon Squeezy, Creem and Gumroad do not hand card details to another seller. So each subscriber subscribes once on the new link:
+This tool does not move saved cards, and AgentaOS does not receive card transfers from another provider today. So each subscriber subscribes once on the new link:
 
 1. `subscribers.csv` lists everyone with their renewal date and new link.
 2. `email-to-subscribers.md` is a short email to send a week or two before each renewal.
@@ -41,9 +63,9 @@ Everything goes to `./agentaos-migration` (change it with `--out`):
 |---|---|
 | `summary.md` | What was found, what was created, next steps |
 | `products.csv` | Each old product with its new product id and link |
-| `redirects.csv` | Old buy link to new link, to swap on your site |
-| `subscribers.csv` | Subscribers with plan, renewal date and new link |
-| `email-to-subscribers.md` | The email to send them |
+| `redirects.csv` | Old buy link to new link, to swap on your site. Written with `--apply` |
+| `subscribers.csv` | Active subscribers with plan, renewal date and new link. Written when there are any |
+| `email-to-subscribers.md` | The email to send them. Written when there are subscribers |
 | `skipped.csv` | What stayed behind, and why |
 
 `subscribers.csv` holds your customers' emails. It stays on your machine, and the folder gets its own `.gitignore` so it is never committed.
